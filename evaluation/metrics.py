@@ -32,7 +32,7 @@ class runningScore(object):
                 n_class * label_true[mask].astype(int) + label_pred[mask], minlength=n_class ** 2
             ).reshape(n_class, n_class)
         except:
-            pdb.set_trace()
+            pdb.set_trace() # problem: label_true has classes 0-19, should be 0-18
         return hist
 
     def update(self, label_trues, label_preds):
