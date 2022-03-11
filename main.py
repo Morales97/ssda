@@ -185,7 +185,6 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args, wandb)
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
