@@ -109,7 +109,7 @@ def main(args, wandb):
             if step % args.log_interval == 0:
                 log_info = OrderedDict({
                     'Train Step': step,
-                    'Time/Image': time_meter.val / args.batch_size
+                    'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, , '{:.3f}')
                 })
                 log_info.update({
                     'CE_2D Loss': FormattedLogItem(loss.item(), '{:.6f}')
@@ -140,19 +140,17 @@ def main(args, wandb):
                     'Train Step': step,
                     'Validation loss': val_loss_meter.avg
                 })
+                
+                score, class_iou = running_metrics_val.get_scores()
+                for k, v in score.items():
+                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+                for k, v in class_iou.items():
+                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
                 log_str = get_log_str(args, log_info, title='Validation Log')
                 print(log_str)
                 wandb.log(rm_format(log_info))
-                
-                score, class_iou = running_metrics_val.get_scores()
-                for k, v in score.items():
-                    print(k, v)
-                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
-
-                for k, v in class_iou.items():
-                    print(k, v)
-                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
                 val_loss_meter.reset()
                 running_metrics_val.reset()
