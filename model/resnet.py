@@ -1,5 +1,7 @@
 import torchvision
 import pdb
+import torch.nn as nn
+
 # from torchsummary import summary
 
 
