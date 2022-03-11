@@ -28,8 +28,8 @@ def main(args, wandb):
     # TODO
     #source_loader, target_loader, target_loader_unl, target_loader_val, \
     #    target_loader_test, class_list = return_dataset(args)
-    train_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine_tiny', img_size=(256, 512), split='train')
-    val_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine_tiny', img_size=(256, 512), split='val')
+    train_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
+    val_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
 
     img, lbl = train_loader.__get_item__()  # usually is done "as for (images, labels) in trainloader:"
 

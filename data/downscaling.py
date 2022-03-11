@@ -63,10 +63,10 @@ if __name__ == "__main__":
     CONVERT_LIST = [
         ('cityscapes/'+ "leftImg8bit/",
         # 'cityscapes/' + "leftImg8bit_small/", (1024, 512)),
-         'cityscapes/' + "leftImg8bit_smaller/", (512, 256)),
+         'cityscapes/' + "leftImg8bit_tiny/", (512, 256)),
         #('gta5/' + "images/",
         # 'gta5/' + "images_small/", (1024, 512)),
-        # 'gta5/' + "images_smaller/", (512, 256)),
+        # 'gta5/' + "images_tiny/", (512, 256)),
     ]
 
     # Convert files
