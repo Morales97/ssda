@@ -214,9 +214,11 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
-
+    main(args, wandb)
+    
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
+    '''
     if not args.expt_name:
         args.expt_name = gen_unique_name()
     if args.project == '':
@@ -228,6 +230,7 @@ if __name__ == '__main__':
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.join()
+    '''
 
 # python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
 # python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 &
