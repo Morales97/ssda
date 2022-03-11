@@ -43,8 +43,17 @@ def main(args, wandb):
         shuffle=True,
     )
 
-    for (images, labels) in train_loader:
+    val_loader = DataLoader(
+        v_loader,
+        batch_size=64,
+        num_workers=args.num_workers,
+        shuffle=True,
+    )    
+    
+    for (image, label) in val_loader:
         pdb.set_trace()
+
+
 
     # Init model
     model = resnet50_FCN(args.pretrained)
