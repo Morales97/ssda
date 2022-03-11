@@ -295,6 +295,6 @@ class fcn16s(nn.Module):
             l2.bias.data = l1.bias.data[:n_class]
 
 
-fcn16 = fcn16s()
-fcn8 = fcn8s()
-pdb.set_trace()
+#fcn16 = fcn16s()
+#fcn8 = fcn8s()
+#pdb.set_trace()
