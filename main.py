@@ -146,7 +146,7 @@ def main(args, wandb):
                     log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
                 for k, v in class_iou.items():
-                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+                    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
 
                 log_str = get_log_str(args, log_info, title='Validation Log')
                 print(log_str)
