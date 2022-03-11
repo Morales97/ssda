@@ -133,7 +133,6 @@ def main(args, wandb):
                         pred = outputs.data.max(1)[1].cpu().numpy()
                         gt = labels_val.data.cpu().numpy()
 
-                        pdb.set_trace()
                         running_metrics_val.update(gt, pred)
                         val_loss_meter.update(val_loss.item())
 
