@@ -11,6 +11,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN
+from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
@@ -55,8 +56,10 @@ def main(args, wandb):
     running_metrics_val = runningScore(t_loader.n_classes)
 
     # Init model
-    model = resnet50_FCN(args.pre_trained)
-
+    if args.net == '' or args.net == 'resnet50_fcn':
+        model = resnet50_FCN(args.pre_trained)
+    if args.net == 'fcn8':
+        model = fcn8s()
     model.cuda()
     model.train()
 

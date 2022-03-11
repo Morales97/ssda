@@ -52,6 +52,8 @@ def get_parser():
                         help='Checkpoint path to resume from')
     parser.add_argument('--pre_trained', type=boolfromstr, default=True,
                         help='Use IN pretrained weights')
+    parser.add_argument('--net', type=str, default='',
+                        help='choose model architecture')
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
