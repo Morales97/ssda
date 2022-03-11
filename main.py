@@ -122,8 +122,8 @@ def main(args, wandb):
             if step % args.val_interval == 0:
                 model.eval()
                 with torch.no_grad():
-                    #for (images_val, labels_val) in val_loader:
-                    for (images_val, labels_val) in tqdm(val_loader):
+                    for (images_val, labels_val) in val_loader:
+                    #for (images_val, labels_val) in tqdm(val_loader):
                         images_val = images_val.cuda()
                         labels_val = labels_val.cuda()
                         pdb.set_trace()
