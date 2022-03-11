@@ -4,7 +4,9 @@ import torch.nn as nn
 
 from torchsummary import summary
 
-
+'''
+ResNet-50 FCN from torch
+'''
 def resnet50_FCN(pretrained=False):
     model = torchvision.models.segmentation.fcn_resnet50(pretrained)
 
@@ -18,7 +20,7 @@ def resnet50_FCN(pretrained=False):
 modified from
 https://github.com/Minauras/road-segmentation/blob/master/ResNet/models.py
 '''
-def resnet_50_upsampling(pretrained=True, n_classes=19):
+def resnet_50_upsampling(pretrained=False, n_classes=19):
     '''
     Has 70M parameters (regular RN50 has 25M)
     
