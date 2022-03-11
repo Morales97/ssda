@@ -155,10 +155,11 @@ class cityscapesLoader(data.Dataset):
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
 
-        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img.transpose(2, 0, 1) # (C, W, H)
         img = np.array(img, dtype=np.uint8)
 
-        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
         if self.augmentations is not None:
