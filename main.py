@@ -94,6 +94,7 @@ def main(args, wandb):
             # train
             optimizer.zero_grad()
             outputs = model(images)
+            pdb.set_trace()
             loss = loss_fn(outputs, labels)
             loss.backward()
             optimizer.step()
