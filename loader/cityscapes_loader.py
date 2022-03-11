@@ -157,8 +157,7 @@ class cityscapesLoader(data.Dataset):
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
         img = np.array(img, dtype=np.uint8)
-        pdb.set_trace()
-        #img.transpose(2, 0, 1) # (C, W, H)
+        
 
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
