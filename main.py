@@ -21,6 +21,7 @@ from loader.cityscapes_loader import cityscapesLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
+import tqdm
 
 import pdb
 
