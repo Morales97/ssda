@@ -22,7 +22,7 @@ def get_parser():
 
     parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                         help='learning rate (default: 0.001)')
-    parser.add_argument('--batch_size', type=int, default=None,
+    parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size of source labelled data to use. If not '
                              'provided, certain default sizes used')
     parser.add_argument('--num_workers', type=int, default=3,
