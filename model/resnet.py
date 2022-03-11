@@ -89,7 +89,9 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
 
     return model
 
+'''
 rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
 model = resnet_34_upsampling()
 pdb.set_trace()
+'''
