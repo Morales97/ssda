@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import scipy.misc as m
+import pdb 
 
 from torch.utils import data
 
@@ -133,6 +134,7 @@ class cityscapesLoader(data.Dataset):
         self.ignore_index = 250
         self.class_map = dict(zip(self.valid_classes, range(19)))
 
+        pdb.set_trace()
         if not self.files[split]:
             raise Exception("No files for split=[%s] found in %s" % (split, self.images_base))
 
