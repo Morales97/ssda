@@ -11,5 +11,5 @@
 #SBATCH --time=06:00:00
 
 
-python main.py --expt_name=cs_pretrain
+python main.py --expt_name=cs_no_pretrain --pre_trained=False
 
