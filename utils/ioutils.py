@@ -81,23 +81,15 @@ def get_parser():
     '''
     return parser
 
-def post_process_args(args):
-    if args.cls_layers:
-        args.cls_layers = [int(num) for num in args.cls_layers.split(',')]
-    else:
-        args.cls_layers = []
-    return args
 
 def parse_args():
     parser = get_parser()
     args = parser.parse_args()
-    args = post_process_args(args)
     return args
 
 def get_default_args():
     parser = get_parser()
     args = parser.parse_args([])
-    args = post_process_args(args)
     return args
 
 def boolfromstr(s):
