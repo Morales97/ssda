@@ -119,9 +119,10 @@ def main(args, wandb):
                 print(log_str)
                 wandb.log(rm_format(log_info))
             
-            if step % args.val_interval == 0 and step > 0:
+            if step % args.val_interval == 0:
                 model.eval()
                 with torch.no_grad():
+                    pdb.set_trace()
                     for (images_val, labels_val) in tqdm(val_loader):
                         images_val = images_val.cuda()
                         labels_val = labels_val.cuda()
@@ -184,6 +185,7 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
+    main(args, wandb)
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
