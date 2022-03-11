@@ -97,7 +97,9 @@ def main(args, wandb):
 
             # train
             optimizer.zero_grad()
-            outputs = model(images)['out']  # rn50-FCN has outputs['out'] (pixel pred) and outputs['aux'] (pixel loss)
+            outputs = model(images)
+            if args.net == '' or args.net == 'resnet50_fcn':
+                outputs = outputs['out']  # rn50-FCN has outputs['out'] (pixel pred) and outputs['aux'] (pixel loss)
             loss = loss_fn(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -130,7 +132,9 @@ def main(args, wandb):
                         images_val = images_val.cuda()
                         labels_val = labels_val.cuda()
 
-                        outputs = model(images_val)['out']
+                        outputs = model(images_val)
+                        if args.net == '' or args.net == 'resnet50_fcn':
+                            outputs = outputs['out']
                         val_loss = loss_fn(input=outputs, target=labels_val)
 
                         pred = outputs.data.max(1)[1].cpu().numpy()
