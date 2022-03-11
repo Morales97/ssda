@@ -126,7 +126,7 @@ def main(args, wandb):
                     #for (images_val, labels_val) in tqdm(val_loader):
                         images_val = images_val.cuda()
                         labels_val = labels_val.cuda()
-                        pdb.set_trace()
+
                         outputs = model(images_val)['out']
                         val_loss = loss_fn(input=outputs, target=labels_val)
 
