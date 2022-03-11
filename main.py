@@ -158,7 +158,7 @@ def main(args, wandb):
                 running_metrics_val.reset()
 
 
-            if step % args.save_interval == 0
+            if step % args.save_interval == 0:
                 if args.save_model:
                     torch.save({
                         'model_state_dict' : model.state_dict(),
