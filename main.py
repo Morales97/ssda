@@ -38,8 +38,8 @@ def main(args, wandb):
 
     train_loader = DataLoader(
         t_loader,
-        batch_size=args.batch_size
-        num_workers=args.num_workers
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
         shuffle=True,
     )
 
