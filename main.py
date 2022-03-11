@@ -164,12 +164,12 @@ def main(args, wandb):
                         'step' : step,
                     }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                 
-                if score['Mean IoU'] > best_mIoU:
+                if score['mIoU'] > best_mIoU:
                     if args.save_model:
                         shutil.copyfile(
                             os.path.join(args.save_dir, 'checkpoint.pth.tar'),
                             os.path.join(args.save_dir, 'model-best.pth.tar'))
-                    best_mIoU = score['Mean IoU']
+                    best_mIoU = score['mIoU']
                 
                     # DM. save model as wandb artifact
                     model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
@@ -187,9 +187,8 @@ if __name__ == '__main__':
         args.expt_name = gen_unique_name()
     if args.project == '':
         args.project = 'seg_test'
-        entity = 'morales97'
     wandb.init(name=args.expt_name, dir=args.save_dir,
-               config=args, reinit=True, project=args.project, entity=entity)
+               config=args, reinit=True, project=args.project, entity=args.entity)
 
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)

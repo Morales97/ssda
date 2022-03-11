@@ -11,7 +11,7 @@ def get_parser():
     parser = argparse.ArgumentParser(description='SSDA Classification')
     parser.add_argument('--expt_name', type=str, default='',
                         help='Name of the experiment for wandb')
-    parser.add_argument('--steps', type=int, default=50000, metavar='N',
+    parser.add_argument('--steps', type=int, default=10000, metavar='N',
                         help='maximum number of iterations '
                              'to train (default: 50000)')
     parser.add_argument('--wd', type=float, default=0.0005,
@@ -31,8 +31,10 @@ def get_parser():
                         help='Maximum number of threads that the process should '
                              'use. Uses torch.set_num_threads()')
 
-    parser.add_argument('--project', type=str, default='',
+    parser.add_argument('--project', type=str, default='seg_test',
                         help='wandb project to use')
+    parser.add_argument('--entity', type=str, default='morales97',
+                        help='wandb entity to use')
     parser.add_argument('--save_dir', type=str, default='expts/tmp_last',
                         help='dir to save experiment results to')
     parser.add_argument('--save_model', action='store_true', default=True,
@@ -42,17 +44,12 @@ def get_parser():
     parser.add_argument('--log_interval', type=int, default=50, metavar='N',
                         help='how many batches to wait before logging '
                              'training status')
-    parser.add_argument('--save_interval', type=int, default=500, metavar='N',
-                        help='how many batches to wait before saving a model')
     parser.add_argument('--val_interval', type=int, default=100, metavar='N',
                         help='how many batches to wait before validation')
-    parser.add_argument('--ckpt_freq', type=int, default=1, metavar='N',
-                        help='Checkpointing frequency in number of save '
-                             'intervals. These checkpoints would be saved '
-                             'as checkpoint_n.pth.tar where n is the step.')
+    parser.add_argument('--save_interval', type=int, default=500, metavar='N',
+                        help='how many batches to wait before saving a model')
     parser.add_argument('--resume', type=str, default='',
                         help='Checkpoint path to resume from')
-
     parser.add_argument('--pre_trained', type=boolfromstr, default=True,
                         help='Use IN pretrained weights')
     '''
