@@ -122,7 +122,7 @@ def main(args, wandb):
             if step % args.val_interval == 0 and step > 0:
                 model.eval()
                 with torch.no_grad():
-                    for i_val, (images_val, labels_val) in tqdm(enumerate(val_loader)):
+                    for (images_val, labels_val) in tqdm(val_loader):
                         images_val = images_val.cuda()
                         labels_val = labels_val.cuda()
 
