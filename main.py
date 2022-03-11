@@ -99,7 +99,6 @@ def main(args, wandb):
             optimizer.step()
 
             time_meter.update(time.time() - start_ts)
-            pdb.set_trace()
             # decrease lr
             if step == args.steps/2:
                 for param_group in optimizer.param_groups:
@@ -188,11 +187,10 @@ if __name__ == '__main__':
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
-    '''
     if not args.expt_name:
         args.expt_name = gen_unique_name()
     if args.project == '':
-        args.project = 'PAC_train'
+        args.project = 'seg_test'
         entity = 'morales97'
     wandb.init(name=args.expt_name, dir=args.save_dir,
                config=args, reinit=True, project=args.project, entity=entity)
