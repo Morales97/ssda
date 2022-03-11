@@ -31,9 +31,9 @@ def main(args, wandb):
     train_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
     val_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
 
-    img, lbl = train_loader.__get_item__()  # usually is done "as for (images, labels) in trainloader:"
+    for (images, labels) in train_loader:
+        pdb.set_trace()
 
-    pdb.set_trace()
     # Init model
     model = resnet50_FCN(args.pretrained)
 
@@ -215,7 +215,7 @@ def main(args, wandb):
 if __name__ == '__main__':
     args = parse_args()
     main(args, wandb)
-    
+
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
     '''
