@@ -61,7 +61,6 @@ def main(args, wandb):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9,
                             weight_decay=args.wd, nesterov=True)
 
-    pdb.set_trace()
     # To resume from a checkpoint
     start_step = 0
     if args.resume:
@@ -99,7 +98,7 @@ def main(args, wandb):
             optimizer.step()
 
             time_meter.update(time.time() - start_ts)
-
+            pdb.set_trace()
             # decrease lr
             if step == args.steps/2:
                 for param_group in optimizer.param_groups:
