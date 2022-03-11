@@ -7,6 +7,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN
 #from utils.eval import test
@@ -27,11 +28,20 @@ def main(args, wandb):
     torch.manual_seed(args.seed)
     #np.random.seed(args.seed)
     random.seed(args.seed)
-    # TODO
-    #source_loader, target_loader, target_loader_unl, target_loader_val, \
-    #    target_loader_test, class_list = return_dataset(args)
-    train_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
-    val_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
+    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+
+    #for (image, label) in train_loader:
+    #    pdb.set_trace()
+        # NOTE: there are some pixels always with label 250 (ignore class). check if the label resizing has some bug.
+
+    train_loader = DataLoader(
+        t_loader,
+        batch_size=args.batch_size
+        num_workers=args.num_workers
+        shuffle=True,
+    )
 
     for (images, labels) in train_loader:
         pdb.set_trace()
