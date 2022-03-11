@@ -175,7 +175,6 @@ class cityscapesLoader(data.Dataset):
         :param img:
         :param lbl:
         """
-        img = m.imresize(img, (self.img_size[1], self.img_size[0]))  # uint8 with RGB mode
         # img = img[:, :, ::-1]  # RGB -> BGR. In some conventions BGR is used. Make sure our pre-trained model is RGB
         img = img.astype(np.float64)
         img -= self.mean
@@ -184,8 +183,8 @@ class cityscapesLoader(data.Dataset):
             img = img.astype(float) / 255.0
 
         classes = np.unique(lbl)
-        lbl = lbl.astype(float)
-        lbl = m.imresize(lbl, (self.img_size[1], self.img_size[0]), "nearest", mode="F")
+        # lbl = lbl.astype(float)
+        # lbl = m.imresize(lbl, (self.img_size[1], self.img_size[0]), "nearest", mode="F") # resizing is done by pil_loader
         lbl = lbl.astype(int)
 
         if not np.all(classes == np.unique(lbl)):
