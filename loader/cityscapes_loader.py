@@ -156,7 +156,7 @@ class cityscapesLoader(data.Dataset):
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
         img = np.array(img, dtype=np.uint8)
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
+        #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
@@ -176,12 +176,12 @@ class cityscapesLoader(data.Dataset):
         """
         # img = img[:, :, ::-1]  # RGB -> BGR. In some conventions BGR is used. Make sure our pre-trained model is RGB
         img = img.astype(np.float64)
-        pdb.set_trace()
         img -= self.mean
         if self.img_norm:
             # Resize scales images from 0 to 255, thus we need to divide by 255.0
             img = img.astype(float) / 255.0
-
+        img = img.transpose(2, 0, 1)  # HWC -> CHW
+        
         classes = np.unique(lbl)
         # lbl = lbl.astype(float)
         # lbl = m.imresize(lbl, (self.img_size[1], self.img_size[0]), "nearest", mode="F") # resizing is done by pil_loader
