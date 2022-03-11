@@ -109,7 +109,7 @@ def main(args, wandb):
             if step % args.log_interval == 0:
                 log_info = OrderedDict({
                     'Train Step': step,
-                    'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, , '{:.3f}')
+                    'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, '{:.3f}')
                 })
                 log_info.update({
                     'CE_2D Loss': FormattedLogItem(loss.item(), '{:.6f}')
