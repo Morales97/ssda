@@ -60,7 +60,7 @@ def main(args, wandb):
         model = resnet50_FCN(args.pre_trained)
     if args.net == 'fcn8':
         model = fcn8s()
-    if args.net = 'rn34_up'
+    if args.net == 'rn34_up':
         model = resnet_34_upsampling(args.pre_trained)
     model.cuda()
     model.train()
