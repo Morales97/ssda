@@ -183,7 +183,6 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args, wandb)
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
@@ -192,7 +191,6 @@ if __name__ == '__main__':
     if args.project == '':
         args.project = 'seg_test'
         entity = 'morales97'
-    pdb.set_trace()
     wandb.init(name=args.expt_name, dir=args.save_dir,
                config=args, reinit=True, project=args.project, entity=entity)
 
