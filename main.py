@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model.resnet import resnet50_FCN
+from model.resnet import resnet50_FCN, resnet_34_upsampling
 from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -60,6 +60,8 @@ def main(args, wandb):
         model = resnet50_FCN(args.pre_trained)
     if args.net == 'fcn8':
         model = fcn8s()
+    if args.net = 'rn34_up'
+        model = resnet_34_upsampling(args.pre_trained)
     model.cuda()
     model.train()
 

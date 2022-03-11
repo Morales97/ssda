@@ -11,5 +11,5 @@
 #SBATCH --time=06:00:00
 
 
-python main.py --expt_name=cs_fcn8 --pre_trained=False  --net=fcn8
+python main.py --expt_name=cs_rn34up_no_pretrain --pre_trained=False  --net=rn34_up
 
