@@ -17,6 +17,8 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loader.cityscapes_loader import cityscapesLoader
+from loss.loss import cross_entropy2d
+from evaluation.metrics import averageMeter, runningScore
 import wandb
 
 import pdb
@@ -32,10 +34,6 @@ def main(args, wandb):
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
 
-    #for (image, label) in train_loader:
-    #    pdb.set_trace()
-        # NOTE: there are some pixels always with label 250 (ignore class). check if the label resizing has some bug.
-
     train_loader = DataLoader(
         t_loader,
         batch_size=args.batch_size,
@@ -45,19 +43,16 @@ def main(args, wandb):
 
     val_loader = DataLoader(
         v_loader,
-        batch_size=64,
+        batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,
     )    
-    
-    for (image, label) in val_loader:
-        pdb.set_trace()
 
-    print('done')
-    pdb_set_trace()
+    # Set up metrics
+    running_metrics_val = runningScore(n_classes)
 
     # Init model
-    model = resnet50_FCN(args.pretrained)
+    model = resnet50_FCN(args.pre_trained)
 
     model.cuda()
     model.train()
@@ -65,6 +60,7 @@ def main(args, wandb):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9,
                             weight_decay=args.wd, nesterov=True)
 
+    pdb.set_trace()
     # To resume from a checkpoint
     start_step = 0
     if args.resume:
@@ -77,162 +73,113 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
-    criterion = nn.CrossEntropyLoss()
+    # Custom loss function. Ignores index 250
+    loss_fn = cross_entropy2d   
 
-    # Iterators for data loaders
-    data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
+    best_acc = 0 
+    step = start_step
+    time_meter = averageMeter()
+    val_loss_meter = averageMeter()
 
-    best_acc = 0 # best validation accuracy
-    for step in range(start_step, args.steps):
+    while step <= args.steps:
+        for (images, labels) in train_loader:
+            step += 1
+            start_ts = time.time()
+            model.train()
+            
+            images = images.cuda()
+            labels = labels.cuda()
 
-        if step % len(target_loader) == 0 and step > 0:
-            data_iter_t = iter(target_loader)
-        if step % len(target_loader_unl) == 0 and step > 0:
-            data_iter_t_unl = iter(target_loader_unl)
-        if step % len(source_loader) == 0 and step > 0:
-            data_iter_s = iter(source_loader)
+            # train
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = loss_fn(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-        data_s = next(data_iter_s)
-        im_data_s = data_s[0].cuda(non_blocking=True)
-        gt_labels_s = data_s[1].cuda(non_blocking=True)
+            time_meter.update(time.time() - start_ts)
 
-        data_t = next(data_iter_t)
-        im_data_t = data_t[0].cuda(non_blocking=True)
-        gt_labels_t = data_t[1].cuda(non_blocking=True)
+            # decrease lr
+            if step == args.steps/2:
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = param_group['lr'] * 0.1
 
-        optimizer_g.zero_grad()
-        optimizer_f.zero_grad()
-
-        with autocast():
-            feats_s = G(im_data_s)
-            feats_t = G(im_data_t)
-
-            loss = 0
-            cls_loss = 0
-            out_s = F1(feats_s)
-            cls_loss += criterion(out_s, gt_labels_s)
-            out_t = F1(feats_t)
-            cls_loss += criterion(out_t, gt_labels_t)
-            loss += cls_loss
-
-            data_t_unl = next(data_iter_t_unl)
-            if args.cons_wt > 0: # using consistency regularization
-                # NOTE : for consistency regularization, the second transform is
-                # supposed to be the mellow one which is used for
-                # computing pseudo-labels : im_data_tu2
-                im_data_tu = data_t_unl[0][0].cuda(non_blocking=True)
-                im_data_tu2 = data_t_unl[0][1].cuda(non_blocking=True)
-
-                # compute unlabelled data feats
-                feats_unl = G(im_data_tu)
-
-                # NOTE : currently cons_aug_level which is the more intense
-                # augmentation is applied on im_data_tu2
-                pls = torch.softmax(F1(feats_unl).detach(), dim=1)
-                confs, _ = torch.max(pls, dim=1)
-                pl_mask = (confs > args.cons_threshold).float()
-                loss_cons = (criterion1(F1(G(im_data_tu2)), pls) * pl_mask).mean()
-                loss += args.cons_wt * loss_cons
-
-            # NOTE : this is currently not meant to be used with the
-            # consistency regularization term above. Would need a small change
-            # in im_data_tu below for this.
-            if args.vat_tw > 0:
-                im_data_tu = data_t_unl[0].cuda(non_blocking=True)
-                feats_unl = G(im_data_tu)
-                vat_loss_t = vat_loss(
-                    args, G, F1, criterion1,
-                    torch.cat((im_data_t, im_data_tu), dim=0),
-                    torch.softmax(
-                        F1(torch.cat((feats_t, feats_unl), dim=0)), dim=1))
-                loss += args.vat_tw * vat_loss_t
-
-            # if some entropy based method is used
-            if args.ent_method:
-                if args.ent_method == 'ENT':
-                    ent_loss = entropy(F1, feats_unl, args.lamda)
-                elif args.ent_method == 'MME':
-                    ent_loss = adentropy(F1, feats_unl, args.lamda)
-                loss += args.ent_wt * ent_loss
-
-        scaler.scale(loss).backward()
-        scaler.step(optimizer_g)
-        scaler.step(optimizer_f)
-        scaler.update()
         
-        # TODO decrease lr
+            if step % args.log_interval == 0:
+                log_info = OrderedDict({
+                    'Train Step': step,
+                    'Time/Image': time_meter.val / args.batch_size
+                })
+                log_info.update({
+                    'CE_2D Loss': FormattedLogItem(loss.item(), '{:.6f}')
+                })
 
-        log_info = OrderedDict({
-            'Train Step': step
-        })
-        log_info.update({
-            'Cls Loss': FormattedLogItem(cls_loss.item(), '{:.6f}')
-        })
-        if args.cons_wt > 0:
-            log_info.update({
-                'Consistency Loss' : loss_cons.item(),
-            })
-        if args.ent_method:
-            log_info.update({
-                # NOTE: this is negative entropy
-                'Ent Loss': FormattedLogItem(ent_loss.item(), '{:.6f}')
-            })
-        if args.vat_tw > 0:
-            log_info.update({
-                'Target VAT loss': vat_loss_t.item()
-            })
+                log_str = get_log_str(args, log_info, title='Training Log')
+                print(log_str)
+                wandb.log(rm_format(log_info))
+            
+            if step % args.val_interval == 0 and step > 0:
+                model.eval()
+                with torch.no_grad():
+                    for i_val, (images_val, labels_val) in tqdm(enumerate(val_loader)):
+                        images_val = images_val.cuda()
+                        labels_val = labels_val.cuda()
 
-        if step % args.log_interval == 0:
-            log_str = get_log_str(args, log_info, title='Training Log')
-            print(log_str)
-            wandb.log(rm_format(log_info))
+                        outputs = model(images_val)
+                        val_loss = loss_fn(input=outputs, target=labels_val)
 
-        if step % args.save_interval == 0 and step > 0:
-            # model.eval() done at the start of test()
-            test_metrics = test(G, F1, target_loader_test, class_list)
-            val_metrics = test(G, F1, target_loader_val, class_list)
-            loss_test, acc_test = test_metrics[0], test_metrics[1]
-            loss_val, acc_val = val_metrics[0], val_metrics[1]
+                        pred = outputs.data.max(1)[1].cpu().numpy()
+                        gt = labels_val.data.cpu().numpy()
 
-            G.train()
-            F1.train()
+                        running_metrics_val.update(gt, pred)
+                        val_loss_meter.update(val_loss.item())
 
-            if args.save_model:
-                torch.save({
-                    'G_state_dict' : G.state_dict(),
-                    'F1_state_dict' : F1.state_dict(),
-                    'optimizer_g_state_dict' : optimizer_g.state_dict(),
-                    'optimizer_f_state_dict' : optimizer_f.state_dict(),
-                    'step' : step,
-                }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                log_info = OrderedDict({
+                    'Train Step': step,
+                    'Validation loss': val_loss_meter.avg
+                })
 
-            if acc_val > best_acc:
-                if args.save_model:
-                    shutil.copyfile(
-                        os.path.join(args.save_dir, 'checkpoint.pth.tar'),
-                        os.path.join(args.save_dir, 'model-best.pth.tar'))
-                best_acc = acc_val
-                best_acc_test = acc_test
+                log_str = get_log_str(args, log_info, title='Validation Log')
+                print(log_str)
+                wandb.log(rm_format(log_info))
                 
-                # DM. save model as wandb artifact
-                model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
-                model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-                wandb.log_artifact(model_artifact)
+                score, class_iou = running_metrics_val.get_scores()
+                for k, v in score.items():
+                    print(k, v)
+                    # TODO add to wandb logger
+
+                for k, v in class_iou.items():
+                    print(k, v)
+                    # TODO add to wandb logger
+
+                val_loss_meter.reset()
+                running_metrics_val.reset()
 
 
-            log_info = OrderedDict({
-                'Train Step': step,
-                'Best Acc Val (target)': FormattedLogItem(best_acc, '{:.2f}'),
-                'Best Acc Test (target)': FormattedLogItem(best_acc_test, '{:.2f}'),
-                'Current Acc Val (target)': FormattedLogItem(acc_val, '{:.2f}'),
-                # logging since it is computed anyway
-                'Current Acc Test (target)': FormattedLogItem(acc_test, '{:.2f}')
-            })
-            log_str = get_log_str(args, log_info, title='Validation Log')
-            print(log_str)
-            wandb.log(rm_format(log_info))
+            if step % args.save_interval == 0 and step > 0:
+                if args.save_model:
+                    torch.save({
+                        'model_state_dict' : model.state_dict(),
+                        'optimizer_state_dict' : optimizer.state_dict(),
+                        'step' : step,
+                    }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+
+                # TODO save best model
+                '''
+                if acc_val > best_acc:
+                    if args.save_model:
+                        shutil.copyfile(
+                            os.path.join(args.save_dir, 'checkpoint.pth.tar'),
+                            os.path.join(args.save_dir, 'model-best.pth.tar'))
+                    best_acc = acc_val
+                    best_acc_test = acc_test
+                
+                    # DM. save model as wandb artifact
+                    model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
+                    model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                    wandb.log_artifact(model_artifact)
+                '''
+
 
 if __name__ == '__main__':
     args = parse_args()

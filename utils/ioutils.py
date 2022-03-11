@@ -39,11 +39,13 @@ def get_parser():
                         help='If not set, model will not be saved')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
-    parser.add_argument('--log_interval', type=int, default=100, metavar='N',
+    parser.add_argument('--log_interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging '
                              'training status')
     parser.add_argument('--save_interval', type=int, default=500, metavar='N',
                         help='how many batches to wait before saving a model')
+    parser.add_argument('--val_interval', type=int, default=100, metavar='N',
+                        help='how many batches to wait before validation')
     parser.add_argument('--ckpt_freq', type=int, default=1, metavar='N',
                         help='Checkpointing frequency in number of save '
                              'intervals. These checkpoints would be saved '
