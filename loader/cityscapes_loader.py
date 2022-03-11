@@ -1,7 +1,6 @@
 import os
 import torch
 import numpy as np
-import scipy.misc as m
 import pdb 
 from PIL import Image
 from loader.loader_utils import pil_loader
@@ -177,6 +176,7 @@ class cityscapesLoader(data.Dataset):
         """
         # img = img[:, :, ::-1]  # RGB -> BGR. In some conventions BGR is used. Make sure our pre-trained model is RGB
         img = img.astype(np.float64)
+        pdb.set_trace()
         img -= self.mean
         if self.img_norm:
             # Resize scales images from 0 to 255, thus we need to divide by 255.0
