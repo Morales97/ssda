@@ -53,7 +53,7 @@ def get_parser():
 
     parser.add_argument('--pre_trained', type=boolfromstr, default=True,
                         help='Use IN pretrained weights')
-'''
+    '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
                         help='which network to use')
@@ -78,9 +78,7 @@ def get_parser():
     parser.add_argument('--fs_ss', action='store_true', default=False,
                         help='Whether to use file_system as '
                              'torch.mutiprocessing sharing strategy')
-'''
-
-
+    '''
     return parser
 
 def post_process_args(args):
