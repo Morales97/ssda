@@ -53,7 +53,8 @@ def main(args, wandb):
     for (image, label) in val_loader:
         pdb.set_trace()
 
-
+    print('done')
+    pdb_set_trace()
 
     # Init model
     model = resnet50_FCN(args.pretrained)
