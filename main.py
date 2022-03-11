@@ -18,6 +18,8 @@ from utils.ioutils import rm_format
 from loader.cityscapes_loader import cityscapesLoader
 import wandb
 
+import pdb
+
 def main(args, wandb):
     torch.set_num_threads(args.max_num_threads)
 
