@@ -78,7 +78,7 @@ def main(args, wandb):
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
 
-    best_acc = 0 
+    best_mIoU = 0 
     step = start_step
     time_meter = averageMeter()
     val_loss_meter = averageMeter()
@@ -148,39 +148,36 @@ def main(args, wandb):
                 score, class_iou = running_metrics_val.get_scores()
                 for k, v in score.items():
                     print(k, v)
-                    # TODO add to wandb logger
+                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
                 for k, v in class_iou.items():
                     print(k, v)
-                    # TODO add to wandb logger
+                    log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
                 val_loss_meter.reset()
                 running_metrics_val.reset()
 
 
-            if step % args.save_interval == 0 and step > 0:
+            if step % args.save_interval == 0
                 if args.save_model:
                     torch.save({
                         'model_state_dict' : model.state_dict(),
                         'optimizer_state_dict' : optimizer.state_dict(),
                         'step' : step,
                     }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-
-                # TODO save best model
-                '''
-                if acc_val > best_acc:
+                
+                if score['Mean IoU'] > best_mIoU:
                     if args.save_model:
                         shutil.copyfile(
                             os.path.join(args.save_dir, 'checkpoint.pth.tar'),
                             os.path.join(args.save_dir, 'model-best.pth.tar'))
-                    best_acc = acc_val
-                    best_acc_test = acc_test
+                    best_mIoU = score['Mean IoU']
                 
                     # DM. save model as wandb artifact
                     model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
                     model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                     wandb.log_artifact(model_artifact)
-                '''
+                
 
 
 if __name__ == '__main__':
