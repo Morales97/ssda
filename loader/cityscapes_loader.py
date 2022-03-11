@@ -3,6 +3,8 @@ import torch
 import numpy as np
 import scipy.misc as m
 import pdb 
+from PIL import Image
+from loader.loader_utils import pil_loader
 
 from torch.utils import data
 
@@ -153,10 +155,10 @@ class cityscapesLoader(data.Dataset):
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
 
-        img = m.imread(img_path)
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         img = np.array(img, dtype=np.uint8)
 
-        lbl = m.imread(lbl_path)
+        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
         if self.augmentations is not None:
