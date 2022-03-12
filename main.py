@@ -65,7 +65,7 @@ def main(args, wandb):
     if args.net == 'rn50_up':
         model = resnet_50_upsampling(args.pre_trained)
     if args.net == 'deeplabv3':
-        model = deeplabv3_rn50(args.pre_trained)
+        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
     model.cuda()
     model.train()
 

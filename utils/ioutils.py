@@ -51,7 +51,9 @@ def get_parser():
     parser.add_argument('--resume', type=str, default='',
                         help='Checkpoint path to resume from')
     parser.add_argument('--pre_trained', type=boolfromstr, default=True,
-                        help='Use IN pretrained weights')
+                        help='Segmentation model pretrained end-to-end, usually on COCO')
+    parser.add_argument('--pre_trained_backbone', type=boolfromstr, default=True,
+                        help='Backbone of the seg model pretrained, usually on ImageNet')
     parser.add_argument('--net', type=str, default='',
                         help='choose model architecture')
     '''

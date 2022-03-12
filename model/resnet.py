@@ -16,10 +16,17 @@ def resnet50_FCN(pretrained=False):
 
     return model
 
-def deeplabv3_rn50(pretrained=False): #, num_classes=19):
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=pretrained)
-    model.classifier[4] = nn.Conv2d(256, 19, kernel_size=(1,1), stride=(1,1))
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
+        pretrained=pretrained, 
+        num_classes =19, 
+        pretrained_backbone=pretrained_backbone)
+    #model.classifier[4] = nn.Conv2d(256, 19, kernel_size=(1,1), stride=(1,1))
     return model
+
+
+#def deeplabv3_mobilenetv3_large(pretrained=False):
+
 
 
 '''
