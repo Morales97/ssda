@@ -66,7 +66,7 @@ def main(args, wandb):
         model = resnet_50_upsampling(args.pre_trained)
     if args.net == 'deeplabv3':
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
-    if args.net = 'dl_mobilenet':
+    if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     model.cuda()
     model.train()
