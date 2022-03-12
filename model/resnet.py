@@ -20,12 +20,20 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=pretrained, 
         num_classes =19, 
-        pretrained_backbone=pretrained_backbone)
+        pretrained_backbone=pretrained_backbone
+    )
     #model.classifier[4] = nn.Conv2d(256, 19, kernel_size=(1,1), stride=(1,1))
     return model
 
 
-#def deeplabv3_mobilenetv3_large(pretrained=False):
+def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
+    model = torchvision.models.segmentation.deeplabv3_mobilenet_v3_large(
+        pretrained=pretrained,
+        num_classes=19,
+        pretrained_backbone=pretrained_backbone
+    )
+    return model
+
 
 
 
@@ -105,6 +113,7 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
     return model
 
 '''
+dl_mobilenet = deeplabv3_mobilenetv3_large()
 deeplab = deeplabv3_rn50()
 rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
