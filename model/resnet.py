@@ -16,7 +16,7 @@ def resnet50_FCN(pretrained=False):
 
     return model
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True)
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=pretrained, 
         num_classes =19, 
