@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large
+from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
 from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -68,6 +68,8 @@ def main(args, wandb):
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
+    if args.net == 'lraspp_mobilenet':
+        model = lraspp_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     model.cuda()
     model.train()
 
@@ -106,7 +108,7 @@ def main(args, wandb):
             # train
             optimizer.zero_grad()
             outputs = model(images)
-            if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet':
+            if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
                 outputs = outputs['out']  # rn50-FCN has outputs['out'] (pixel pred) and outputs['aux'] (pixel loss)
             loss = loss_fn(outputs, labels)
             loss.backward()
@@ -141,7 +143,7 @@ def main(args, wandb):
                         labels_val = labels_val.cuda()
 
                         outputs = model(images_val)
-                        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet':
+                        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
                             outputs = outputs['out']
                         val_loss = loss_fn(input=outputs, target=labels_val)
 

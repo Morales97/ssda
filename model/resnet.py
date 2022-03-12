@@ -34,6 +34,13 @@ def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
     )
     return model
 
+def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
+    model = torchvision.models.segmentation.lraspp_mobilenet_v3_large(
+        pretrained=pretrained,
+        num_classes=19,
+        pretrained_backbone=pretrained_backbone
+    )
+    return model
 
 
 
