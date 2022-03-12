@@ -11,14 +11,14 @@ ResNet-50 FCN from torch
 def resnet50_FCN(pretrained=False):
     model = torchvision.models.segmentation.fcn_resnet50(pretrained)
 
-    # change number of classes from 21 to 19
+    # change number of classes from 21 to 19. NOTE this probably can be done with n_classes as attribute instead...
     model.classifier[4] = nn.Conv2d(512, 19, kernel_size=(1,1), stride=(1,1))
 
     return model
 
-def deeplabv3(pretrained=False):
+def deeplabv3_rn50(pretrained=False, num_classes=19):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=pretrained)
-    model.classifier[4] = nn.Conv2d(256, 19, kernel_size=(1,1), stride=(1,1))
+    #model.classifier[4] = nn.Conv2d(256, 19, kernel_size=(1,1), stride=(1,1))
     return model
 
 
@@ -98,7 +98,7 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
     return model
 
 '''
-deeplab = deeplabv3()
+deeplab = deeplabv3_rn50()
 rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
 model = resnet_34_upsampling()

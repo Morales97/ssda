@@ -11,5 +11,5 @@
 #SBATCH --time=06:00:00
 
 
-python main.py --expt_name=deeplabv3 --pre_trained=False  --net=deeplabv3
+python main.py --expt_name=deeplabv3_rn50_1500 --pre_trained=False  --net=deeplabv3 --resume=expts/tmp_last/checkpoint_dlrn50_1500.pth.tar
 
