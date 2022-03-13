@@ -25,7 +25,7 @@ def get_parser():
     parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size of source labelled data to use. If not '
                              'provided, certain default sizes used')
-    parser.add_argument('--num_workers', type=int, default=3,
+    parser.add_argument('--num_workers', type=int, default=1,
                         help='Number of worker threads to use in each dataloader')
     parser.add_argument('--max_num_threads', type=int, default=12,
                         help='Maximum number of threads that the process should '
