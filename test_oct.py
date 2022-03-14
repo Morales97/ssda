@@ -38,8 +38,18 @@ def main(args, wandb):
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Spectralis_part1', label_path='data/retouch-dataset/pre_processed/Spectralis_part1', img_size=(512, 512))
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Cirrus_part1', label_path='data/retouch-dataset/pre_processed/Cirrus_part1', img_size=(512, 512))
     #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/cityscapes/labels', img_size=(360, 680))
+    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680))
     s_loader.test()
+
+    loader = DataLoader(
+        s_loader,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=False,  # TODO change to True
+    )
+
+    for (images, labels) in train_loader:
+        pdb.set_trace()
 
 if __name__ == '__main__':
     args = parse_args()

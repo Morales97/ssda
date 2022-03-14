@@ -155,9 +155,7 @@ class gtaLoader(data.Dataset):
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
-
-            #img_path.split(os.sep)[-2],
-            #os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])

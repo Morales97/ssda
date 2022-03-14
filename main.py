@@ -37,7 +37,7 @@ def main(args, wandb):
     # TODO: rn loaders don't use augmentations. Probably should be using some
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/cityscapes/labels', img_size=(360, 680))
+    #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680))
 
     train_loader = DataLoader(
         t_loader,
