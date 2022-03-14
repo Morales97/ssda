@@ -162,10 +162,7 @@ class gtaLoader(data.Dataset):
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
 
-        with open(lbl_path, 'rb') as f:
-            with Image.open(f) as _img:
-                print('***')
-                pdb.set_trace()
+        pdb.set_trace()
 
 
     def __getitem__(self, index):
