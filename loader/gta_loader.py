@@ -82,8 +82,8 @@ class gtaLoader(data.Dataset):
         self.mean = np.array(self.mean_rgb[version])
         self.files = {}
 
-        self.images_base = os.path.join(self.image_path, self.split)
-        self.annotations_base = os.path.join(self.label_path, self.split)
+        self.images_base = os.path.join(self.image_path)
+        self.annotations_base = os.path.join(self.label_path)
 
         # TODO if split train, select first 22500 images. if split val, select rest. If split '' or 'all', select all (do nothing)
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
