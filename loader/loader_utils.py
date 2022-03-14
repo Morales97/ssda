@@ -23,7 +23,7 @@ def _load(_path, is_segmentation, resize, width, height, convert_segmentation=Tr
             if is_segmentation:
                 if convert_segmentation:
                     _img = _img.convert()
-                    pdb.set_trace()
+                    #pdb.set_trace()
                 if resize: _img = _img.resize(_build_size(_img, width, height), Image.NEAREST)
             else:
                 _img = _img.convert('RGB')

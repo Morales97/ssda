@@ -164,6 +164,7 @@ class gtaLoader(data.Dataset):
 
         with open(lbl_path, 'rb') as f:
             with Image.open(f) as _img:
+                print('***')
                 pdb.set_trace()
 
 
