@@ -35,9 +35,10 @@ def main(args, wandb):
     random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680))
+    #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train')
+    #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+    t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="train")
+    v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="val")
 
     train_loader = DataLoader(
         t_loader,
@@ -204,7 +205,7 @@ if __name__ == '__main__':
     if not args.expt_name:
         args.expt_name = gen_unique_name()
     if args.project == '':
-        args.project = 'seg_test'
+        args.project = 'gta_test'
     wandb.init(name=args.expt_name, dir=args.save_dir,
                config=args, reinit=True, project=args.project, entity=args.entity)
 
