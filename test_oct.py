@@ -45,7 +45,7 @@ def main(args, wandb):
     #s_loader.test()
 
     loader = DataLoader(
-        s_loader,
+        v_loader,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=False,  # TODO change to True
