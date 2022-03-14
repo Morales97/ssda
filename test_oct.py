@@ -42,7 +42,7 @@ def main(args, wandb):
     #v_loader.test()
     #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680))
     s_loader = gtaLoader(image_path='data/images', label_path='data/labels', img_size=(360, 680))
-    s_loader.test()
+    #s_loader.test()
 
     loader = DataLoader(
         s_loader,
