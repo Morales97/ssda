@@ -31,7 +31,7 @@ def get_parser():
                         help='Maximum number of threads that the process should '
                              'use. Uses torch.set_num_threads()')
 
-    parser.add_argument('--project', type=str, default='seg_test',
+    parser.add_argument('--project', type=str, default='',
                         help='wandb project to use')
     parser.add_argument('--entity', type=str, default='morales97',
                         help='wandb entity to use')
