@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-
+import pdb
 
 def _build_size(orig_img, width, height):
     size = [width, height]
