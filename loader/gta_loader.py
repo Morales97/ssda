@@ -51,7 +51,7 @@ class gtaLoader(data.Dataset):
         [0, 0, 230],
         [119, 11, 32],
     ]
-   label_colours = dict(zip(range(19), colors))
+    label_colours = dict(zip(range(19), colors))
 
     mean_rgb = {
         "pascal": [103.939, 116.779, 123.68],
