@@ -66,7 +66,7 @@ if __name__ == "__main__":
         # 'cityscapes/' + "leftImg8bit_tiny/", (512, 256)),
         ('gta5/' + "images/",
         # 'gta5/' + "images_small/", (1280, 720)),
-         'gta5/' + "images_tiny/", (640, 260)),
+         'gta5/' + "images_tiny/", (640, 360)),
     ]
 
     # Convert files

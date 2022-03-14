@@ -22,11 +22,8 @@ def _load(_path, is_segmentation, resize, width, height, convert_segmentation=Tr
         with Image.open(f) as _img:
             if is_segmentation:
                 if convert_segmentation:
-                    # pdb.set_trace()
-                    _img = _img.convert()
+                    #_img = _img.convert()
                     pass    # for GTA-5 dataset, it should not convert anything!. The default label file comes with the trianing IDs!
-                            # NOTE Need to change cityscape ids to training Ids. 
-                    #pdb.set_trace()
                 if resize: _img = _img.resize(_build_size(_img, width, height), Image.NEAREST)
             else:
                 _img = _img.convert('RGB')

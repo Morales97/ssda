@@ -85,9 +85,10 @@ class gtaLoader(data.Dataset):
         self.images_base = os.path.join(self.image_path, self.split)
         self.annotations_base = os.path.join(self.label_path, self.split)
 
-
+        # TODO if split train, select first 22500 images. if split val, select rest. If split '' or 'all', select all (do nothing)
         #self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".png"))
+        pdb.set_trace()
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [
             7,
