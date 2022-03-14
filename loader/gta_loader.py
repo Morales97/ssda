@@ -161,7 +161,10 @@ class gtaLoader(data.Dataset):
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
-        pdb.set_trace()
+
+        with open(lbl_path, 'rb') as f:
+            with Image.open(f) as _img:
+                pdb.set_trace()
 
 
     def __getitem__(self, index):
