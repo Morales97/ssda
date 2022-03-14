@@ -3,10 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# files
-retouch-dataset/
-*.zip
-
 # C extensions
 *.so
 

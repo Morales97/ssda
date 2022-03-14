@@ -121,10 +121,11 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
     return model
 
 '''
+lraspp_mn = lraspp_mobilenetv3_large()
 dl_mobilenet = deeplabv3_mobilenetv3_large()
 deeplab = deeplabv3_rn50()
 rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
-model = resnet_34_upsampling()
+rn34_u = resnet_34_upsampling()
 pdb.set_trace()
 '''
