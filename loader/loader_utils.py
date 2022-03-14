@@ -22,7 +22,7 @@ def _load(_path, is_segmentation, resize, width, height, convert_segmentation=Tr
         with Image.open(f) as _img:
             if is_segmentation:
                 if convert_segmentation:
-                    pdb.set_trace()
+                    # pdb.set_trace()
                     #_img = _img.convert()
                     #pdb.set_trace()
                 if resize: _img = _img.resize(_build_size(_img, width, height), Image.NEAREST)
