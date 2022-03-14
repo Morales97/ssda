@@ -86,7 +86,8 @@ class gtaLoader(data.Dataset):
         self.annotations_base = os.path.join(self.label_path, self.split)
 
 
-        self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
+        #self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
+        self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".png"))
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [
             7,
