@@ -131,7 +131,7 @@ class combinedLoader(data.Dataset):
         if not self.files:
             raise Exception("No files found in %s" % (self.images_base))
 
-        print("Found %d %s images" % (len(self.files[split]), split))
+        print("Found %d images" % (len(self.files)))
 
     def __len__(self):
         """__len__"""
