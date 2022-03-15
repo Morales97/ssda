@@ -32,8 +32,6 @@ def main(args, wandb):
 
     # set random seed
     torch.manual_seed(args.seed)
-    #np.random.seed(args.seed)
-    random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=args.target_samples)
@@ -56,14 +54,7 @@ def main(args, wandb):
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,
-    )    
-
-    val_loader = DataLoader(
-        v_loader,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        shuffle=True,
-    )    
+    )      
 
     # Set up metrics
     running_metrics_val = runningScore(t_loader.n_classes)
@@ -112,29 +103,23 @@ def main(args, wandb):
     # Iterators
     data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
-    #data_iter_t_unl = iter(target_loader_unl)
 
     while step <= args.steps:
 
-        # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % len(target_loader) == 0 and step > 0:
             data_iter_t = iter(target_loader)
-        #if step % len(target_loader_unl) == 0 and step > 0:
-        #    data_iter_t_unl = iter(target_loader_unl)
         if step % len(source_loader) == 0 and step > 0:
             data_iter_s = iter(source_loader)
     
-        images_s, labels_s = next(data_iter_s)
-        images_t, labels_t = next(data_iter_t)
+        images_s, _ = next(data_iter_s)
+        images_t, _ = next(data_iter_t)
         
         step += 1
         start_ts = time.time()
         model.train()
         
         images_s = images_s.cuda()
-        labels_s = labels_s.cuda()
         images_t = images_t.cuda()
-        labels_t = labels_t.cuda()
 
         # train
         optimizer.zero_grad()
@@ -247,6 +232,3 @@ if __name__ == '__main__':
     main(args, wandb)
     wandb.join()
     
-
-# python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
-# python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 &

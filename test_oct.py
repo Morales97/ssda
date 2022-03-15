@@ -21,7 +21,6 @@ from utils.ioutils import rm_format
 from loader.oct_loader import octLoader
 from loader.gta_loader import gtaLoader
 from loader.cityscapes_loader import cityscapesLoader
-from loader.combined_loader import combinedLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
@@ -45,8 +44,6 @@ def main(args, wandb):
     #s_loader = gtaLoader(image_path='data/images', label_path='data/labels', img_size=(360, 640))
     #s_loader.test()
 
-    c_loader = combinedLoader(source_loader=s_loader, target_loader=t_loader)
-    #c_loader.test()
     loader = DataLoader(
         c_loader,   # TODO there will be the problem of different img sizes in the same batch
         batch_size=args.batch_size,
