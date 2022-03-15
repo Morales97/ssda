@@ -110,7 +110,8 @@ def main(args, wandb):
     val_loss_meter = averageMeter()
 
     while step <= args.steps:
-        for (images, labels) in train_source_loader:
+        for (images, labels) in train_target_loader:
+            pdb.set_trace()
             step += 1
             start_ts = time.time()
             model.train()
