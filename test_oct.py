@@ -46,7 +46,7 @@ def main(args, wandb):
     #s_loader.test()
 
     c_loader = combinedLoader(source_loader=s_loader, target_loader=t_loader)
-
+    c_loader.test()
     loader = DataLoader(
         v_loader,
         batch_size=args.batch_size,
