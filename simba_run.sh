@@ -11,5 +11,5 @@
 #SBATCH --time=08:00:00
 
 
-python main.py --expt_name=fcn_rn50 --net=resnet50_fcn --pre_trained=False  --pre_trained_backbone=True --lr=0.01 --steps=5000
+python main.py --expt_name=lraspp_mnv3 --net=lraspp_mobilenet --pre_trained=False  --pre_trained_backbone=True --lr=0.01 --steps=5000
 
