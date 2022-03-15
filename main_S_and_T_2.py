@@ -44,22 +44,19 @@ def main(args, wandb):
     #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="train")
     #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="val")
 
-    train_source_loader = DataLoader(
+    source_loader = DataLoader(
         s_loader,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,
     )
-    train_source_iter = iter(train_source_loader)
 
-    train_target_loader = DataLoader(
+    target_loader = DataLoader(
         t_loader,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,
     )    
-    train_target_iter = iter(train_target_loader)
-
 
     val_loader = DataLoader(
         v_loader,
@@ -112,13 +109,24 @@ def main(args, wandb):
     time_meter = averageMeter()
     val_loss_meter = averageMeter()
 
+    # Iterators
+    data_iter_s = iter(source_loader)
+    data_iter_t = iter(target_loader)
+    #data_iter_t_unl = iter(target_loader_unl)
+
     while step <= args.steps:
 
-        if (step % 2) == 0:
-            images, labels = next(train_source_iter)
-        else:
-            images, labels = next(train_target_iter)
+        # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
+        if step % len(target_loader) == 0 and step > 0:
+            data_iter_t = iter(target_loader)
+        #if step % len(target_loader_unl) == 0 and step > 0:
+        #    data_iter_t_unl = iter(target_loader_unl)
+        if step % len(source_loader) == 0 and step > 0:
+            data_iter_s = iter(source_loader)
     
+        images_s, labels_s = next(data_iter_s)
+        images_t, labels_t = next(data_iter_t)
+        
         step += 1
         start_ts = time.time()
         model.train()
@@ -128,10 +136,14 @@ def main(args, wandb):
 
         # train
         optimizer.zero_grad()
-        outputs = model(images)
+        outputs_s = model(images_s)
+        outputs_t = model(images_t)
         if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
-            outputs = outputs['out']  # rn50-FCN has outputs['out'] (pixel pred) and outputs['aux'] (pixel loss)
-        loss = loss_fn(outputs, labels)
+            outputs_s = outputs_s['out']  
+            outputs_t = outputs_t['out']  
+        loss = 0
+        loss += loss_fn(outputs_s, labels_s)
+        loss += loss_fn(outputs_t, labels_t)
         loss.backward()
         optimizer.step()
 
