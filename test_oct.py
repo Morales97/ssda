@@ -46,12 +46,12 @@ def main(args, wandb):
     #s_loader.test()
 
     c_loader = combinedLoader(source_loader=s_loader, target_loader=t_loader)
-    c_loader.test()
+    #c_loader.test()
     loader = DataLoader(
-        v_loader,
+        c_loader,   # TODO there will be the problem of different img sizes in the same batch
         batch_size=args.batch_size,
         num_workers=args.num_workers,
-        shuffle=False,  # TODO change to True
+        shuffle=True,  # TODO change to True
     )
 
     for (images, labels) in loader:

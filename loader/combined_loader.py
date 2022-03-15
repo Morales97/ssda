@@ -140,40 +140,66 @@ class combinedLoader(data.Dataset):
     def test(self):
         index=0
         img_path = self.files[index].rstrip()
-        pdb.set_trace()
-        lbl_path = os.path.join(
-            self.annotations_base,
-            img_path.split(os.sep)[-2],
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
-        )
 
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
+        if img_path.split(os.sep)[1] == 'gta5':
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-1] 
+            )
+            img = pil_loader(img_path, self.source_loader.img_size[1], self.source_loader.img_size[0])
+            img = np.array(img, dtype=np.uint8)
+            #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
-        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+            lbl = pil_loader(lbl_path, self.source_loader.img_size[1], self.source_loader.img_size[0], is_segmentation=True)
+            lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
-        pdb.set_trace()
+        elif img_path.split(os.sep)[1] == 'cityscapes':
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-2],
+                os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            )
+            img = pil_loader(img_path, self.target_loader.img_size[1], self.target_loader.img_size[0])
+            img = np.array(img, dtype=np.uint8)
+            #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
+            lbl = pil_loader(lbl_path, self.target_loader.img_size[1], self.target_loader.img_size[0], is_segmentation=True)
+            lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        else:
+            raise Exception("folders to not correspond to gta5 or cityscapes")
+        
     def __getitem__(self, index):
         """__getitem__
         :param index:
         """
         img_path = self.files[index].rstrip()
         
-        lbl_path = os.path.join(
-            self.annotations_base,
-            img_path.split(os.sep)[-2],
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
-        )
+        if img_path.split(os.sep)[1] == 'gta5':
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-1] 
+            )
+            img = pil_loader(img_path, self.source_loader.img_size[1], self.source_loader.img_size[0])
+            img = np.array(img, dtype=np.uint8)
+            #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
+            lbl = pil_loader(lbl_path, self.source_loader.img_size[1], self.source_loader.img_size[0], is_segmentation=True)
+            lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
-        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        elif img_path.split(os.sep)[1] == 'cityscapes':
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-2],
+                os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            )
+            img = pil_loader(img_path, self.target_loader.img_size[1], self.target_loader.img_size[0])
+            img = np.array(img, dtype=np.uint8)
+            #img = img.transpose(2, 0, 1)  # HWC -> CHW
+
+            lbl = pil_loader(lbl_path, self.target_loader.img_size[1], self.target_loader.img_size[0], is_segmentation=True)
+            lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        else:
+            raise Exception("folders to not correspond to gta5 or cityscapes")
 
         if self.augmentations is not None:
             img, lbl = self.augmentations(img, lbl)
