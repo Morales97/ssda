@@ -131,8 +131,10 @@ def main(args, wandb):
         start_ts = time.time()
         model.train()
         
-        images = images.cuda()
-        labels = labels.cuda()
+        images_s = images_s.cuda()
+        labels_s = labels_s.cuda()
+        images_t = images_t.cuda()
+        labels_t = labels_t.cuda()
 
         # train
         optimizer.zero_grad()
