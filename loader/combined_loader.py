@@ -61,6 +61,7 @@ class combinedLoader(data.Dataset):
         img_norm=True,
         version="cityscapes",
         test_mode=False,
+        img_size=(1024, 512,)
     ):
         self.source_loader = source_loader
         self.target_loader = target_loader
