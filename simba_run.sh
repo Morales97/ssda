@@ -12,6 +12,6 @@
 
 
 # python main.py --expt_name=lraspp_mnv3 --net=lraspp_mobilenet --pre_trained=False  --pre_trained_backbone=True --steps=5000
-# python main.py --project=GTA_to_CS_tiny --expt_name=full_sup_CS_new_lr --net=lraspp_mobilenet
-python main.py --project=GTA_to_CS_small --expt_name=full_sup_CS --net=lraspp_mobilenet
+python main.py --project=GTA_to_CS_tiny --expt_name=full_sup_CS_new_lr --net=lraspp_mobilenet --target_samples=100
+# python main.py --project=GTA_to_CS_small --expt_name=full_sup_CS --net=lraspp_mobilenet
 
