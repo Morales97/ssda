@@ -20,8 +20,8 @@ def get_parser():
     parser.add_argument('--backbone_path', type=str, default='',
                         help='Path to checkpoint to load backbone from')
 
-    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
-                        help='learning rate (default: 0.001)')
+    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                        help='learning rate (default: 0.01)')
     parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size of source labelled data to use. If not '
                              'provided, certain default sizes used')
@@ -50,7 +50,7 @@ def get_parser():
                         help='how many batches to wait before saving a model')
     parser.add_argument('--resume', type=str, default='',
                         help='Checkpoint path to resume from')
-    parser.add_argument('--pre_trained', type=boolfromstr, default=True,
+    parser.add_argument('--pre_trained', type=boolfromstr, default=False,
                         help='Segmentation model pretrained end-to-end, usually on COCO')
     parser.add_argument('--pre_trained_backbone', type=boolfromstr, default=True,
                         help='Backbone of the seg model pretrained, usually on ImageNet')

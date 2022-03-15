@@ -11,5 +11,6 @@
 #SBATCH --time=08:00:00
 
 
-python main.py --expt_name=lraspp_mnv3 --net=lraspp_mobilenet --pre_trained=False  --pre_trained_backbone=True --lr=0.01 --steps=5000
+# python main.py --expt_name=lraspp_mnv3 --net=lraspp_mobilenet --pre_trained=False  --pre_trained_backbone=True --steps=5000
+python main.py --project=GTA_to_CS --expt_name=no_DA --net=lraspp_mobilenet --steps=5000
 
