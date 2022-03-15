@@ -75,17 +75,10 @@ class combinedLoader(data.Dataset):
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.mean = np.array(self.mean_rgb[version])
-        self.files = {}
-        pdb.set_trace()
-        self.files[''] = [self.source_loader.files.values()] + [self.target_loader.files.values()]
+        self.files = self.source_loader.files[self.source_loader.split] + self.target_loader.files[self.target_loader.split]
         
         self.images_base = os.path.join(self.image_path, self.split)
         self.annotations_base = os.path.join(self.label_path, self.split)
-
-
-        self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
-        if self.few_samples >= 0:
-            self.files[split] = self.files[split][:self.few_samples]
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
         self.valid_classes = [
@@ -142,11 +135,12 @@ class combinedLoader(data.Dataset):
 
     def __len__(self):
         """__len__"""
-        return len(self.files[self.split])
+        return len(self.files)
 
     def test(self):
         index=0
-        img_path = self.files[self.split][index].rstrip()
+        img_path = self.files[index].rstrip()
+        pdb.set_trace()
         lbl_path = os.path.join(
             self.annotations_base,
             img_path.split(os.sep)[-2],
@@ -166,7 +160,8 @@ class combinedLoader(data.Dataset):
         """__getitem__
         :param index:
         """
-        img_path = self.files[self.split][index].rstrip()
+        img_path = self.files[index].rstrip()
+        
         lbl_path = os.path.join(
             self.annotations_base,
             img_path.split(os.sep)[-2],
