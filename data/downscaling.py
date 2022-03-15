@@ -61,12 +61,12 @@ if __name__ == "__main__":
     n = args.chunk_size
 
     CONVERT_LIST = [
-        #('cityscapes/'+ "leftImg8bit/",
-        # 'cityscapes/' + "leftImg8bit_small/", (1024, 512)),
+        ('cityscapes/'+ "leftImg8bit/",
+        'cityscapes/' + "leftImg8bit_small/", (1024, 512)),
         # 'cityscapes/' + "leftImg8bit_tiny/", (512, 256)),
         ('gta5/' + "images/",
-        # 'gta5/' + "images_small/", (1280, 720)),
-         'gta5/' + "images_tiny/", (640, 360)),
+        'gta5/' + "images_small/", (1280, 720)),
+        # 'gta5/' + "images_tiny/", (640, 360)),
     ]
 
     # Convert files

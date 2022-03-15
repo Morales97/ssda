@@ -119,6 +119,7 @@ def main(args, wandb):
             optimizer.step()
 
             time_meter.update(time.time() - start_ts)
+            
             # decrease lr
             if step == args.steps/2:
                 for param_group in optimizer.param_groups:
@@ -197,6 +198,8 @@ def main(args, wandb):
                     model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                     wandb.log_artifact(model_artifact)
                 
+            if step >= args.steps:
+                break
 
 
 if __name__ == '__main__':
