@@ -77,8 +77,8 @@ class combinedLoader(data.Dataset):
         self.mean = np.array(self.mean_rgb[version])
         self.files = self.source_loader.files[self.source_loader.split] + self.target_loader.files[self.target_loader.split]
         
-        self.images_base = os.path.join(self.image_path, self.split)
-        self.annotations_base = os.path.join(self.label_path, self.split)
+        self.images_base = None #os.path.join(self.image_path, self.split)
+        self.annotations_base = None #os.path.join(self.label_path, self.split)
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
         self.valid_classes = [
