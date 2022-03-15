@@ -120,6 +120,7 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
 
     return model
 
+'''
 mnv3 = torchvision.models.mobilenet_v3_large(pretrained=False)
 lraspp_mn = lraspp_mobilenetv3_large()
 dl_mobilenet = deeplabv3_mobilenetv3_large()
@@ -128,3 +129,4 @@ rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
 rn34_u = resnet_34_upsampling()
 pdb.set_trace()
+'''
