@@ -63,6 +63,7 @@ class cityscapesLoader(data.Dataset):
         image_path,
         label_path,
         split="train",
+        few_samples= -1,        # Select only few samples for training
         is_transform=True,
         img_size=(512, 1024),
         augmentations=None,
@@ -73,6 +74,7 @@ class cityscapesLoader(data.Dataset):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
+        self.few_samples = few_samples
         self.is_transform = is_transform
         self.augmentations = augmentations
         self.img_norm = img_norm
@@ -86,6 +88,9 @@ class cityscapesLoader(data.Dataset):
 
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
+        if self.few_samples >= 0:
+            self.files[split] = self.files[split][:self.few_samples]
+
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
         self.valid_classes = [
             7,

@@ -11,7 +11,7 @@ def get_parser():
     parser = argparse.ArgumentParser(description='SSDA Classification')
     parser.add_argument('--expt_name', type=str, default='',
                         help='Name of the experiment for wandb')
-    parser.add_argument('--steps', type=int, default=10000, metavar='N',
+    parser.add_argument('--steps', type=int, default=5000, metavar='N',
                         help='maximum number of iterations '
                              'to train (default: 50000)')
     parser.add_argument('--wd', type=float, default=0.0005,
@@ -31,7 +31,7 @@ def get_parser():
                         help='Maximum number of threads that the process should '
                              'use. Uses torch.set_num_threads()')
 
-    parser.add_argument('--project', type=str, default='',
+    parser.add_argument('--project', type=str, default='GTA_to_CS_tiny',
                         help='wandb project to use')
     parser.add_argument('--entity', type=str, default='morales97',
                         help='wandb entity to use')
@@ -56,6 +56,8 @@ def get_parser():
                         help='Backbone of the seg model pretrained, usually on ImageNet')
     parser.add_argument('--net', type=str, default='',
                         help='choose model architecture')
+    parser.add_argument('--target_samples', type=int, default=-1,
+                        help='how many target domain samples to use. Default -1: use all samples')
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
