@@ -58,7 +58,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
         # copy matching keys of state dict -- all but for LRASPP head
         model.cuda()
         model.load_state_dict(new_state_dict, strict=False)
-        print(model.state_dict()['backbone.15.block.2.fc2.weight'] == state_dict['backbone.0.15.block.2.fc2.weight'])
+
     return model
 
 

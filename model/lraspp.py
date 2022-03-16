@@ -1,3 +1,6 @@
+# Torch's source code
+
+
 from collections import OrderedDict
 from typing import Any, Dict
 
@@ -129,24 +132,4 @@ def lraspp_mobilenet_v3_large(
     return model
 
 mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
-checkpoint = torch.load('ckpt.tar', map_location=torch.device('cpu'))
-state_dict = checkpoint['model_state_dict']
-
-new_state_dict = {}
-for key, param in state_dict.items():
-    if 'backbone.0' in key:
-        new_key = 'features' + key[10:]
-        new_state_dict[new_key] = param
-m_sd = mnv3.state_dict
-mnv3.load_state_dict(new_state_dict, strict=False)
-
-lr_mn = lraspp_mobilenet_v3_large()
-
-new_state_dict = {}
-for key, param in state_dict.items():
-    if 'backbone.0' in key:
-        new_key = 'backbone' + key[10:]
-        new_state_dict[new_key] = param
-lr_mn.load_state_dict(new_state_dict, strict=False)
-
 pdb.set_trace()

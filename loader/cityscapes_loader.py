@@ -1,12 +1,16 @@
 import os
+import sys
 import torch
 import numpy as np
 import pdb 
 from PIL import Image
+import torchvision.transforms.functional as TF
 from loader.loader_utils import pil_loader
 
 from torch.utils import data
 
+sys.path.append(os.path.abspath('..'))
+from utils.transforms import get_transforms
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -20,14 +24,7 @@ def recursive_glob(rootdir=".", suffix=""):
         if filename.endswith(suffix)
     ]
 
-class cityscapesLoader(data.Dataset):
-    """cityscapesLoader
-    https://www.cityscapes-dataset.com
-    Data is derived from CityScapes, and can be downloaded from here:
-    https://www.cityscapes-dataset.com/downloads/
-    Many Thanks to @fvisin for the loader repo:
-    https://github.com/fvisin/dataset_loaders/blob/master/dataset_loaders/images/cityscapes.py
-    """
+class cityscapesLoader2(data.Dataset):
 
     colors = [  # [  0,   0,   0],
         [128, 64, 128],
@@ -50,13 +47,7 @@ class cityscapesLoader(data.Dataset):
         [0, 0, 230],
         [119, 11, 32],
     ]
-
     label_colours = dict(zip(range(19), colors))
-
-    mean_rgb = {
-        "pascal": [103.939, 116.779, 123.68],
-        "cityscapes": [0.0, 0.0, 0.0],
-    }  # pascal mean for PSPNet and ICNet pre-trained model
 
     def __init__(
         self,
@@ -64,34 +55,33 @@ class cityscapesLoader(data.Dataset):
         label_path,
         split="train",
         few_samples= -1,        # Select only few samples for training
-        is_transform=True,
         img_size=(512, 1024),
-        augmentations=None,
-        img_norm=True,
-        version="cityscapes",
+        version="gta",
         test_mode=False,
+        rotation=False
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
+        self.rot = rotation
+        if self.rot:
+            self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
+            print('Images with random square crops of size ', str(min(img_size)))
+        else:
+            self.transforms = get_transforms(aug_level=0)
         self.few_samples = few_samples
-        self.is_transform = is_transform
-        self.augmentations = augmentations
-        self.img_norm = img_norm
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
-        self.mean = np.array(self.mean_rgb[version])
         self.files = {}
 
         self.images_base = os.path.join(self.image_path, self.split)
         self.annotations_base = os.path.join(self.label_path, self.split)
 
-
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.few_samples >= 0:
             self.files[split] = self.files[split][:self.few_samples]
 
-        self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
+        self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [
             7,
             8,
@@ -136,6 +126,7 @@ class cityscapesLoader(data.Dataset):
             "bicycle",
         ]
 
+
         self.ignore_index = 250
         self.class_map = dict(zip(self.valid_classes, range(19)))
 
@@ -156,15 +147,42 @@ class cityscapesLoader(data.Dataset):
             img_path.split(os.sep)[-2],
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
+        pdb.set_trace()
 
+        # Rotation pretask      
+        if self.rot:
+            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            all_rotated_imgs = [
+                self.transforms(TF.rotate(img, -90)),
+                self.transforms(img),
+                self.transforms(TF.rotate(img, 90)),
+                self.transforms(TF.rotate(img, 180))]
+            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
+            rot_lbl = torch.LongTensor([0, 1, 2, 3])
+            pdb.set_trace()
+            return all_rotated_imgs, rot_lbl
+            
+        # Image
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
+        img = self.transforms(img)
 
+        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
+
+        if not np.all(classes == np.unique(lbl)):
+            print("WARN: resizing labels yielded fewer classes")
+        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
+            print("after det", classes, np.unique(lbl))
+            raise ValueError("Segmentation map contained invalid class values")
+        lbl = torch.from_numpy(lbl).long()
+
 
         pdb.set_trace()
+
 
     def __getitem__(self, index):
         """__getitem__
@@ -177,50 +195,38 @@ class cityscapesLoader(data.Dataset):
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
 
+        # Rotation pretask
+        if self.rot:
+            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            all_rotated_imgs = [
+                self.transforms(TF.rotate(img, -90)),
+                self.transforms(img),
+                self.transforms(TF.rotate(img, 90)),
+                self.transforms(TF.rotate(img, 180))]
+            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
+            rot_lbl = torch.LongTensor([0, 1, 2, 3])
+            return all_rotated_imgs, rot_lbl
+            
+        # Image
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
+        img = self.transforms(img)
 
+        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-
-        if self.augmentations is not None:
-            img, lbl = self.augmentations(img, lbl)
-
-        if self.is_transform:
-            img, lbl = self.transform(img, lbl)
-
-        return img, lbl
-
-    def transform(self, img, lbl):
-        """transform
-        :param img:
-        :param lbl:
-        """
-        # img = img[:, :, ::-1]  # RGB -> BGR. In some conventions BGR is used. Make sure our pre-trained model is RGB
-        img = img.astype(np.float64)
-        img -= self.mean
-        if self.img_norm:
-            # Resize scales images from 0 to 255, thus we need to divide by 255.0
-            img = img.astype(float) / 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
         
         classes = np.unique(lbl)
-        # lbl = lbl.astype(float)
-        # lbl = m.imresize(lbl, (self.img_size[1], self.img_size[0]), "nearest", mode="F") # resizing is done by pil_loader
         lbl = lbl.astype(int)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
-
         if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
             print("after det", classes, np.unique(lbl))
             raise ValueError("Segmentation map contained invalid class values")
-
-        img = torch.from_numpy(img).float()
         lbl = torch.from_numpy(lbl).long()
 
         return img, lbl
+
 
     def decode_segmap(self, temp):
         r = temp.copy()
@@ -244,32 +250,3 @@ class cityscapesLoader(data.Dataset):
         for _validc in self.valid_classes:
             mask[mask == _validc] = self.class_map[_validc]
         return mask
-
-'''
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    augmentations = Compose([Scale(2048), RandomRotate(10), RandomHorizontallyFlip(0.5)])
-
-    local_path = "/datasets01/cityscapes/112817/"
-    dst = cityscapesLoader(local_path, is_transform=True, augmentations=augmentations)
-    bs = 4
-    trainloader = data.DataLoader(dst, batch_size=bs, num_workers=0)
-    for i, data_samples in enumerate(trainloader):
-        imgs, labels = data_samples
-        import pdb
-
-        pdb.set_trace()
-        imgs = imgs.numpy()[:, ::-1, :, :]
-        imgs = np.transpose(imgs, [0, 2, 3, 1])
-        f, axarr = plt.subplots(bs, 2)
-        for j in range(bs):
-            axarr[j][0].imshow(imgs[j])
-            axarr[j][1].imshow(dst.decode_segmap(labels.numpy()[j]))
-        plt.show()
-        a = input()
-        if a == "ex":
-            break
-        else:
-            plt.close()
-'''
