@@ -189,7 +189,6 @@ if __name__ == '__main__':
 
     wandb.init(name=args.expt_name, dir=args.save_dir,
                config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb = None
     main(args, wandb)
 
     wandb.join()
