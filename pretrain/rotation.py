@@ -140,7 +140,7 @@ def main(args, wandb):
         images_s = images_s.flatten(end_dim=1).cuda()      # (B, 4, C, H, W) -> (B·4, C, H, W)
         images_t = images_t.flatten(end_dim=1).cuda()
         rot_lbl_s = rot_lbl_s.flatten().cuda()             # (B, 4) -> (B·4)
-        rot_lbl_s = rot_lbl_s.flatten().cuda()
+        rot_lbl_t = rot_lbl_t.flatten().cuda()
 
         preds_s = model(images_s)
         preds_t = model(images_t)
