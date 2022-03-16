@@ -125,7 +125,7 @@ class Predictor(nn.Module):
     def __init__(self, num_class=64, inc=4096, temp=0.05, hidden=[]):
         super(Predictor, self).__init__()
         layer_nodes = [inc] + hidden + [num_class]
-        layers = [nn.Linear(layer_nodes[i], layer_nodes[i+1]) for i in range(len(layer_nodenums)-1)]
+        layers = [nn.Linear(layer_nodes[i], layer_nodes[i+1]) for i in range(len(layer_nodes)-1)]
 
         self.fc = nn.Sequential(*layers)
         self.num_class = num_class
