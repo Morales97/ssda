@@ -135,16 +135,15 @@ def main(args, wandb):
         images_s, rot_lbl_s = next(data_iter_t)
         images_t, rot_lbl_t = next(data_iter_s)
 
-        pdb.set_trace()
+        images_s = images_s.flatten(end_dim=1).cuda()      # (B, 4, C, H, W) -> (B·4, C, H, W)
+        images_t = images_t.flatten(end_dim=1).cuda()
+        rot_lbl_s = rot_lbl_s.flatten().cuda()             # (B, 4) -> (B·4)
+        rot_lbl_s = rot_lbl_s.flatten().cuda()
 
-        im_data_s = data_s[0].reshape(
-            (-1,) + data_s[0].shape[2:]).cuda(non_blocking=True)
-        rot_labels_s = data_s[2].reshape(
-            (-1,) + data_s[2].shape[2:]).cuda(non_blocking=True)
-        im_data_t = data_t[0].reshape(
-            (-1,) + data_t[0].shape[2:]).cuda(non_blocking=True)
-        rot_labels_t = data_t[2].reshape(
-            (-1,) + data_t[2].shape[2:]).cuda(non_blocking=True)
+        all_imgs = torch.cat((images_s, images_t), dim=0)
+        all_labels = torch.cat((rot_labels_s, rot_labels_t), dim=0)
+
+        pdb.set_trace()
 
         with autocast():
             all_imgs = torch.cat((im_data_s, im_data_t), dim=0)
