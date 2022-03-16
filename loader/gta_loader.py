@@ -167,6 +167,7 @@ class gtaLoader(data.Dataset):
             img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
+        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
         if self.rot:
             all_rotated_imgs = [
                 self.transform_rot(TF.rotate(img, -90)),
