@@ -10,7 +10,7 @@ from loader.loader_utils import pil_loader
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
-from utils.transforms import get_transforms
+from utils.transforms import get_transforms, WeakStrongAug
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -54,11 +54,12 @@ class cityscapesLoader(data.Dataset):
         image_path,
         label_path,
         split="train",
-        few_samples= -1,        # Select only few samples for training
+        n_samples= -1,        # Select only few samples for training
         img_size=(512, 1024),
         version="gta",
         test_mode=False,
-        rotation=False
+        rotation=False,
+        unlabeled=False
     ):
         self.image_path = image_path
         self.label_path = label_path
@@ -68,18 +69,27 @@ class cityscapesLoader(data.Dataset):
             self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
             print('Images with random square crops of size ', str(min(img_size)))
         else:
-            self.transforms = get_transforms(aug_level=0)
-        self.few_samples = few_samples
+            if not unlabeled:
+                self.transforms = get_transforms(aug_level=0)
+            if unlabeled:
+                weak = get_transforms(aug_level=0)
+                strong = get_transforms(aug_level=2)
+                self.transforms = WeakStrongAug(weak, strong)
+        self.n_samples = n_samples
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.files = {}
+        self.unlabeled = unlabeled
 
         self.images_base = os.path.join(self.image_path, self.split)
         self.annotations_base = os.path.join(self.label_path, self.split)
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
-        if self.few_samples >= 0:
-            self.files[split] = self.files[split][:self.few_samples]
+        if self.n_samples >= 0:
+            if not unlabeled:
+                self.files[split] = self.files[split][:self.n_samples]
+            else:
+                self.files[split] = self.files[split][self.n_samples:]
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [
@@ -210,6 +220,9 @@ class cityscapesLoader(data.Dataset):
         # Image
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
         img = self.transforms(img)
+
+        if self.unlabeled:
+            return img
 
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)

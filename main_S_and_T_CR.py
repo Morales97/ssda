@@ -35,8 +35,9 @@ def main(args, wandb):
     random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', n_samples=args.target_samples)
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), n_samples=args.target_samples)
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), unlabeled=True, n_samples=(2975-args.target_samples))
    
     #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', n_samples=args.target_samples)
     #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
@@ -57,6 +58,13 @@ def main(args, wandb):
         num_workers=args.num_workers,
         shuffle=True,
     )    
+
+    target_loader_unl = DataLoader(
+        t_unl_loader,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=True,
+    )   
 
     val_loader = DataLoader(
         v_loader,
@@ -112,21 +120,22 @@ def main(args, wandb):
     # Iterators
     data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
-    #data_iter_t_unl = iter(target_loader_unl)
+    data_iter_t_unl = iter(target_loader_unl)
 
     while step <= args.steps:
 
-        # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % len(target_loader) == 0:
             data_iter_t = iter(target_loader)
-        #if step % len(target_loader_unl) == 0 and step > 0:
-        #    data_iter_t_unl = iter(target_loader_unl)
+        if step % len(target_loader_unl) == 0:
+            data_iter_t_unl = iter(target_loader_unl)
         if step % len(source_loader) == 0:
             data_iter_s = iter(source_loader)
     
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
+        images_t_unl = next(data_iter_t_unl)
         
+        pdb.set_trace()
         step += 1
         start_ts = time.time()
         model.train()
