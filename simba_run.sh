@@ -13,4 +13,4 @@
 
 # python main.py --expt_name=lraspp_mnv3 --net=lraspp_mobilenet --pre_trained=False  --pre_trained_backbone=True --steps=5000
 # python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy2_S_and_T_200_NEW_LOADER --net=lraspp_mobilenet --target_samples=200 --batch_size=8
-python pretrain/rotation.py --batch_size=4 --lr=0.001 --project=rotation --expt_name=test_same_lr --save_dir=expts_rot/tmp_last_same 
+python pretrain/rotation.py --batch_size=4 --lr=0.001 --project=rotation --expt_name=longer_run --save_dir=expts_rot/tmp_last_good --save_interval=2000 --steps=10000 
