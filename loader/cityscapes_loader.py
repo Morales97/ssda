@@ -87,9 +87,13 @@ class cityscapesLoader(data.Dataset):
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.n_samples >= 0:
             if not self.unlabeled:
+                print(self.unlabeled)
                 self.files[split] = self.files[split][:self.n_samples]
+                print(len(self.files[split]))
             else:
                 self.files[split] = self.files[split][self.n_samples:]
+                print(self.unlabeled)
+                print(len(self.files[split]))
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [

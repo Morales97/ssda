@@ -133,3 +133,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 # TODO what is this? wouldn't it be better to have it random?
 def _float_parameter(v, max_v):
     return float(v) * max_v / 10
+
+
+def _int_parameter(v, max_v):
+    return int(v * max_v / 10)
