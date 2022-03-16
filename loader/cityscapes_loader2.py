@@ -74,8 +74,8 @@ class cityscapesLoader2(data.Dataset):
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.files = {}
 
-        self.images_base = os.path.join(self.image_path)
-        self.annotations_base = os.path.join(self.label_path)
+        self.images_base = os.path.join(self.image_path, self.split)
+        self.annotations_base = os.path.join(self.label_path, self.split)
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.few_samples >= 0:
