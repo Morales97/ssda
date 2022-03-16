@@ -93,7 +93,7 @@ def main(args, wandb):
     params = []
     for key, value in dict(model.named_parameters()).items():
         if value.requires_grad:
-            if '1.fc' in key:   # '1.fc' corresponds to clas_head
+            if 'classifier' in key: 
                 params += [{'params': [value], 'lr': 10*args.lr,
                             'weight_decay': args.wd}]
             else:
