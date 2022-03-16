@@ -4,7 +4,7 @@ from collections import OrderedDict
 import time
 
 #sys.path.append(os.path.abspath('..'))
-#sys.path.insert(0, '/home/danmoral/PAC')
+sys.path.insert(0, '/home/danmoral/seg_test')
 #sys.path.insert(0, '/Users/dani/Google Drive/My Drive/Uni/Master/EPFL/Thesis/Few Shot Domain Adaptation/repos/PAC_local')
 
 import pdb
