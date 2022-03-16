@@ -147,6 +147,7 @@ class cityscapesLoader2(data.Dataset):
             img_path.split(os.sep)[-2],
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
+        pdb.set_trace()
 
         # Rotation pretask      
         if self.rot:
