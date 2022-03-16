@@ -24,14 +24,7 @@ def recursive_glob(rootdir=".", suffix=""):
         if filename.endswith(suffix)
     ]
 
-class gtaLoader(data.Dataset):
-    """cityscapesLoader
-    https://www.cityscapes-dataset.com
-    Data is derived from CityScapes, and can be downloaded from here:
-    https://www.cityscapes-dataset.com/downloads/
-    Many Thanks to @fvisin for the loader repo:
-    https://github.com/fvisin/dataset_loaders/blob/master/dataset_loaders/images/cityscapes.py
-    """
+class cityscapesLoader2(data.Dataset):
 
     colors = [  # [  0,   0,   0],
         [128, 64, 128],
@@ -56,12 +49,12 @@ class gtaLoader(data.Dataset):
     ]
     label_colours = dict(zip(range(19), colors))
 
-
     def __init__(
         self,
         image_path,
         label_path,
         split="",
+        few_samples= -1,        # Select only few samples for training
         img_size=(512, 1024),
         version="gta",
         test_mode=False,
@@ -76,6 +69,7 @@ class gtaLoader(data.Dataset):
             print('Images with random square crops of size ', str(min(img_size)))
         else:
             self.transforms = get_transforms(aug_level=0)
+        self.few_samples = few_samples
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.files = {}
@@ -84,10 +78,8 @@ class gtaLoader(data.Dataset):
         self.annotations_base = os.path.join(self.label_path)
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
-        if split == 'train':
-            self.files[split] = self.files[split][:22500]
-        if split == 'val':
-            self.files[split] = self.files[split][22500:]
+        if self.few_samples >= 0:
+            self.files[split] = self.files[split][:self.few_samples]
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, 34, -1]
         self.valid_classes = [
@@ -197,7 +189,8 @@ class gtaLoader(data.Dataset):
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
-            img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
+            img_path.split(os.sep)[-2],
+            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
 
         # Rotation pretask

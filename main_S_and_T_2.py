@@ -19,6 +19,7 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loader.cityscapes_loader import cityscapesLoader
+from loader.cityscapes_loader2 import cityscapesLoader2
 from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
@@ -35,8 +36,12 @@ def main(args, wandb):
     random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=args.target_samples)
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+    #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=args.target_samples)
+    #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+    t_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=args.target_samples)
+    v_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+   
+    
     #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=args.target_samples)
     #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta")
