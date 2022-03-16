@@ -164,7 +164,7 @@ class gtaLoader(data.Dataset):
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
-            img_path.split(os.sep)[-1]  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
+            img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
         if self.rot:
