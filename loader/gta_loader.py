@@ -168,12 +168,7 @@ class gtaLoader(data.Dataset):
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.float64)
-        img -= self.mean
-        if self.img_norm:
-            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
-
+    
         if self.rot:
             all_rotated_imgs = [
                 self.transform_rot(TF.rotate(img, -90)),
@@ -232,9 +227,17 @@ class gtaLoader(data.Dataset):
         return img, lbl
 
     def transform_rot(self, img):
-        img = torch.from_numpy(img).float()
         # augment
         img = self.augmentations(img)
+
+        img = np.array(img, dtype=np.float64)
+        img -= self.mean
+        if self.img_norm:
+            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
+        img = img.transpose(2, 0, 1)  # HWC -> CHW
+
+        return img
+
 
 
     def transform(self, img, lbl):
