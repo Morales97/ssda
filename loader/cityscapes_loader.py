@@ -24,7 +24,7 @@ def recursive_glob(rootdir=".", suffix=""):
         if filename.endswith(suffix)
     ]
 
-class cityscapesLoaders(data.Dataset):
+class cityscapesLoader(data.Dataset):
 
     colors = [  # [  0,   0,   0],
         [128, 64, 128],
