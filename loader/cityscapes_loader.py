@@ -63,7 +63,7 @@ class cityscapesLoader(data.Dataset):
     ):
         self.image_path = image_path
         self.label_path = label_path
-        self.split = split
+        self.split = split if not unlabeled else 'unlabeled'
         self.rot = rotation
         if self.rot:
             self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
@@ -86,7 +86,7 @@ class cityscapesLoader(data.Dataset):
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.n_samples >= 0:
-            if not unlabeled:
+            if not self.unlabeled:
                 self.files[split] = self.files[split][:self.n_samples]
             else:
                 self.files[split] = self.files[split][self.n_samples:]

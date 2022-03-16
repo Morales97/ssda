@@ -72,7 +72,7 @@ class RandAugmentMC(object):
             v = np.random.randint(1, self.m)
             if random.random() < 0.5:
                 img = op(img, v=v, max_v=max_v, bias=bias)
-        img = CutoutAbs(img, 16)
+        #img = CutoutAbs(img, 16)
         return img
 
 
@@ -128,3 +128,8 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
     transform = transforms.Compose(transform_list)
 
     return transform
+
+
+# TODO what is this? wouldn't it be better to have it random?
+def _float_parameter(v, max_v):
+    return float(v) * max_v / 10
