@@ -44,7 +44,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
 
     if custom_pretrain_path is not None:
         # load pretrained backbone
-        checkpoint = torch.load('ckpt.tar', map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         state_dict = checkpoint['model_state_dict']
 
         # adapt state_dict to match
