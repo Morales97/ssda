@@ -142,6 +142,7 @@ def main(args, wandb):
         rot_lbl_s = rot_lbl_s.flatten().cuda()             # (B, 4) -> (B·4)
         rot_lbl_s = rot_lbl_s.flatten().cuda()
 
+        pdb.set_trace()
         preds_s = model(images_s)
         preds_t = model(images_t)
         loss = 0
