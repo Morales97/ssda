@@ -106,6 +106,7 @@ def main(args, wandb):
                             weight_decay=args.wd, nesterov=True)
 
     start_step = 0
+    time_meter = averageMeter()
 
     '''
     if args.resume:
@@ -120,7 +121,6 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
     '''
-
 
     criterion = nn.CrossEntropyLoss()
     data_iter_s = iter(source_loader)
