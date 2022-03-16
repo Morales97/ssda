@@ -14,7 +14,7 @@ from torchvision import transforms
 
 
 
-def get_augmentations(crop_size=256, split='train', aug_level=0):
+def get_transforms(crop_size=256, split='train', aug_level=0):
 
     #normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
@@ -24,6 +24,9 @@ def get_augmentations(crop_size=256, split='train', aug_level=0):
         ]
     elif split == 'train':
         if aug_level == 0:
+            # Do nothing
+            transform_list = []
+        elif aug_level == 1:
             # Mellow transform used for pseudo-labeling during consistency
             transform_list = [
                 transforms.RandomHorizontalFlip(),

@@ -11,7 +11,7 @@ import pdb
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
-from utils.augmentations import get_augmentations
+from utils.transforms import get_augmentations
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -68,9 +68,7 @@ class gtaLoader(data.Dataset):
         image_path,
         label_path,
         split="",
-        is_transform=True,
         img_size=(512, 1024),
-        augmentations=None,
         img_norm=True,
         version="gta",
         test_mode=False,
@@ -79,13 +77,12 @@ class gtaLoader(data.Dataset):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
-        self.is_transform = is_transform
         self.rot = rotation
         if self.rot:
-            self.augmentations = get_augmentations(crop_size=min(img_size), split='train', aug_level=0)
+            self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
             print('Images with random square crops of size ', str(min(img_size)))
         else:
-            self.augmentations = augmentations
+            self.transforms = get_transforms(aug_level=1)
         self.img_norm = img_norm
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
@@ -197,69 +194,38 @@ class gtaLoader(data.Dataset):
             img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.float64)
-        img -= self.mean
-        if self.img_norm:
-            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
-
+        # Rotation pretask
         if self.rot:
+            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
             all_rotated_imgs = [
-                self.transform_rot(TF.rotate(img, -90)),
-                self.transform_rot(img),
-                self.transform_rot(TF.rotate(img, 90)),
-                self.transform_rot(TF.rotate(img, 180))]
+                self.transforms(TF.rotate(img, -90)),
+                self.transforms(img),
+                self.transforms(TF.rotate(img, 90)),
+                self.transforms(TF.rotate(img, 180))]
             all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             return all_rotated_imgs, rot_lbl
+            
+        # Image
+        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = self.transforms(img)
 
-
+        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-
-        if self.augmentations is not None:
-            img, lbl = self.augmentations(img, lbl)
-
-        if self.is_transform:
-            img, lbl = self.transform(img, lbl)
-
-        return img, lbl
-
-    def transform_rot(self, img):
-        # augment
-        img = self.augmentations(img)
-
-        pdb.set_trace()
-        img = np.array(img, dtype=np.float64)
-        img -= self.mean
-        if self.img_norm:
-            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
-
-        return img
-
-
-
-    def transform(self, img, lbl):
-        """transform
-        :param img:
-        :param lbl:
-        """
+        
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
-
         if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
             print("after det", classes, np.unique(lbl))
             raise ValueError("Segmentation map contained invalid class values")
-
-        img = torch.from_numpy(img).float()
         lbl = torch.from_numpy(lbl).long()
 
         return img, lbl
+        
 
     def decode_segmap(self, temp):
         r = temp.copy()
