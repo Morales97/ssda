@@ -168,6 +168,12 @@ class gtaLoader(data.Dataset):
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = img.astype(np.float64)
+        img -= self.mean
+        if self.img_norm:
+            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
+        img = img.transpose(2, 0, 1)  # HWC -> CHW
+
         if self.rot:
             all_rotated_imgs = [
                 self.transform_rot(TF.rotate(img, -90)),
@@ -178,10 +184,6 @@ class gtaLoader(data.Dataset):
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             pdb.set_trace()
             return all_rotated_imgs, rot_lbl
-
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
@@ -204,10 +206,8 @@ class gtaLoader(data.Dataset):
         img = img.astype(np.float64)
         img -= self.mean
         if self.img_norm:
-            # Resize scales images from 0 to 255, thus we need to divide by 255.0
-            img = img.astype(float) / 255.0
+            img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
         img = img.transpose(2, 0, 1)  # HWC -> CHW
-        #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
         if self.rot:
             all_rotated_imgs = [
