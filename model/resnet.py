@@ -35,12 +35,28 @@ def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
     )
     return model
 
-def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
+def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
     model = torchvision.models.segmentation.lraspp_mobilenet_v3_large(
         pretrained=pretrained,
         num_classes=19,
         pretrained_backbone=pretrained_backbone
     )
+
+    if custom_pretrain_path is not None:
+        # load pretrained backbone
+        checkpoint = torch.load('ckpt.tar', map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        state_dict = checkpoint['model_state_dict']
+
+        # adapt state_dict to match
+        new_state_dict = {}
+        for key, param in state_dict.items():
+            if 'backbone.0' in key:
+                new_key = 'backbone' + key[10:]
+                new_state_dict[new_key] = param
+        
+        # copy matching keys of state dict -- all but for LRASPP head
+        model.load_state_dict(new_state_dict, strict=False)
+        print(model.state_dict()['backbone.15.block.2.fc2.weight'] == state_dict['backbone.0.15.block.2.fc2.weight'])
     return model
 
 

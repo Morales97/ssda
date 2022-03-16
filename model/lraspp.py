@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from typing import Any, Dict
 
+import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
 
@@ -91,10 +92,10 @@ def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, num_classes: int) -> 
     low_channels = backbone[low_pos].out_channels
     high_channels = backbone[high_pos].out_channels
 
-    pdb.set_trace()
+    #pdb.set_trace()
     backbone = IntermediateLayerGetter(backbone, return_layers={str(low_pos): "low", str(high_pos): "high"})
 
-    pdb.set_trace()
+    #pdb.set_trace()
     return LRASPP(backbone, low_channels, high_channels, num_classes)
 
 
@@ -127,5 +128,25 @@ def lraspp_mobilenet_v3_large(
         #_load_weights(arch, model, model_urls.get(arch, None), progress)
     return model
 
-m = lraspp_mobilenet_v3_large()
+mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
+checkpoint = torch.load('ckpt.tar', map_location=torch.device('cpu'))
+state_dict = checkpoint['model_state_dict']
+
+new_state_dict = {}
+for key, param in state_dict.items():
+    if 'backbone.0' in key:
+        new_key = 'features' + key[10:]
+        new_state_dict[new_key] = param
+m_sd = mnv3.state_dict
+mnv3.load_state_dict(new_state_dict, strict=False)
+
+lr_mn = lraspp_mobilenet_v3_large()
+
+new_state_dict = {}
+for key, param in state_dict.items():
+    if 'backbone.0' in key:
+        new_key = 'backbone' + key[10:]
+        new_state_dict[new_key] = param
+lr_mn.load_state_dict(new_state_dict, strict=False)
+
 pdb.set_trace()

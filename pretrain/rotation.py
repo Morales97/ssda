@@ -183,7 +183,6 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
-    args.save_dir = 'expts_rot/tmp_last'
     os.makedirs(args.save_dir, exist_ok=True)
 
     wandb.init(name=args.expt_name, dir=args.save_dir,

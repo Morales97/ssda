@@ -86,7 +86,7 @@ def main(args, wandb):
     if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'lraspp_mobilenet':
-        model = lraspp_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
+        model = lraspp_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
     model.cuda()
     model.train()
 
@@ -178,7 +178,6 @@ def main(args, wandb):
             model.eval()
             with torch.no_grad():
                 for (images_val, labels_val) in val_loader:
-                #for (images_val, labels_val) in tqdm(val_loader):
                     images_val = images_val.cuda()
                     labels_val = labels_val.cuda()
 
