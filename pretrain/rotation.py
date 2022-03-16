@@ -94,11 +94,10 @@ def main(args, wandb):
     for key, value in dict(model.named_parameters()).items():
         if value.requires_grad:
             if 'classifier' in key: 
-                params += [{'params': [value], 'lr': 10*args.lr,
-                            'weight_decay': args.wd}]
+                #params += [{'params': [value], 'lr': 10*args.lr,'weight_decay': args.wd}]
+                params += [{'params': [value], 'lr': args.lr,'weight_decay': args.wd}]
             else:
-                params += [{'params': [value], 'lr': args.lr,
-                            'weight_decay': args.wd}]
+                params += [{'params': [value], 'lr': args.lr, 'weight_decay': args.wd}]
 
 
     # The classifiers have 10 times the learning rate of the backbone
