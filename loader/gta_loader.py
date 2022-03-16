@@ -230,6 +230,7 @@ class gtaLoader(data.Dataset):
         # augment
         img = self.augmentations(img)
 
+        pdb.set_trace()
         img = np.array(img, dtype=np.float64)
         img -= self.mean
         if self.img_norm:
