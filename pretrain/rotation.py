@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from torch.utils.data import DataLoader
 from torchvision.models import mobilenet_v3_large
 from model.resnet import lraspp_mobilenetv3_large, Predictor
 #from utils.eval import test
