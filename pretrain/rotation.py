@@ -20,7 +20,7 @@ from utils.ioutils import gen_unique_name
 from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
-from loader.cityscapes_loader import cityscapesLoader
+from loader.cityscapes_loader2 import cityscapesLoader2
 from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
