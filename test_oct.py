@@ -40,7 +40,7 @@ def main(args, wandb):
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Cirrus_part1', label_path='data/retouch-dataset/pre_processed/Cirrus_part1', img_size=(512, 512))
     #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', few_samples=100)
     #v_loader.test()
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 640), split='val')
+    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 640), split='val', rotation=True)
     #s_loader = gtaLoader(image_path='data/images', label_path='data/labels', img_size=(360, 640))
     s_loader.test()
 
