@@ -53,7 +53,7 @@ class cityscapesLoader2(data.Dataset):
         self,
         image_path,
         label_path,
-        split="",
+        split="train",
         few_samples= -1,        # Select only few samples for training
         img_size=(512, 1024),
         version="gta",
