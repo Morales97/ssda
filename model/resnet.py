@@ -44,7 +44,8 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
 
     if custom_pretrain_path is not None:
         # load pretrained backbone
-        checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        # checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        checkpoint = torch.load(custom_pretrain_path)
         state_dict = checkpoint['model_state_dict']
 
         # adapt state_dict to match
@@ -55,6 +56,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
                 new_state_dict[new_key] = param
         
         # copy matching keys of state dict -- all but for LRASPP head
+        model.cuda()
         model.load_state_dict(new_state_dict, strict=False)
         print(model.state_dict()['backbone.15.block.2.fc2.weight'] == state_dict['backbone.0.15.block.2.fc2.weight'])
     return model
