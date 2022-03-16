@@ -164,21 +164,36 @@ class gtaLoader(data.Dataset):
             img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-    
+        # Rotation pretask      
         if self.rot:
+            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
             all_rotated_imgs = [
-                self.transform_rot(TF.rotate(img, -90)),
-                self.transform_rot(img),
-                self.transform_rot(TF.rotate(img, 90)),
-                self.transform_rot(TF.rotate(img, 180))]
+                self.transforms(TF.rotate(img, -90)),
+                self.transforms(img),
+                self.transforms(TF.rotate(img, 90)),
+                self.transforms(TF.rotate(img, 180))]
             all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             pdb.set_trace()
             return all_rotated_imgs, rot_lbl
+            
+        # Image
+        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = self.transforms(img)
 
+        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
+
+        if not np.all(classes == np.unique(lbl)):
+            print("WARN: resizing labels yielded fewer classes")
+        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
+            print("after det", classes, np.unique(lbl))
+            raise ValueError("Segmentation map contained invalid class values")
+        lbl = torch.from_numpy(lbl).long()
 
 
         pdb.set_trace()
