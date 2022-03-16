@@ -142,7 +142,6 @@ def main(args, wandb):
         rot_lbl_s = rot_lbl_s.flatten().cuda()             # (B, 4) -> (B·4)
         rot_lbl_s = rot_lbl_s.flatten().cuda()
 
-        pdb.set_trace()
         preds_s = model(images_s)
         preds_t = model(images_t)
         loss = 0
@@ -188,11 +187,11 @@ if __name__ == '__main__':
     args.save_dir = 'expts_rot/tmp_last'
     os.makedirs(args.save_dir, exist_ok=True)
 
-    #wandb.init(name=args.expt_name, dir=args.save_dir,
-    #           config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb.init(name=args.expt_name, dir=args.save_dir,
+               config=args, reinit=True, project=args.project, entity=args.entity)
     wandb = None
     main(args, wandb)
 
-    #wandb.join()
+    wandb.join()
 
 
