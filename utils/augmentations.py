@@ -43,7 +43,7 @@ def get_augmentations(crop_size=256, split='train', aug_level=0):
             # Mellow transform used for pseudo-labeling during consistency
             transform_list = [
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
+                transforms.RandomCrop(crop_size)
             ]
         '''
         elif aug_level == 1:
