@@ -121,6 +121,36 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
     return model
 
 
+class Predictor(nn.Module):
+    def __init__(self, num_class=64, inc=4096, temp=0.05, hidden=[],
+                 normalize=False, cls_bias=True):
+        super(Predictor, self).__init__()
+        layer_nodenums = [inc] + hidden + [num_class]
+        layers = []
+        for i in range(len(layer_nodenums)-1):
+            if i==len(layer_nodenums)-2:
+                bias = cls_bias
+            else:
+                bias = True
+            layers.append(nn.Linear(layer_nodenums[i], layer_nodenums[i+1], bias=bias))
+
+        self.normalize = normalize
+        # self.fc = layers[-1]
+        # self.layers = nn.Sequential(*layers[:-1])
+        self.fc = nn.Sequential(*layers)
+        self.num_class = num_class
+        self.temp = temp
+
+    def forward(self, x, reverse=False, eta=0.1):
+        if reverse:
+            x = grad_reverse(x, eta)
+        if self.normalize:
+            x = F.normalize(x)
+        # x = self.layers(x)
+        x_out = self.fc(x) / self.temp
+        return x_out
+
+'''
 mnv3 = torchvision.models.mobilenet_v3_large(pretrained=False)
 mnv3_d = torchvision.models.mobilenet_v3_large(pretrained=False, dilated=True)
 lraspp_mn = lraspp_mobilenetv3_large()
@@ -130,3 +160,4 @@ rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
 rn34_u = resnet_34_upsampling()
 pdb.set_trace()
+'''

@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from torchvision.models import mobilenet_v3_large
-from model.resnet import lraspp_mobilenetv3_large
+from model.resnet import lraspp_mobilenetv3_large, Predictor
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
@@ -52,24 +52,19 @@ def validate(G, F2, loader_s, loader_t):
     return acc_s.avg, acc_t.avg
 
 def main(args, wandb):
-    if args.fs_ss:
-        print('Setting sharing strategy to file_system')
-        torch.multiprocessing.set_sharing_strategy('file_system')
-
-    torch.backends.cudnn.benchmark = True
     torch.set_num_threads(args.max_num_threads)
 
     torch.manual_seed(args.seed)
-    random.seed(args.seed)
 
-    source_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
-    target_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
+    #source_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
+    #target_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
 
     # Model
     if args.net == 'lraspp_mobilenet':
         model = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
         model_layers = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
-        G = nn.Sequential(model_layers)
+        clas_head = Predictor(num_class=4, inc=960, temp=0.05, hidden=[])
+        G = nn.Sequential(model_layers, clas_head)
         pdb.set_trace()
     else:
         raise ValueError('Model cannot be recognized.')
@@ -78,33 +73,26 @@ def main(args, wandb):
     G.cuda()
     G.train()
 
+    # prediction head has x10 LR
+    # TODO try with same LR
     params = []
     for key, value in dict(G.named_parameters()).items():
         if value.requires_grad:
-            if 'classifier' in key:
-                # last layer learning rate is 10 times that of the rest of the
-                # backbone (the is last layer)
+            if '1.fc' in key:   # '1.fc' corresponds to clas_head
                 params += [{'params': [value], 'lr': 10*args.lr,
-                            'weight_decay': 0.0005}]
+                            'weight_decay': args.wd}]
             else:
                 params += [{'params': [value], 'lr': args.lr,
-                            'weight_decay': 0.0005}]
+                            'weight_decay': args.wd}]
 
-    # Predictor to predict image rotation
-    F2 = Predictor(num_class=4, inc=inc, temp=args.T, hidden=args.cls_layers,
-                   normalize=args.cls_normalize, cls_bias=args.cls_bias)
-    F2.cuda()
-    F2.train()
-    scaler = GradScaler()
 
     # The classifiers have 10 times the learning rate of the backbone
-    optimizer_g = optim.SGD(params, momentum=0.9,
-                            weight_decay=args.wd, nesterov=True)
-    # learning rates
-    optimizer_f = optim.SGD(list(F2.parameters()), lr=10*args.lr, momentum=0.9,
+    optimizer = optim.SGD(params, momentum=0.9,
                             weight_decay=args.wd, nesterov=True)
 
     start_step = 0
+
+    '''
     if args.resume:
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
@@ -116,26 +104,24 @@ def main(args, wandb):
             print('Resuming from train step {}'.format(start_step))
         else:
             raise Exception('No file found at {}'.format(args.resume))
-    param_lr_g = []
-    for param_group in optimizer_g.param_groups:
-        param_lr_g.append(param_group["lr"])
-    param_lr_f = []
-    for param_group in optimizer_f.param_groups:
-        param_lr_f.append(param_group["lr"])
+    '''
+
+
     criterion = nn.CrossEntropyLoss()
-    all_step = args.steps
     data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
-    for step in range(start_step, all_step):
-        optimizer_g = inv_lr_scheduler(param_lr_g, optimizer_g, step)
-        optimizer_f = inv_lr_scheduler(param_lr_f, optimizer_f, step)
+
+    for step in range(start_step, args.steps):
 
         if step % len(target_loader) == 0:
             data_iter_t = iter(target_loader)
         if step % len(source_loader) == 0:
             data_iter_s = iter(source_loader)
-        data_t = next(data_iter_t)
-        data_s = next(data_iter_s)
+        
+        images_s, rot_lbl_s = next(data_iter_t)
+        images_t, rot_lbl_t = next(data_iter_s)
+
+        pdb.set_trace()
 
         im_data_s = data_s[0].reshape(
             (-1,) + data_s[0].shape[2:]).cuda(non_blocking=True)
@@ -209,12 +195,14 @@ def main(args, wandb):
 
 if __name__ == '__main__':
     args = parse_args()
+    args.net = 'lraspp_mobilenet' # TODO DELETE
     os.makedirs(args.save_dir, exist_ok=True)
 
-    wandb.init(name=args.expt_name, dir=args.save_dir,
-               config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb.init(name=args.expt_name, dir=args.save_dir,
+    #           config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb = None
     main(args, wandb)
 
-    wandb.join()
+    #wandb.join()
 
 
