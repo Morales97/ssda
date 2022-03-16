@@ -201,15 +201,20 @@ class gtaLoader(data.Dataset):
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = np.array(img, dtype=np.uint8)
+        img = img.astype(np.float64)
+        img -= self.mean
+        if self.img_norm:
+            # Resize scales images from 0 to 255, thus we need to divide by 255.0
+            img = img.astype(float) / 255.0
+        img = img.transpose(2, 0, 1)  # HWC -> CHW
         #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
         if self.rot:
             all_rotated_imgs = [
-                self.transform_rot(I2T(TF.rotate(T2I(img), -90))),
+                self.transform_rot(TF.rotate(img, -90)),
                 self.transform_rot(img),
-                self.transform_rot(I2T(TF.rotate(T2I(img), 90))),
-                self.transform_rot(I2T(TF.rotate(T2I(img), 180)))]
+                self.transform_rot(TF.rotate(img, 90)),
+                self.transform_rot(TF.rotate(img, 180))]
             all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             return all_rotated_imgs, rot_lbl
@@ -227,13 +232,7 @@ class gtaLoader(data.Dataset):
         return img, lbl
 
     def transform_rot(self, img):
-        img = img.astype(np.float64)
-        img -= self.mean
-        if self.img_norm:
-            # Resize scales images from 0 to 255, thus we need to divide by 255.0
-            img = img.astype(float) / 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
-
+        img = torch.from_numpy(img).float()
         # augment
         img = self.augmentations(img)
 
@@ -243,14 +242,6 @@ class gtaLoader(data.Dataset):
         :param img:
         :param lbl:
         """
-        # img = img[:, :, ::-1]  # RGB -> BGR. In some conventions BGR is used. Make sure our pre-trained model is RGB
-        img = img.astype(np.float64)
-        img -= self.mean
-        if self.img_norm:
-            # Resize scales images from 0 to 255, thus we need to divide by 255.0
-            img = img.astype(float) / 255.0
-        img = img.transpose(2, 0, 1)  # HWC -> CHW
-        
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
 
