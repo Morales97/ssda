@@ -79,18 +79,18 @@ def main(args, wandb):
         model = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
         model_layers = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
         clas_head = Predictor(num_class=4, inc=960, temp=0.05, hidden=[])
-        G = nn.Sequential(model_layers, clas_head)
+        model = nn.Sequential(model_layers, clas_head)
         #pdb.set_trace()
     else:
         raise ValueError('Model cannot be recognized.')
 
-    G.cuda()
-    G.train()
+    model.cuda()
+    model.train()
 
     # prediction head has x10 LR
     # TODO try with same LR
     params = []
-    for key, value in dict(G.named_parameters()).items():
+    for key, value in dict(model.named_parameters()).items():
         if value.requires_grad:
             if '1.fc' in key:   # '1.fc' corresponds to clas_head
                 params += [{'params': [value], 'lr': 10*args.lr,
@@ -126,6 +126,7 @@ def main(args, wandb):
     data_iter_t = iter(target_loader)
 
     for step in range(start_step, args.steps):
+        start_ts = time.time()
 
         if step % len(target_loader) == 0:
             data_iter_t = iter(target_loader)
@@ -140,75 +141,51 @@ def main(args, wandb):
         rot_lbl_s = rot_lbl_s.flatten().cuda()             # (B, 4) -> (B·4)
         rot_lbl_s = rot_lbl_s.flatten().cuda()
 
-        all_imgs = torch.cat((images_s, images_t), dim=0)
-        all_labels = torch.cat((rot_labels_s, rot_labels_t), dim=0)
-
         pdb.set_trace()
 
-        with autocast():
-            all_imgs = torch.cat((im_data_s, im_data_t), dim=0)
-            all_labels = torch.cat(
-                (rot_labels_s, rot_labels_t), dim=0)
-            all_feats = G(all_imgs)
-            preds = F2(all_feats)
-            loss = criterion(preds, all_labels)
+        preds_s = model(images_s)
+        preds_t = model(images_t)
+        loss = 0
+        loss += criterion(preds_s, rot_lbl_s)
+        loss += criterion(preds_t, rot_lbl_t)
 
-        optimizer_g.zero_grad()
-        optimizer_f.zero_grad()
-        scaler.scale(loss).backward()
-        scaler.step(optimizer_g)
-        scaler.step(optimizer_f)
-        scaler.update()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        time_meter.update(time.time() - start_ts)
 
         if step % args.log_interval == 0:
             log_info = OrderedDict({
                 'Train Step': step,
-                'Loss': FormattedLogItem(loss.item(), '{:.6f}'),
+                'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size*2, '{:.3f}')
             })
-            wandb.log(rm_format(log_info))
+            log_info.update({
+                'Rotation CE Loss': FormattedLogItem(loss.item(), '{:.6f}')
+            })
+
             log_str = get_log_str(args, log_info, title='Training Log')
             print(log_str)
-
-        if step % args.save_interval == 0 and step > 0:
-            with torch.no_grad():
-                acc_s, acc_t = validate(
-                    G, F2, source_loader, target_loader)
-            log_info = OrderedDict({
-                'Train Step': step,
-                'Source Acc': FormattedLogItem(100. * acc_s, '{:.2f}'),
-                'Target Acc': FormattedLogItem(100. * acc_t, '{:.2f}')
-            })
             wandb.log(rm_format(log_info))
-            log_str = get_log_str(args, log_info, title='Validation Log')
-            print(log_str)
-            G.train()
-            F2.train()
 
-            torch.save({
-                'Train Step' : step,
-                'G_state_dict' : G.state_dict(),
-                'F2_state_dict' : F2.state_dict(),
-                'optimizer_g_state_dict' : optimizer_g.state_dict(),
-                'optimizer_f_state_dict' : optimizer_f.state_dict(),
-            }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-
-            if step % (args.save_interval * args.ckpt_freq) == 0:
-                shutil.copyfile(
-                    os.path.join(args.save_dir, 'checkpoint.pth.tar'),
-                    os.path.join(
-                        args.save_dir, 'checkpoint_{}.pth.tar'.format(step)))
-
-                # DM. save model as wandb artifact
-                path_save_model = os.path.join(args.save_dir, 'G_state_dict.pth')
-                torch.save(G.state_dict(), path_save_model)
-                model_artifact = wandb.Artifact('model_{}'.format(step), type='model')
-                model_artifact.add_file(path_save_model)
-                wandb.log_artifact(model_artifact)
+ 
+        if step % args.save_interval == 0:
+            if args.save_model:
+                torch.save({
+                    'model_state_dict' : model.state_dict(),
+                    'optimizer_state_dict' : optimizer.state_dict(),
+                    'step' : step,
+                }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+            
+            # DM. save model as wandb artifact
+            model_artifact = wandb.Artifact('checkpoint_{}'.format(step), type='model')
+            model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+            wandb.log_artifact(model_artifact)
 
 
 if __name__ == '__main__':
     args = parse_args()
-    args.net = 'lraspp_mobilenet' # TODO DELETE
+    args.save_dir = 'expts_rot/tmp_last'
     os.makedirs(args.save_dir, exist_ok=True)
 
     #wandb.init(name=args.expt_name, dir=args.save_dir,

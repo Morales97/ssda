@@ -54,7 +54,7 @@ def get_parser():
                         help='Segmentation model pretrained end-to-end, usually on COCO')
     parser.add_argument('--pre_trained_backbone', type=boolfromstr, default=True,
                         help='Backbone of the seg model pretrained, usually on ImageNet')
-    parser.add_argument('--net', type=str, default='',
+    parser.add_argument('--net', type=str, default='lraspp_mobilenet',
                         help='choose model architecture')
     parser.add_argument('--target_samples', type=int, default=-1,
                         help='how many target domain samples to use. Default -1: use all samples')
