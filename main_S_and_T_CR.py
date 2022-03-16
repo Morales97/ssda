@@ -248,12 +248,12 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir,
-               config=args, reinit=True, project=args.project, entity=args.entity)
-
+    #wandb.init(name=args.expt_name, dir=args.save_dir,
+    #           config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.join()
+    #wandb.join()
     
 
 # python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &

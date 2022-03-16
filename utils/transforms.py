@@ -110,7 +110,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
         elif aug_level == 2:
             # Strong augmentation for CR: Color Jitter + RandAugment
             transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=rot_pt_augment_pool()),
+                RandAugmentMC(n=2, m=10, augment_pool=cr_augment_pool()),
                 transforms.RandomApply([
                     transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
                 ], p=0.8)
