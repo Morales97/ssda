@@ -142,7 +142,6 @@ class RotationPred(nn.Module):
         super().__init__()
         self.backbone = backbone
         self.classifier = clas_head
-        self.softmax = nn.
 
     def forward(self, x):
         x = self.backbone(x)
