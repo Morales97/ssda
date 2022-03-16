@@ -42,10 +42,10 @@ def main(args, wandb):
     #v_loader.test()
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 640), split='val', rotation=True)
     #s_loader = gtaLoader(image_path='data/images', label_path='data/labels', img_size=(360, 640))
-    s_loader.test()
+    #s_loader.test()
 
     loader = DataLoader(
-        c_loader,   # TODO there will be the problem of different img sizes in the same batch
+        s_loader,   # TODO there will be the problem of different img sizes in the same batch
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,  # TODO change to True
