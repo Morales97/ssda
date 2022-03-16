@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import pdb 
 from PIL import Image
+import torchvision.transforms.functional as TF
 from loader.loader_utils import pil_loader
 import pdb 
 
@@ -168,10 +169,10 @@ class gtaLoader(data.Dataset):
 
         if self.rot:
             all_rotated_imgs = [
-                self.transform_rot(I2T(TF.rotate(T2I(img), -90))),
+                self.transform_rot(TF.rotate(img, -90)),
                 self.transform_rot(img),
-                self.transform_rot(I2T(TF.rotate(T2I(img), 90))),
-                self.transform_rot(I2T(TF.rotate(T2I(img), 180)))]
+                self.transform_rot(TF.rotate(img, 90)),
+                self.transform_rot(TF.rotate(img, 180))]
             all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             pdb.set_trace()

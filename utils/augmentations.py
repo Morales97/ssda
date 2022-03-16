@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 
+'''
 class RandAugmentMC(object):
     def __init__(self, n, m, augment_pool):
         assert n >= 1
@@ -28,7 +29,7 @@ class RandAugmentMC(object):
                 img = op(img, v=v, max_v=max_v, bias=bias)
         img = CutoutAbs(img, 16)
         return img
-
+'''
 
 def get_augmentations(crop_size=256, split='train', aug_level=0):
 
@@ -43,7 +44,7 @@ def get_augmentations(crop_size=256, split='train', aug_level=0):
             # Mellow transform used for pseudo-labeling during consistency
             transform_list = [
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size)
+                transforms.RandomCrop(crop_size),
             ]
         '''
         elif aug_level == 1:
@@ -88,12 +89,6 @@ def get_augmentations(crop_size=256, split='train', aug_level=0):
     else:
         raise Exception('get_transforms: split not recognized')
 
-    if False # data_type == FILELIST:
-        # add resize
-        transform_list = [transforms.Resize((256, 256))] + transform_list
-    else:
-        # convert to PIL Image
-        transform_list = [transforms.ToPILImage()] + transform_list
 
     transform_list.append(transforms.ToTensor())
     #transform_list.append(normalize)
