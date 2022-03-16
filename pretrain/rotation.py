@@ -56,8 +56,8 @@ def main(args, wandb):
 
     torch.manual_seed(args.seed)
 
-    #source_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
-    #target_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
+    source_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
+    target_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
 
     # Model
     if args.net == 'lraspp_mobilenet':
@@ -65,11 +65,11 @@ def main(args, wandb):
         model_layers = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
         clas_head = Predictor(num_class=4, inc=960, temp=0.05, hidden=[])
         G = nn.Sequential(model_layers, clas_head)
-        pdb.set_trace()
+        #pdb.set_trace()
     else:
         raise ValueError('Model cannot be recognized.')
 
-    #pdb.set_trace()
+    
     G.cuda()
     G.train()
 
