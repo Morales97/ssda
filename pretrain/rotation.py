@@ -78,7 +78,7 @@ def main(args, wandb):
     # Model
     if args.net == 'lraspp_mobilenet':
         backbone = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
-        backbone = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
+        backbone = nn.Sequential(*list(backbone.children())[:-1])  # remove FC layers
         clas_head = Predictor(num_class=4, inc=960, temp=0.05, hidden=[])
         model = RotationPred(backbone, clas_head)
         #pdb.set_trace()
