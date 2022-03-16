@@ -80,7 +80,7 @@ class gtaLoader(data.Dataset):
         self.is_transform = is_transform
         self.rot = rotation
         if self.rot:
-            self.augmentations = get_augmentations(crop_size=min(img_size)), split='train', aug_level=0)
+            self.augmentations = get_augmentations(crop_size=min(img_size), split='train', aug_level=0)
             print('Images with random square crops of size ', str(min(img_size)))
         else:
             self.augmentations = augmentations
