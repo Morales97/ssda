@@ -57,8 +57,8 @@ def main(args, wandb):
 
     torch.manual_seed(args.seed)
 
-    source_loader = gtaLoader(image_path='../data/gta5/images_tiny', label_path='../data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
-    target_loader = cityscapesLoader2(image_path='../data/cityscapes/leftImg8bit_tiny', label_path='../data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
+    s_loader = gtaLoader(image_path='../data/gta5/images_tiny', label_path='../data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
+    t_loader = cityscapesLoader2(image_path='../data/cityscapes/leftImg8bit_tiny', label_path='../data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
     
     source_loader = DataLoader(
         s_loader,
