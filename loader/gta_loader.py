@@ -72,8 +72,9 @@ class gtaLoader(data.Dataset):
         self.split = split
         self.rot = rotation
         if self.rot:
-            self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
-            print('Images with random square crops of size ', str(min(img_size)))
+            #self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
+            self.transforms = get_transforms(crop_size=256, split='train', aug_level=1)
+            print('Images with random square crops of size ', str(256))
         else:
             self.transforms = get_transforms(aug_level=0)
         self.n_classes = 19
