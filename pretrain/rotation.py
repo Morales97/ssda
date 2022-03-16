@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from torchvision.models import mobilenet_v3_large
 from model.resnet import lraspp_mobilenetv3_large
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -61,12 +62,15 @@ def main(args, wandb):
     torch.manual_seed(args.seed)
     random.seed(args.seed)
 
-    source_loader, target_loader, class_list = return_dataset_pretrain(args)
-    torch.manual_seed(args.seed)
+    source_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
+    target_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
 
     # Model
     if args.net == 'lraspp_mobilenet':
-        model = lraspp_mobilenetv3_large(pre_trained=False, pre_trained_backbone=True)
+        model = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
+        model_layers = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
+        G = nn.Sequential(model_layers)
+        pdb.set_trace()
     else:
         raise ValueError('Model cannot be recognized.')
 
