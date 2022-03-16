@@ -12,24 +12,7 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 
-'''
-class RandAugmentMC(object):
-    def __init__(self, n, m, augment_pool):
-        assert n >= 1
-        assert 1 <= m <= 10
-        self.n = n
-        self.m = m
-        self.augment_pool = augment_pool
 
-    def __call__(self, img):
-        ops = random.choices(self.augment_pool, k=self.n)
-        for op, max_v, bias in ops:
-            v = np.random.randint(1, self.m)
-            if random.random() < 0.5:
-                img = op(img, v=v, max_v=max_v, bias=bias)
-        img = CutoutAbs(img, 16)
-        return img
-'''
 
 def get_augmentations(crop_size=256, split='train', aug_level=0):
 
@@ -46,44 +29,7 @@ def get_augmentations(crop_size=256, split='train', aug_level=0):
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomCrop(crop_size),
             ]
-        '''
-        elif aug_level == 1:
-            # Color Jittering
-            transform_list = [
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8),
-            ]
-        elif aug_level == 2:
-            # Randaugment
-            transform_list = [
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
-                RandAugmentMC(n=2, m=10, augment_pool=fixmatch_augment_pool())
-            ]
-        elif aug_level == 3:
-            # Color jittering + Rand augment
-            transform_list = [
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
-                RandAugmentMC(n=2, m=10, augment_pool=fixmatch_augment_pool()),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-            ]
-        elif aug_level == 4:
-            # lower rotation and sheer augmentations for rotation prediction
-            transform_list = [
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
-                RandAugmentMC(n=2, m=10, augment_pool=rot_pt_augment_pool()),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-            ]
-        '''
+        # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
         else:
             raise Exception('get_transforms : augmentation not recognized')
     else:
