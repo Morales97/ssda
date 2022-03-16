@@ -22,7 +22,7 @@ from utils.ioutils import gen_unique_name
 from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
-from loader.cityscapes_loader2 import cityscapesLoader2
+from loader.cityscapes_loader import cityscapesLoader
 from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
@@ -59,7 +59,7 @@ def main(args, wandb):
     torch.manual_seed(args.seed)
 
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta", rotation=True)
-    t_loader = cityscapesLoader2(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', rotation=True)
     
     source_loader = DataLoader(
         s_loader,
