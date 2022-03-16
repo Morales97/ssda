@@ -122,21 +122,11 @@ def resnet_34_upsampling(pretrained=True, n_classes=19):
 
 
 class Predictor(nn.Module):
-    def __init__(self, num_class=64, inc=4096, temp=0.05, hidden=[],
-                 normalize=False, cls_bias=True):
+    def __init__(self, num_class=64, inc=4096, temp=0.05, hidden=[]):
         super(Predictor, self).__init__()
-        layer_nodenums = [inc] + hidden + [num_class]
-        layers = []
-        for i in range(len(layer_nodenums)-1):
-            if i==len(layer_nodenums)-2:
-                bias = cls_bias
-            else:
-                bias = True
-            layers.append(nn.Linear(layer_nodenums[i], layer_nodenums[i+1], bias=bias))
+        layer_nodes = [inc] + hidden + [num_class]
+        layers = [nn.Linear(layer_nodes[i], layer_nodes[i+1]) for i in range(len(layer_nodenums)-1)]
 
-        self.normalize = normalize
-        # self.fc = layers[-1]
-        # self.layers = nn.Sequential(*layers[:-1])
         self.fc = nn.Sequential(*layers)
         self.num_class = num_class
         self.temp = temp
@@ -144,11 +134,21 @@ class Predictor(nn.Module):
     def forward(self, x, reverse=False, eta=0.1):
         if reverse:
             x = grad_reverse(x, eta)
-        if self.normalize:
-            x = F.normalize(x)
-        # x = self.layers(x)
         x_out = self.fc(x) / self.temp
         return x_out
+
+class RotationPred(nn.Module):
+    def __init__(self, backbone, clas_head):
+        super().__init__()
+        self.backbone = backbone
+        self.classifier = clas_head
+        self.softmax = nn.
+
+    def forward(self, x):
+        x = self.backbone(x)
+        x = x.squeeze()     # (B·4, inc, 1, 1) -> (B·4, inc)
+        x = self.classifier(x)
+        return x
 
 '''
 mnv3 = torchvision.models.mobilenet_v3_large(pretrained=False)

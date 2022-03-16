@@ -15,7 +15,7 @@ import torch.optim as optim
 
 from torch.utils.data import DataLoader
 from torchvision.models import mobilenet_v3_large
-from model.resnet import lraspp_mobilenetv3_large, Predictor
+from model.resnet import lraspp_mobilenetv3_large, Predictor, RotationPred
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
@@ -77,10 +77,10 @@ def main(args, wandb):
 
     # Model
     if args.net == 'lraspp_mobilenet':
-        model = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
-        model_layers = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
+        backbone = mobilenet_v3_large(pretrained=True, dilated=True)   # dilated only removes last downsampling. for (224, 224) input, (14, 14) feature maps instead of (7,7) 
+        backbone = nn.Sequential(*list(model.children())[:-1])  # remove FC layers
         clas_head = Predictor(num_class=4, inc=960, temp=0.05, hidden=[])
-        model = nn.Sequential(model_layers, clas_head)
+        model = RotationPred(backbone, clas_head)
         #pdb.set_trace()
     else:
         raise ValueError('Model cannot be recognized.')
