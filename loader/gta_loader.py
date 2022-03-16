@@ -168,7 +168,7 @@ class gtaLoader(data.Dataset):
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = img.astype(np.float64)
+        img = np.array(img, dtype=np.float64)
         img -= self.mean
         if self.img_norm:
             img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
@@ -203,7 +203,7 @@ class gtaLoader(data.Dataset):
         )
 
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
-        img = img.astype(np.float64)
+        img = np.array(img, dtype=np.float64)
         img -= self.mean
         if self.img_norm:
             img = img.astype(float) / 255.0  # Resize scales images from 0 to 255, thus we need to divide by 255.0
