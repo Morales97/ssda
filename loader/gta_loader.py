@@ -8,6 +8,8 @@ import pdb
 
 from torch.utils import data
 
+sys.path.append(os.path.abspath('..'))
+from utils.augmentations import get_augmentations
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -70,12 +72,18 @@ class gtaLoader(data.Dataset):
         img_norm=True,
         version="gta",
         test_mode=False,
+        rotation=False
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
         self.is_transform = is_transform
-        self.augmentations = augmentations
+        self.rot = rotation
+        if self.rot:
+            self.augmentations = get_augmentations(crop_size=min(img_size)), split='train', aug_level=0)
+            print('Images with random square crops of size ', str(min(img_size)))
+        else:
+            self.augmentations = augmentations
         self.img_norm = img_norm
         self.n_classes = 19
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
@@ -157,6 +165,17 @@ class gtaLoader(data.Dataset):
             img_path.split(os.sep)[-1]  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
 
+        if self.rot:
+            all_rotated_imgs = [
+                self.transform_rot(I2T(TF.rotate(T2I(img), -90))),
+                self.transform_rot(img),
+                self.transform_rot(I2T(TF.rotate(T2I(img), 90))),
+                self.transform_rot(I2T(TF.rotate(T2I(img), 180)))]
+            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
+            rot_lbl = torch.LongTensor([0, 1, 2, 3])
+            pdb.set_trace()
+            return all_rotated_imgs, rot_lbl
+
         img = pil_loader(img_path, self.img_size[1], self.img_size[0])
         img = np.array(img, dtype=np.uint8)
         #img = img.transpose(2, 0, 1)  # HWC -> CHW
@@ -182,6 +201,17 @@ class gtaLoader(data.Dataset):
         img = np.array(img, dtype=np.uint8)
         #img = img.transpose(2, 0, 1)  # HWC -> CHW
 
+        if self.rot:
+            all_rotated_imgs = [
+                self.transform_rot(I2T(TF.rotate(T2I(img), -90))),
+                self.transform_rot(img),
+                self.transform_rot(I2T(TF.rotate(T2I(img), 90))),
+                self.transform_rot(I2T(TF.rotate(T2I(img), 180)))]
+            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
+            rot_lbl = torch.LongTensor([0, 1, 2, 3])
+            return all_rotated_imgs, rot_lbl
+
+
         lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
@@ -192,6 +222,18 @@ class gtaLoader(data.Dataset):
             img, lbl = self.transform(img, lbl)
 
         return img, lbl
+
+    def transform_rot(self, img):
+        img = img.astype(np.float64)
+        img -= self.mean
+        if self.img_norm:
+            # Resize scales images from 0 to 255, thus we need to divide by 255.0
+            img = img.astype(float) / 255.0
+        img = img.transpose(2, 0, 1)  # HWC -> CHW
+
+        # augment
+        img = self.augmentations(img)
+
 
     def transform(self, img, lbl):
         """transform
@@ -207,8 +249,6 @@ class gtaLoader(data.Dataset):
         img = img.transpose(2, 0, 1)  # HWC -> CHW
         
         classes = np.unique(lbl)
-        # lbl = lbl.astype(float)
-        # lbl = m.imresize(lbl, (self.img_size[1], self.img_size[0]), "nearest", mode="F") # resizing is done by pil_loader
         lbl = lbl.astype(int)
 
         if not np.all(classes == np.unique(lbl)):
@@ -216,7 +256,6 @@ class gtaLoader(data.Dataset):
 
         if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
             print("after det", classes, np.unique(lbl))
-            #pdb.set_trace()
             raise ValueError("Segmentation map contained invalid class values")
 
         img = torch.from_numpy(img).float()

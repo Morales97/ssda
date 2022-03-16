@@ -23,7 +23,6 @@ from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
-import tqdm
 
 import pdb
 
