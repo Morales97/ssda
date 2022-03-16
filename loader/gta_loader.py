@@ -11,7 +11,7 @@ import pdb
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
-from utils.transforms import get_augmentations
+from utils.transforms import get_transforms
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -225,7 +225,7 @@ class gtaLoader(data.Dataset):
         lbl = torch.from_numpy(lbl).long()
 
         return img, lbl
-        
+
 
     def decode_segmap(self, temp):
         r = temp.copy()
