@@ -63,7 +63,7 @@ class cityscapesLoader(data.Dataset):
     ):
         self.image_path = image_path
         self.label_path = label_path
-        self.split = split if not unlabeled else 'unlabeled'
+        self.split = split
         self.rot = rotation
         if self.rot:
             self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
