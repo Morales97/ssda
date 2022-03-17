@@ -21,7 +21,6 @@ from utils.ioutils import rm_format
 from loader.oct_loader import octLoader
 from loader.gta_loader import gtaLoader
 from loader.cityscapes_loader import cityscapesLoader
-from loader.cityscapes_loader2 import cityscapesLoader2
 
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
