@@ -83,7 +83,7 @@ class gtaLoader(data.Dataset):
             self.transforms = get_transforms(crop_size=min(self.crop_size), split='train', aug_level=1)
             print('Images with random square crops of size ', str(min(self.crop_size)))
         else:
-            self.transforms = get_transforms(crop_size=self.crop_size, aug_level=2)
+            self.transforms = get_transforms(crop_size=self.crop_size, aug_level=0)
         self.n_classes = 19
 
         self.files = {}
@@ -179,10 +179,14 @@ class gtaLoader(data.Dataset):
         # Image
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         pdb.set_trace()
+        i, j, h, w = transforms.RandomCrop.get_params(img, self.crop_size)
+        img = transforms.Crop(img, i, j, h, w)
         img = self.transforms(img)
 
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        pdb.set_trace()
+        lbl = transforms.Crop(lbl, i, j, h, w)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)
