@@ -93,8 +93,8 @@ def main(args, wandb):
         if value.requires_grad:
             if 'classifier' in key: 
                 # NOTE choose between same LR or x10
-                params += [{'params': [value], 'lr': 10*args.lr,'weight_decay': args.wd}]
-                #params += [{'params': [value], 'lr': args.lr,'weight_decay': args.wd}]
+                #params += [{'params': [value], 'lr': 10*args.lr,'weight_decay': args.wd}]
+                params += [{'params': [value], 'lr': args.lr,'weight_decay': args.wd}]
             else:
                 params += [{'params': [value], 'lr': args.lr, 'weight_decay': args.wd}]
 
