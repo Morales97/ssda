@@ -66,7 +66,7 @@ class cityscapesLoader(data.Dataset):
         self.split = split
         self.rot = rotation
         if size == "small":
-            self.img_size = (1024, 512)
+            self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
         elif size == "tiny":
             self.img_size = (512, 256)
         else:
@@ -168,8 +168,6 @@ class cityscapesLoader(data.Dataset):
             img_path.split(os.sep)[-2],
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
-        pdb.set_trace()
-
         # Rotation pretask      
         if self.rot:
             img = pil_loader(img_path, self.img_size[0], self.img_size[1])
@@ -185,6 +183,7 @@ class cityscapesLoader(data.Dataset):
             
         # Image
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        pdb.set_trace()
         img = self.transforms(img)
 
         # Segmentation label
