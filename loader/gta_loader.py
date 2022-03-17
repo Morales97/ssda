@@ -75,8 +75,9 @@ class gtaLoader(data.Dataset):
             self.img_size = (1280, 720)
             self.crop_size = (1024, 512)
         elif size == "tiny":
-            self.img_size = (640, 360)
-            self.crop_size = (512, 256)
+            self.img_size = (640, 360)  # w, h
+            self.crop_size = (512, 256) # w, h
+            self.crop_size = (256, 512) # h, w
         else:
             raise Exception('size not valid')
         if self.rot:
