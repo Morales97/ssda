@@ -98,7 +98,7 @@ def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, num_classes: int) -> 
     #pdb.set_trace()
     backbone = IntermediateLayerGetter(backbone, return_layers={str(low_pos): "low", str(high_pos): "high"})
 
-    #pdb.set_trace()
+    pdb.set_trace()
     return LRASPP(backbone, low_channels, high_channels, num_classes)
 
 
@@ -132,4 +132,5 @@ def lraspp_mobilenet_v3_large(
     return model
 
 mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
+lr_mn = lraspp_mobilenet_v3_large()
 pdb.set_trace()
