@@ -167,7 +167,7 @@ class RotationPred(nn.Module):
         x = self.classifier(x)
         return x
 
-
+'''
 mnv3 = torchvision.models.mobilenet_v3_large(pretrained=False)
 mnv3_d = torchvision.models.mobilenet_v3_large(pretrained=False, dilated=True)
 lraspp_mn = lraspp_mobilenetv3_large()
@@ -177,3 +177,4 @@ rn50_fcn = resnet50_FCN()
 rn50_u = resnet_50_upsampling()
 rn34_u = resnet_34_upsampling()
 pdb.set_trace()
+'''
