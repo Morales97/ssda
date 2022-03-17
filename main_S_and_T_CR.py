@@ -35,15 +35,13 @@ def main(args, wandb):
     random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), n_samples=args.target_samples)
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), unlabeled=True, n_samples=(2975-args.target_samples))
-   
-    #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', n_samples=args.target_samples)
-    #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta")
-    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="train")
-    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="val")
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", n_samples=args.target_samples)
+    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
+    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
+
+    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
+    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="train")
+    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
 
     source_loader = DataLoader(
         s_loader,
@@ -135,7 +133,6 @@ def main(args, wandb):
         images_t, labels_t = next(data_iter_t)
         images_t_unl = next(data_iter_t_unl)
         
-        pdb.set_trace()
         step += 1
         start_ts = time.time()
         model.train()
@@ -155,6 +152,15 @@ def main(args, wandb):
         loss = 0
         loss += loss_fn(outputs_s, labels_s)
         loss += loss_fn(outputs_t, labels_t)
+
+        # CR
+        x_weak = images_t_unl[0].cuda()
+        x_strong = images_t_unl[1].cuda()
+
+        # TODO fw pass, samples some random pixels, apply threshold, 
+
+
+
         loss.backward()
         optimizer.step()
 

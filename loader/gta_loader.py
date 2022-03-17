@@ -62,7 +62,7 @@ class gtaLoader(data.Dataset):
         image_path,
         label_path,
         split="",
-        img_size=(512, 1024),
+        size="tiny",
         version="gta",
         test_mode=False,
         rotation=False
@@ -71,14 +71,21 @@ class gtaLoader(data.Dataset):
         self.label_path = label_path
         self.split = split
         self.rot = rotation
-        if self.rot:
-            #self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
-            self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
-            print('Images with random square crops of size ', str(min(img_size)))
+        if size == "small":
+            self.img_size = (1280, 720)
+            self.crop_size = (1024, 512)
+        elif size == "tiny":
+            self.img_size = (640, 360)
+            self.crop_size = (512, 256)
         else:
-            self.transforms = get_transforms(aug_level=0)
+            raise Exception('size not valid')
+        if self.rot:
+            self.transforms = get_transforms(crop_size=min(self.crop_size), split='train', aug_level=1)
+            print('Images with random square crops of size ', str(min(self.crop_size)))
+        else:
+            self.transforms = get_transforms(crop_size=self.crop_size, aug_level=2)
         self.n_classes = 19
-        self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
+
         self.files = {}
 
         self.images_base = os.path.join(self.image_path)
@@ -158,7 +165,7 @@ class gtaLoader(data.Dataset):
 
         # Rotation pretask      
         if self.rot:
-            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
             all_rotated_imgs = [
                 self.transforms(TF.rotate(img, -90)),
                 self.transforms(img),
@@ -170,11 +177,12 @@ class gtaLoader(data.Dataset):
             return all_rotated_imgs, rot_lbl
             
         # Image
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        pdb.set_trace()
         img = self.transforms(img)
 
         # Segmentation label
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
+        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)
@@ -203,7 +211,7 @@ class gtaLoader(data.Dataset):
 
         # Rotation pretask
         if self.rot:
-            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
             all_rotated_imgs = [
                 self.transforms(TF.rotate(img, -90)),
                 self.transforms(img),
@@ -214,11 +222,11 @@ class gtaLoader(data.Dataset):
             return all_rotated_imgs, rot_lbl
             
         # Image
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         img = self.transforms(img)
 
         # Segmentation label
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
+        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)

@@ -55,7 +55,7 @@ class cityscapesLoader(data.Dataset):
         label_path,
         split="train",
         n_samples= -1,        # Select only few samples for training
-        img_size=(512, 1024),
+        size="tiny",
         version="gta",
         test_mode=False,
         rotation=False,
@@ -65,19 +65,26 @@ class cityscapesLoader(data.Dataset):
         self.label_path = label_path
         self.split = split
         self.rot = rotation
+        if size == "small":
+            self.img_size = (1024, 512)
+        elif size == "tiny":
+            self.img_size = (512, 256)
+        else:
+            raise Exception('size not valid')
+
         if self.rot:
-            self.transforms = get_transforms(crop_size=min(img_size), split='train', aug_level=1)
-            print('Images with random square crops of size ', str(min(img_size)))
+            self.transforms = get_transforms(crop_size=min(self.img_size), split='train', aug_level=1)
+            print('Images with random square crops of size ', str(min(self.img_size)))
         else:
             if not unlabeled:
                 self.transforms = get_transforms(aug_level=0)
             if unlabeled:
                 weak = get_transforms(aug_level=0)
-                strong = get_transforms(aug_level=2)
+                strong = get_transforms(aug_level=3)
                 self.transforms = WeakStrongAug(weak, strong)
+
         self.n_samples = n_samples
         self.n_classes = 19
-        self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         self.files = {}
         self.unlabeled = unlabeled
 
@@ -165,7 +172,7 @@ class cityscapesLoader(data.Dataset):
 
         # Rotation pretask      
         if self.rot:
-            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
             all_rotated_imgs = [
                 self.transforms(TF.rotate(img, -90)),
                 self.transforms(img),
@@ -177,11 +184,11 @@ class cityscapesLoader(data.Dataset):
             return all_rotated_imgs, rot_lbl
             
         # Image
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         img = self.transforms(img)
 
         # Segmentation label
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
+        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)
@@ -211,7 +218,7 @@ class cityscapesLoader(data.Dataset):
 
         # Rotation pretask
         if self.rot:
-            img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
             all_rotated_imgs = [
                 self.transforms(TF.rotate(img, -90)),
                 self.transforms(img),
@@ -222,14 +229,14 @@ class cityscapesLoader(data.Dataset):
             return all_rotated_imgs, rot_lbl
             
         # Image
-        img = pil_loader(img_path, self.img_size[1], self.img_size[0])
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         img = self.transforms(img)
 
         if self.unlabeled:
             return img
 
         # Segmentation label
-        lbl = pil_loader(lbl_path, self.img_size[1], self.img_size[0], is_segmentation=True)
+        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)

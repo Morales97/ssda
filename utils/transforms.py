@@ -108,6 +108,11 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
                 transforms.RandomCrop(crop_size),
             ]
         elif aug_level == 2:
+            # Only crop
+            transform_list = [
+                transforms.RandomCrop(crop_size),
+            ]
+        elif aug_level == 3:
             # Strong augmentation for CR: Color Jitter + RandAugment
             transform_list = [
                 RandAugmentMC(n=2, m=10, augment_pool=cr_augment_pool()),

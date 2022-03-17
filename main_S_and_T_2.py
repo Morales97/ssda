@@ -35,14 +35,12 @@ def main(args, wandb):
     random.seed(args.seed)
 
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', n_samples=args.target_samples)
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
+    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
    
-    #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='train', n_samples=args.target_samples)
-    #v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_small', label_path='data/cityscapes/gtFine', img_size=(256, 512), split='val')
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="all_gta")
-    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="train")
-    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', img_size=(360, 680), split="val")
+    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
+    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="train")
+    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
 
     source_loader = DataLoader(
         s_loader,
