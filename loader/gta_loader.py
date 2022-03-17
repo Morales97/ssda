@@ -228,10 +228,13 @@ class gtaLoader(data.Dataset):
             
         # Image
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
+        img = TF.crop(img, i, j, h, w)
         img = self.transforms(img)
 
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        lbl = TF.crop(lbl, i, j, h, w)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)
