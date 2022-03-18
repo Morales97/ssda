@@ -11,7 +11,7 @@
 #SBATCH --time=12:00:00
 
 
-python main.py --expt_name=deeplab_rn50 --net=deeplabv3 --pre_trained=False  --pre_trained_backbone=True --steps=5000
+python main.py --project=GTA_to_CS_tiny --expt_name=denseCL_fcn_rn50_FS_CS --net=denseCL_fcn_rn50 --steps=5000
 
 # IN backbone
 #python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy2_100_same_size --net=lraspp_mobilenet --target_samples=100 --batch_size=8

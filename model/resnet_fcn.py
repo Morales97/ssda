@@ -1,5 +1,6 @@
 from torch import nn
 import pdb
+import torch
 from torchsummary import summary
 from torchvision.models import resnet
 import torch.nn.functional as F
@@ -50,6 +51,25 @@ def fcn_resnet50(num_classes=19):
     model = _fcn_resnet(backbone, num_classes)
     return model
 
+def fcn_resnet50_densecl(num_classes=19):
+    # pretrained model from https://github.com/WXinlong/DenseCL 
+    densecl_pretrained = torch.load('pretrained/densecl_r50_imagenet_200ep.pth')
+    rn50 = resnet.resnet50(replace_stride_with_dilation=[False, True, True])
+    sd = densecl_pretrained['state_dict']
+    rn50_sd = rn50.state_dict()
+
+    # NOTE sd is missing (fc) keys, add them
+    for key, param in rn50_sd.items():
+        if key not in sd.keys():
+            sd[key] = param
+
+    rn50.load_state_dict(sd)
+
+    backbone = nn.Sequential(*list(rn50.children())[:-2])
+    model = _fcn_resnet(backbone, num_classes)
+    return model
+
+
 def fcn_resnet34(num_classes=19):
     # pretrained weights on coco are available - check torch
     # TODO: does not work bc resnet34 is built of BasicBlock, while resnet50 is built of Bottlenecks.
@@ -66,8 +86,11 @@ def fcn_resnet18(num_classes=19):
     return model
 
 
-
+'''
 #fcn18 = fcn_resnet18()
-fcn34 = fcn_resnet34()
+#fcn34 = fcn_resnet34()
 fcn50 = fcn_resnet50()
+densecl_rn50 = fcn_resnet50_densecl()
+
 pdb.set_trace()
+'''
