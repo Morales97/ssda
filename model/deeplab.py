@@ -7,6 +7,9 @@ import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
 
+from collections import OrderedDict
+
+
 '''
 torch's deeplab from
 https://github.com/pytorch/vision/blob/main/torchvision/models/segmentation/deeplabv3.py 
