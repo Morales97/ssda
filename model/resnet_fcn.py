@@ -90,7 +90,7 @@ def fcn_resnet18(num_classes=19):
 
 #fcn18 = fcn_resnet18()
 #fcn34 = fcn_resnet34()
-fcn50 = fcn_resnet50()
+#fcn50 = fcn_resnet50()
 #densecl_rn50 = fcn_resnet50_densecl()
 
-pdb.set_trace()
+#pdb.set_trace()
