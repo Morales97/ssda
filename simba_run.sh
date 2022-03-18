@@ -11,7 +11,7 @@
 #SBATCH --time=12:00:00
 
 
-python main.py --project=GTA_to_CS_tiny --expt_name=denseCL_fcn_rn50_FS_CS --net=denseCL_fcn_rn50 --steps=5000
+python main.py --project=GTA_to_CS_tiny --expt_name=deeplab_rn50_FS_CS_pt_mask --net=deeplabv3_mask_pt --steps=5000
 #python main.py --project=GTA_to_CS_tiny --expt_name=fcn_rn50_FS_CS --net=resnet50_fcn --steps=5000
 
 
