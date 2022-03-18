@@ -178,8 +178,3 @@ rn50_u = resnet_50_upsampling()
 rn34_u = resnet_34_upsampling()
 pdb.set_trace()
 '''
-
-mask_pt = torch.load('model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar', map_location=torch.device('cpu'))
-rn50 = torchvision.models.resnet.resnet50(pretrained=False, replace_stride_with_dilation=[False, True, True])
-dl = deeplabv3_rn50()
-pdb.set_trace()
