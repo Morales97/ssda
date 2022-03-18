@@ -76,7 +76,7 @@ def main(args, wandb):
     if args.net == 'deeplabv3':
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'deeplabv3_mask_pt':
-        deeplabv3_resnet50_maskContrast()
+        model = deeplabv3_resnet50_maskContrast()
     if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'lraspp_mobilenet':
