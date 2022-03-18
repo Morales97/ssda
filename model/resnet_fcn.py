@@ -53,7 +53,7 @@ def fcn_resnet50(num_classes=19):
 
 def fcn_resnet50_densecl(num_classes=19):
     # pretrained model from https://github.com/WXinlong/DenseCL 
-    densecl_pretrained = torch.load('pretrained/densecl_r50_imagenet_200ep.pth')
+    densecl_pretrained = torch.load('model/pretrained/densecl_r50_imagenet_200ep.pth')
     rn50 = resnet.resnet50(replace_stride_with_dilation=[False, True, True])
     sd = densecl_pretrained['state_dict']
     rn50_sd = rn50.state_dict()
