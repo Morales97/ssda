@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
 from model.resnet_fcn import fcn_resnet50_densecl
-from model.deeplabv3 import deeplabv3_resnet50_maskContrast
+from model.deeplab import deeplabv3_resnet50_maskContrast
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
