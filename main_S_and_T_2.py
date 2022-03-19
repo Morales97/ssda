@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
 from model.resnet_fcn import fcn_resnet50_densecl
+from model.deeplab import deeplabv3_resnet50_maskContrast
 from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -80,6 +81,8 @@ def main(args, wandb):
         model = resnet_50_upsampling(args.pre_trained)
     if args.net == 'deeplabv3':
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
+    if args.net == 'deeplabv3_mask_pt':
+        model = deeplabv3_resnet50_maskContrast()
     if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'lraspp_mobilenet':
@@ -141,7 +144,7 @@ def main(args, wandb):
         optimizer.zero_grad()
         outputs_s = model(images_s)
         outputs_t = model(images_t)
-        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
+        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet' or args.net == 'deeplabv3_mask_pt':
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
         loss = 0
@@ -179,7 +182,7 @@ def main(args, wandb):
                     labels_val = labels_val.cuda()
 
                     outputs = model(images_val)
-                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
+                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet'  or args.net == 'deeplabv3_mask_pt':
                         outputs = outputs['out']
                     val_loss = loss_fn(input=outputs, target=labels_val)
 
