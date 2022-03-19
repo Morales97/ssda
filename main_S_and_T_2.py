@@ -11,6 +11,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
+from model.resnet_fcn import fcn_resnet50_densecl
 from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -69,6 +70,8 @@ def main(args, wandb):
     # Init model
     if args.net == '' or args.net == 'resnet50_fcn':
         model = resnet50_FCN(args.pre_trained)
+    if args.net == 'denseCL_fcn_rn50':
+        model = fcn_resnet50_densecl()
     if args.net == 'fcn8':
         model = fcn8s()
     if args.net == 'rn34_up':
