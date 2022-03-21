@@ -12,10 +12,10 @@
 
 # ----- Fully supervised CS -----
 #python main.py --project=GTA_to_CS_tiny --expt_name=deeplab_rn50_FS_CS_pt_mask --net=deeplabv3_mask_pt --steps=5000
-python main.py --project=GTA_to_CS_tiny --expt_name=only_100_CS --net=lraspp_mobilenet --steps=5000 --target_samples=100 
+#python main.py --project=GTA_to_CS_tiny --expt_name=only_100_CS --net=lraspp_mobilenet --steps=5000 --target_samples=100 
 
 # ----- Domain Adaptation -----
-#python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=only_100_CS --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --lr=0.001
+python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy_100_normalized --net=lraspp_mobilenet --target_samples=100 --batch_size=8
 
 # Rotation pretrained backbone
 #python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy2_100_same_size_rot_pt --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --custom_pretrain_path=ckpt_rot_10k.tar

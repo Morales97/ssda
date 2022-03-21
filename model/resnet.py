@@ -49,6 +49,12 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
         state_dict = checkpoint['model_state_dict']
 
         # adapt state_dict to match
+        '''
+        A cleaner way to do it
+        for k, v in state_dict.items():
+            if k.startswith('module.encoder_q'):
+                new_dict[k.rsplit('module.encoder_q.')[1]] = v
+        ''''
         new_state_dict = {}
         for key, param in state_dict.items():
             if 'backbone.0' in key:

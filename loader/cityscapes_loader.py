@@ -273,3 +273,4 @@ class cityscapesLoader(data.Dataset):
         for _validc in self.valid_classes:
             mask[mask == _validc] = self.class_map[_validc]
         return mask
+
