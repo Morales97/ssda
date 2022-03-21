@@ -121,13 +121,13 @@ def main(args, wandb):
     while step <= args.steps:
 
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
+        if step % len(source_loader) == 0:
+            data_iter_s = iter(source_loader)
         if step % len(target_loader) == 0:
             data_iter_t = iter(target_loader)
         #if step % len(target_loader_unl) == 0 and step > 0:
         #    data_iter_t_unl = iter(target_loader_unl)
-        if step % len(source_loader) == 0:
-            data_iter_s = iter(source_loader)
-    
+
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
         
