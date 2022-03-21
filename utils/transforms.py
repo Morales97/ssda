@@ -91,7 +91,7 @@ class WeakStrongAug:
 
 def get_transforms(crop_size=256, split='train', aug_level=0):
 
-    normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    # normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
     if split == 'test':
         transform_list = [
@@ -129,7 +129,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 
 
     transform_list.append(transforms.ToTensor())
-    transform_list.append(normalize)    # NOTE does normalization occur after transforms? or before? (color jitter and such might change )
+    # transform_list.append(normalize)    # NOTE does normalization occur after transforms? or before? (color jitter and such might change )
     transform = transforms.Compose(transform_list)
 
     return transform
