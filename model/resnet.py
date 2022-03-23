@@ -17,7 +17,7 @@ def resnet50_FCN(pretrained=False, pretrained_backbone=True):
     #model.classifier[4] = nn.Conv2d(512, 19, kernel_size=(1,1), stride=(1,1))
     return model
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True):
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=pretrained, 
         num_classes=19, 
@@ -43,6 +43,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
     )
 
     if custom_pretrain_path is not None:
+        print('Loading model...')
         # load pretrained backbone
         # checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         checkpoint = torch.load(custom_pretrain_path)

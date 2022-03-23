@@ -59,7 +59,7 @@ def get_parser():
     parser.add_argument('--target_samples', type=int, default=-1,
                         help='how many target domain samples to use. Default -1: use all samples')
     parser.add_argument('--custom_pretrain_path', type=str, default=None,
-                        help='dir to save experiment results to')
+                        help='path to load pretrained model from')
                         
     '''
     parser.add_argument('--net', type=str, default='resnet34',

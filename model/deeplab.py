@@ -179,10 +179,16 @@ def deeplabv3_resnet50(
     return model
 
 
-def deeplabv3_resnet50_maskContrast(num_classes=19):
+def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     # Load a pretrained DeepLabV3_rn50 on PASCAL VOC.
     # pretrained model from https://github.com/wvangansbeke/Unsupervised-Semantic-Segmentation (on PASCAL VOC unsupervised saliency)
-    maskContrast_pretrained = torch.load('model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar', map_location=torch.device('cpu'))
+    
+    assert model_path is not None
+    # for PASCAL pretrained model:          model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar 
+    # for CS pretrained model at epoch 39:  model/pretrained/checkpoint_39_mask_dlrn50.pth.tar
+
+    print('Loading model from %s...' % model_path)
+    maskContrast_pretrained = torch.load(model_path, map_location=torch.device('cpu'))
     model = deeplabv3_resnet50()   
     sd = maskContrast_pretrained['model']
 
