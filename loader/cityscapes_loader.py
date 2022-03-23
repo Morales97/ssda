@@ -95,7 +95,7 @@ class cityscapesLoader(data.Dataset):
         if self.n_samples >= 0:
             if not self.unlabeled:
                 self.files[split] = self.files[split][:self.n_samples]
-                print('Loading %d labeled images and %d unlabeled images' % (len(self.files[split], 0)))
+                print('Loading %d labeled images and %d unlabeled images' % (len(self.files[split]), 0))
             else:
                 # TODO have labeled and unlabeled in different splits?
                 self.files[split] = self.files[split][self.n_samples:]
