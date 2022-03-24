@@ -187,7 +187,7 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     # for PASCAL pretrained model:          model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar 
     # for CS pretrained model at epoch 39:  model/pretrained/checkpoint_39_mask_dlrn50.pth.tar
 
-    print('Loading model from %s...' % model_path)
+    print('Loading model from %s' % model_path)
     maskContrast_pretrained = torch.load(model_path, map_location=torch.device('cpu'))
     model = deeplabv3_resnet50()   
     sd = maskContrast_pretrained['model']
