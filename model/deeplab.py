@@ -189,7 +189,7 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
 
     print('Loading model from %s' % model_path)
     maskContrast_pretrained = torch.load(model_path, map_location=torch.device('cpu'))
-    model = deeplabv3_resnet50()   
+    model = deeplabv3_resnet50(num_classes=num_classes)   
     sd = maskContrast_pretrained['model']
 
     # Create a new state_dict
@@ -206,6 +206,6 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     return model
 
 '''
-model = deeplabv3_resnet50_maskContrast()
+model = deeplabv3_resnet50_maskContrast(model_path='model/pretrained/checkpoint_39_mask_dlrn50.pth.tar')
 pdb.set_trace()
 '''
