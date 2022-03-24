@@ -58,7 +58,19 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
                     new_dict[new_key] = v 
         
         elif 'model' in checkpoint.keys():
-            # MaskContrast pretrain with head embedding dimensions = n_classes
+            # MaskContrast pretrain with head embedding dim = 32
+            state_dict = checkpoint['model']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('model_q.backbone'):
+                    new_dict[k.rsplit('model_q.')[1]] = v
+                if k.startswith('model_q.decoder') and 'low' not in k and 'high' not in k:
+                    new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
+
+        '''
+        elif 'model' in checkpoint.keys():
+            # MaskContrast pretrain with head embedding dim = n_classes
             state_dict = checkpoint['model']
 
             new_dict = {}
@@ -67,7 +79,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
                     new_dict[k.rsplit('model_q.')[1]] = v
                 if k.startswith('model_q.decoder') and 'saliency' not in k:
                     new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
-
+        '''
         # copy matching keys of state dict -- all but for LRASPP head
         model.cuda()
         model.load_state_dict(new_dict, strict=False)
