@@ -64,7 +64,7 @@ def main(args, wandb):
         num_workers=args.num_workers,
         shuffle=True,
     )    
-
+    
     # Set up metrics
     running_metrics_val = runningScore(t_loader.n_classes)
 

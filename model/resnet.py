@@ -43,28 +43,34 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
     )
 
     if custom_pretrain_path is not None:
-        print('Loading model...')
         # load pretrained backbone
-        # checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        checkpoint = torch.load(custom_pretrain_path)
-        state_dict = checkpoint['model_state_dict']
+        checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        print('Loading model from ' + custom_pretrain_path)
 
-        # adapt state_dict to match
-        # NOTE
-        #A cleaner way to do it
-        #for k, v in state_dict.items():
-        #    if k.startswith('module.encoder_q'):
-        #        new_dict[k.rsplit('module.encoder_q.')[1]] = v
+        if 'model_state_dict' in checkpoint.keys():
+            # Rotations pretrain (?)
+            state_dict = checkpoint['model_state_dict']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('backbone.0'):
+                    new_key = k.rsplit('.0')[0] + k.rsplit('.0')[1]     # remove '.0'
+                    new_dict[new_key] = v 
         
-        new_state_dict = {}
-        for key, param in state_dict.items():
-            if 'backbone.0' in key:
-                new_key = 'backbone' + key[10:]
-                new_state_dict[new_key] = param
-        
+        elif 'model' in checkpoint.keys():
+            # MaskContrast pretrain with head embedding dimensions = n_classes
+            state_dict = checkpoint['model']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('model_q.backbone'):
+                    new_dict[k.rsplit('model_q.')[1]] = v
+                if k.startswith('model_q.decoder') and 'saliency' not in k:
+                    new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
+
         # copy matching keys of state dict -- all but for LRASPP head
         model.cuda()
-        model.load_state_dict(new_state_dict, strict=False)
+        model.load_state_dict(new_dict, strict=False)
 
     return model
 
