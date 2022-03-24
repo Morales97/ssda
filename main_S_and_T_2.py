@@ -35,7 +35,7 @@ def main(args, wandb):
     torch.manual_seed(args.seed)
     #np.random.seed(args.seed)
     random.seed(args.seed)
-    '''
+    
     # TODO: rn loaders don't use augmentations. Probably should be using some
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
@@ -67,7 +67,7 @@ def main(args, wandb):
     
     # Set up metrics
     running_metrics_val = runningScore(t_loader.n_classes)
-    '''
+    
     # Init model
     if args.net == '' or args.net == 'resnet50_fcn':
         model = resnet50_FCN(args.pre_trained)
@@ -243,9 +243,9 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir,
-    #           config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir,
+                config=args, reinit=True, project=args.project, entity=args.entity)
+
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.join()
