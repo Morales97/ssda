@@ -56,7 +56,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
                 if k.startswith('backbone.0'):
                     new_key = k.rsplit('.0')[0] + k.rsplit('.0')[1]     # remove '.0'
                     new_dict[new_key] = v 
-        
+        '''
         elif 'model' in checkpoint.keys():
             # MaskContrast pretrain with head embedding dim = 32
             state_dict = checkpoint['model']
@@ -79,7 +79,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
                     new_dict[k.rsplit('model_q.')[1]] = v
                 if k.startswith('model_q.decoder') and 'saliency' not in k:
                     new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
-        '''
+        
         # copy matching keys of state dict -- all but for LRASPP head
         model.cuda()
         model.load_state_dict(new_dict, strict=False)
