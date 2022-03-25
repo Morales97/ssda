@@ -15,7 +15,7 @@
 #python main.py --project=GTA_to_CS_tiny --expt_name=only_100_CS --net=lraspp_mobilenet --steps=5000 --target_samples=100 
 
 # ----- Domain Adaptation -----
-python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy_100_mask_pt_CS_GTA_lraspp --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --custom_pretrain_path=model/pretrained/ccheckpoint_mask_lraspp_CS_GTA.pth.tar
+python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy_100_mask_pt_CS_GTA_lraspp --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
 
 # Rotation pretrained backbone
 #python main_S_and_T_2.py --project=GTA_to_CS_tiny --expt_name=dummy2_100_same_size_rot_pt --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --custom_pretrain_path=ckpt_rot_10k.tar
