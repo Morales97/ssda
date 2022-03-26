@@ -184,7 +184,8 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     # pretrained model from https://github.com/wvangansbeke/Unsupervised-Semantic-Segmentation (on PASCAL VOC unsupervised saliency)
     
     assert model_path is not None
-    # for PASCAL pretrained model:          model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar 
+    # for PASCAL pretrained model (sup):    model/pretrained/VOCSegmentation_supervised_saliency_model.pth.tar 
+    # for PASCAL pretrained model (unsup):  model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar 
     # for CS pretrained model at epoch 39:  model/pretrained/checkpoint_39_mask_dlrn50.pth.tar
     # for CS + GTA pretrained at epoch 32:  model/pretrained/checkpoint_mask_dlrn50_CS_GTA.pth.tar
 
@@ -203,10 +204,9 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
                 new_state_dict['classifier' + key[22:]] = param
 
     model.load_state_dict(new_state_dict, strict=False) 
-    
     return model
 
 '''
-model = deeplabv3_resnet50_maskContrast(model_path='model/pretrained/checkpoint_39_mask_dlrn50.pth.tar')
+model = deeplabv3_resnet50_maskContrast(model_path='model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar')
 pdb.set_trace()
 '''

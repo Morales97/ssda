@@ -59,6 +59,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
         
         elif 'model' in checkpoint.keys():
             # MaskContrast pretrain with head embedding dim = 32
+            # Replace last layer of head with a new layer of output_dim=n_class
             state_dict = checkpoint['model']
 
             new_dict = {}
