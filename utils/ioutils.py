@@ -46,7 +46,7 @@ def get_parser():
                              'training status')
     parser.add_argument('--val_interval', type=int, default=100, metavar='N',
                         help='how many batches to wait before validation')
-    parser.add_argument('--save_interval', type=int, default=500, metavar='N',
+    parser.add_argument('--save_interval', type=int, default=1000, metavar='N',
                         help='how many batches to wait before saving a model')
     parser.add_argument('--resume', type=str, default='',
                         help='Checkpoint path to resume from')
