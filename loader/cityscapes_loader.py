@@ -69,7 +69,7 @@ class cityscapesLoader(data.Dataset):
             self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
         elif size == "tiny":
             self.img_size = (512, 256)
-            self.crop_size = 256
+            self.crop_size = (256, 256)
         else:
             raise Exception('size not valid')
 
