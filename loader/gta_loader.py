@@ -67,7 +67,9 @@ class gtaLoader(data.Dataset):
         size="tiny",
         version="gta",
         test_mode=False,
-        rotation=False
+        rotation=False,
+        do_crop=False,
+        hflip=False
     ):
         self.image_path = image_path
         self.label_path = label_path
@@ -87,6 +89,8 @@ class gtaLoader(data.Dataset):
         else:
             self.transforms = get_transforms(crop_size=self.crop_size, aug_level=0)
         self.n_classes = 19
+        self.do_crop = do_crop
+        self.hflip = hflip
 
         self.files = {}
 
@@ -157,42 +161,24 @@ class gtaLoader(data.Dataset):
         """__len__"""
         return len(self.files[self.split])
 
-    def test(self):
-        index=0
+    def test(self, index):
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
             img_path.split(os.sep)[-1][:-4] + ".png"  # index.jpg (e.g. for index 0, turn 00001.jpg into 00001.png)
         )
-
-        # Rotation pretask      
-        if self.rot:
-            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-            all_rotated_imgs = [
-                self.transforms(TF.rotate(img, -90)),
-                self.transforms(img),
-                self.transforms(TF.rotate(img, 90)),
-                self.transforms(TF.rotate(img, 180))]
-            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
-            rot_lbl = torch.LongTensor([0, 1, 2, 3])
-            pdb.set_trace()
-            return all_rotated_imgs, rot_lbl
             
-        # Image
+        # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-        pdb.set_trace()
-        i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
-        img = TF.crop(img, i, j, h, w)
-        img = self.transforms(img)
-
-        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
-        pdb.set_trace()
-        lbl = TF.crop(lbl, i, j, h, w)
+
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-        
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
+
+        # TODO need to change how transforms are applied. 
+        # cannot do it with this self.transforms bc we need to apply the same transformation to image and label (see above)
+        img = self.transforms(img)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
@@ -200,10 +186,8 @@ class gtaLoader(data.Dataset):
             print("after det", classes, np.unique(lbl))
             raise ValueError("Segmentation map contained invalid class values")
         lbl = torch.from_numpy(lbl).long()
-
-
         pdb.set_trace()
-
+        return img, lbl
 
     def __getitem__(self, index):
         """__getitem__
@@ -227,17 +211,19 @@ class gtaLoader(data.Dataset):
             rot_lbl = torch.LongTensor([0, 1, 2, 3])
             return all_rotated_imgs, rot_lbl
             
-        # Image
+        # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-        i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
-        img = TF.crop(img, i, j, h, w)
-
-        # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
-        lbl = TF.crop(lbl, i, j, h, w)
+
+        # Data Augmentation
+        # Crop
+        if self.do_crop
+            i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
+            img = TF.crop(img, i, j, h, w)
+            lbl = TF.crop(lbl, i, j, h, w)        
 
         # Random horizontal flipping
-        if random.random() > 0.5:
+        if self.hflip and random.random() > 0.5:
             img = TF.hflip(img)
             lbl = TF.hflip(lbl)
 
