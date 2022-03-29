@@ -195,7 +195,7 @@ class cityscapesLoader(data.Dataset):
 
         # Data Augmentation
         # Crop
-        if self.do_crop
+        if self.do_crop:
             i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
             img = TF.crop(img, i, j, h, w)
             lbl = TF.crop(lbl, i, j, h, w)        
