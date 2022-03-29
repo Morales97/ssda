@@ -236,9 +236,6 @@ class cityscapesLoader(data.Dataset):
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = TF.crop(lbl, i, j, h, w)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-        
-        classes = np.unique(lbl)
-        lbl = lbl.astype(int)
 
         # Random horizontal flipping
         if random.random() > 0.5:
@@ -248,6 +245,9 @@ class cityscapesLoader(data.Dataset):
         img = self.transforms(img)
         if self.unlabeled:
             return img
+
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")

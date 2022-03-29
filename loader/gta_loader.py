@@ -236,15 +236,15 @@ class gtaLoader(data.Dataset):
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = TF.crop(lbl, i, j, h, w)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-        
-        classes = np.unique(lbl)
-        lbl = lbl.astype(int)
 
         # Random horizontal flipping
         if random.random() > 0.5:
             img = TF.hflip(img)
             lbl = TF.hflip(lbl)
 
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
+        
         # TODO need to change how transforms are applied. 
         # cannot do it with this self.transforms bc we need to apply the same transformation to image and label (see above)
         img = self.transforms(img)
