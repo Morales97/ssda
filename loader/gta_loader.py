@@ -161,7 +161,8 @@ class gtaLoader(data.Dataset):
         """__len__"""
         return len(self.files[self.split])
 
-    def test(self, index):
+    def test(self):
+        index = 0
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
