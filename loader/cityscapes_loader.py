@@ -6,7 +6,7 @@ import pdb
 from PIL import Image
 import torchvision.transforms.functional as TF
 from loader.loader_utils import pil_loader
-
+import random
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
@@ -69,6 +69,7 @@ class cityscapesLoader(data.Dataset):
             self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
         elif size == "tiny":
             self.img_size = (512, 256)
+            self.crop_size = 256
         else:
             raise Exception('size not valid')
 
@@ -228,6 +229,8 @@ class cityscapesLoader(data.Dataset):
             
         # Image
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
+        img = TF.crop(img, i, j, h, w)
         img = self.transforms(img)
 
         if self.unlabeled:
@@ -235,10 +238,16 @@ class cityscapesLoader(data.Dataset):
 
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        lbl = TF.crop(lbl, i, j, h, w)
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
+
+        # Random horizontal flipping
+        if random.random() > 0.5:
+            img = TF.hflip(img)
+            lbl = TF.hflip(lbl)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")

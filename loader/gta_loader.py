@@ -77,7 +77,7 @@ class gtaLoader(data.Dataset):
             self.crop_size = (512, 1024)
         elif size == "tiny":
             self.img_size = (640, 360)  # w, h -- PIL uses (w, h) format
-            self.crop_size = (256, 512) # h, w -- Torch's transforms uses (h, w) format
+            self.crop_size = 256 # (256, 512) # h, w -- Torch's transforms uses (h, w) format
         else:
             raise Exception('size not valid')
         if self.rot:
@@ -239,6 +239,11 @@ class gtaLoader(data.Dataset):
         
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
+
+        # Random horizontal flipping
+        if random.random() > 0.5:
+            img = TF.hflip(img)
+            lbl = TF.hflip(lbl)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
