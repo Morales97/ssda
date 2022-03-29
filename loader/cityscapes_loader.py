@@ -235,7 +235,6 @@ class cityscapesLoader(data.Dataset):
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         lbl = TF.crop(lbl, i, j, h, w)
-        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
 
         # Random horizontal flipping
         if random.random() > 0.5:
@@ -246,6 +245,7 @@ class cityscapesLoader(data.Dataset):
         if self.unlabeled:
             return img
 
+        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
 
