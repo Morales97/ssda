@@ -231,7 +231,6 @@ class gtaLoader(data.Dataset):
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
         img = TF.crop(img, i, j, h, w)
-        img = self.transforms(img)
 
         # Segmentation label
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
@@ -245,6 +244,10 @@ class gtaLoader(data.Dataset):
         if random.random() > 0.5:
             img = TF.hflip(img)
             lbl = TF.hflip(lbl)
+
+        # TODO need to change how transforms are applied. 
+        # cannot do it with this self.transforms bc we need to apply the same transformation to image and label (see above)
+        img = self.transforms(img)
 
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
