@@ -7,6 +7,7 @@ from PIL import Image
 import torchvision
 import torchvision.transforms.functional as TF
 from loader.loader_utils import pil_loader
+import random
 
 from torch.utils import data
 
