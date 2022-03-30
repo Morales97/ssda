@@ -8,7 +8,7 @@
 #SBATCH --partition=gpu
 #SBATCH --qos=gpu_free
 #SBATCH --gres=gpu:1
-#SBATCH --mem=30000
+#SBATCH --mem=40000
 #SBATCH --time=06:00:00
 
 # ----- Fully supervised CS -----
