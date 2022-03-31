@@ -247,8 +247,8 @@ if __name__ == '__main__':
                 config=args, reinit=True, project=args.project, entity=args.entity)
 
     os.makedirs(args.save_dir, exist_ok=True)
-    #main(args, wandb)
-    wandb.join()
+    main(args, wandb)
+    wandb.finish()
     
 
 # python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
