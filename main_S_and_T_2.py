@@ -247,7 +247,7 @@ if __name__ == '__main__':
                 config=args, reinit=True, project=args.project, entity=args.entity)
 
     os.makedirs(args.save_dir, exist_ok=True)
-    main(args, wandb)
+    #main(args, wandb)
     wandb.join()
     
 
