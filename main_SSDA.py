@@ -171,10 +171,8 @@ def main(args, wandb):
 
         # approach 1: turning into One-hot
         tau = 0.9
-        pseudo_lbl = torch.argmax(p_w, dim=1)
-        pdb.set_trace()
-        below_tau = torch.where(torch.max(p_w, dim=1) < tau, 1, 0)
-        pseudo_lbl[below_tau.non_zero()] = 250          # 250 is the ignore index
+        max_prob, pseudo_lbl = torch.max(p_w, dim=1)
+        pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
         
         outputs_strong = model(images_strong)
         loss_cr = loss_fn(outputs_strong, pseudo_lbl)
