@@ -198,10 +198,10 @@ def main(args, wandb):
             log_info = OrderedDict({
                 'Train Step': step,
                 'Time/Image [s]': round(time_meter.avg / args.batch_size, 3),
-                'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}')
-                'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}')
-                'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}')
-                'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}')
+                'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}'),
+                'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
+                'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
+                'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
                 'Num pseudo lbl': round(pseudo_lbl_meter.avg, 1),
             })
 
