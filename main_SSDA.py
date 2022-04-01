@@ -202,7 +202,7 @@ def main(args, wandb):
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
-                'Num pseudo lbl': round(pseudo_lbl_meter.avg, 1),
+                'Num pseudo lbl':FormattedLogItem(pseudo_lbl_meter.avg, '{:.1f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
