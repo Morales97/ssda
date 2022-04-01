@@ -18,12 +18,12 @@ def cr_one_hot(out_w, out_s, tau=0.9):
     pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
     # pseudo_lbl.unique(return_counts=True)
 
-    out_s = out_s[idxs].permute(0, 2, 3, 1)
+    out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     assert len(pseudo_lbl) == out_s.size()[0]
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl)
-    return loss_cr
+    return loss_cr, len(pseudo_lbl)
     
 def cr_prob_distr(out_w, out_s, tau=0.9):
     '''

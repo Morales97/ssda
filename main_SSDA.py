@@ -123,7 +123,8 @@ def main(args, wandb):
     train_loss_meter = averageMeter()
     source_ce_loss_meter = averageMeter()
     target_ce_loss_meter = averageMeter()
-    cr_loss_meter = averageMeter
+    cr_loss_meter = averageMeter()
+    pseudo_lbl_meter = averageMeter()
 
     # Iterators
     data_iter_s = iter(source_loader)
@@ -175,7 +176,7 @@ def main(args, wandb):
             outputs_w = outputs_w['out']
             outputs_strong = outputs_strong['out']
 
-        loss_cr = cr_one_hot(outputs_w, outputs_strong)
+        loss_cr, n_pseudo_lbl = cr_one_hot(outputs_w, outputs_strong)
         loss = loss_cr + loss_ce
 
         loss.backward()
@@ -186,6 +187,7 @@ def main(args, wandb):
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
         cr_loss_meter.update(loss_cr)
+        pseudo_lbl_meter.update(n_pseudo_lbl)
 
         # decrease lr
         if step == np.floor(args.steps * 0.75):
@@ -200,7 +202,8 @@ def main(args, wandb):
                 'CE Source Loss': source_ce_loss_meter.avg,
                 'CE Target Loss': target_ce_loss_meter.avg,
                 'CR Loss': cr_loss_meter.avg,
-                'Train Loss': train_loss_meter.avg
+                'Train Loss': train_loss_meter.avg,
+                'Num pseudo lbl:' pseudo_lbl_meter.avg
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
