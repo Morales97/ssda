@@ -118,6 +118,7 @@ def main(args, wandb):
     best_mIoU = 0 
     step = start_step
     time_meter = averageMeter()
+    time_meter_cr = averageMeter()
     val_loss_meter = averageMeter()
     train_loss_meter = averageMeter()
     source_ce_loss_meter = averageMeter()
@@ -135,8 +136,6 @@ def main(args, wandb):
 
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
-        images_t_unl = next(data_iter_t_unl)
-
         images_s = images_s.cuda()
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
@@ -159,9 +158,12 @@ def main(args, wandb):
 
         # CR
         loss_cr = 0
+        start_ts_cr = time.time()
         if args.cr is not None:
             if step % len(target_loader_unl) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
+            
+            images_t_unl = next(data_iter_t_unl)
             images_weak = images_t_unl[0].cuda()
             images_strong = images_t_unl[1].cuda()
             
@@ -178,6 +180,7 @@ def main(args, wandb):
         optimizer.step()
 
         time_meter.update(time.time() - start_ts)
+        time_meter_cr.update(time.time() - start_ts_cr)
         train_loss_meter.update(loss)
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
@@ -194,6 +197,7 @@ def main(args, wandb):
             log_info = OrderedDict({
                 'Train Step': step,
                 'Time/Image [s]': round(time_meter.avg / args.batch_size, 3),
+                'Time CR/Image [s]': round(time_meter_cr.avg / args.batch_size, 3),
                 'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}'),
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
