@@ -173,7 +173,7 @@ def main(args, wandb):
                 outputs_strong = outputs_strong['out']
 
             loss_cr, percent_pl = consistency_reg(args.cr, outputs_w, outputs_strong)
-            time_cr = time.time() - start_ts_cr)
+            time_cr = time.time() - start_ts_cr
             
         loss = loss_s + loss_t + loss_cr 
         loss.backward()
