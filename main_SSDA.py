@@ -164,7 +164,6 @@ def main(args, wandb):
 
         loss_s = loss_fn(outputs_s, labels_s)
         loss_t = loss_fn(outputs_t, labels_t)
-        loss_ce = loss_s + loss_t
 
         # CR
         images_weak = images_t_unl[0].cuda()
@@ -177,7 +176,7 @@ def main(args, wandb):
             outputs_strong = outputs_strong['out']
 
         loss_cr, n_pseudo_lbl = cr_one_hot(outputs_w, outputs_strong)
-        loss = loss_cr + loss_ce
+        loss = loss_s + loss_t + loss_cr 
 
         loss.backward()
         optimizer.step()

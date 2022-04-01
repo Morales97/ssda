@@ -22,9 +22,10 @@ def cr_one_hot(out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)
     assert len(pseudo_lbl) == out_s.size()[0]
 
-    loss_cr = F.cross_entropy(out_s, pseudo_lbl)
+    loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
     return loss_cr, len(pseudo_lbl)
     
+
 def cr_prob_distr(out_w, out_s, tau=0.9):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
@@ -46,5 +47,5 @@ def cr_prob_distr(out_w, out_s, tau=0.9):
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
-    loss_cr = F.cross_entropy(out_s, p_w)
+    loss_cr = F.cross_entropy(out_s, p_w, ignore_index=250)
     return loss_cr
