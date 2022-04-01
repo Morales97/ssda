@@ -24,6 +24,7 @@ from utils.ioutils import rm_format
 from loader.cityscapes_loader import cityscapesLoader
 from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
+from consistency.consistency import cr_one_hot
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
@@ -119,6 +120,10 @@ def main(args, wandb):
     step = start_step
     time_meter = averageMeter()
     val_loss_meter = averageMeter()
+    train_loss_meter = averageMeter()
+    source_ce_loss_meter = averageMeter()
+    target_ce_loss_meter = averageMeter()
+    cr_loss_meter = averageMeter
 
     # Iterators
     data_iter_s = iter(source_loader)
@@ -155,9 +160,10 @@ def main(args, wandb):
         if type(outputs_s) == OrderedDict:
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
-        loss_ce = 0
-        loss_ce += loss_fn(outputs_s, labels_s)
-        loss_ce += loss_fn(outputs_t, labels_t)
+
+        loss_s = loss_fn(outputs_s, labels_s)
+        loss_t = loss_fn(outputs_t, labels_t)
+        loss_ce = loss_s + loss_t
 
         # CR
         images_weak = images_t_unl[0].cuda()
@@ -169,25 +175,17 @@ def main(args, wandb):
             outputs_w = outputs_w['out']
             outputs_strong = outputs_strong['out']
 
-        outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-        outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
-        p_w = F.softmax(outputs_w, dim=1).detach()        # compute softmax along classes dimension
-
-        # approach 1: turning into One-hot
-        tau = 0.9
-        max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-        pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
-        
-        if len(pseudo_lbl.unique(return_counts=True)[0]) > 1:
-            pass #pdb.set_trace()
-
-        loss_cr = loss_fn(outputs_strong, pseudo_lbl)
+        loss_cr = cr_one_hot(outputs_w, outputs_strong)
         loss = loss_cr + loss_ce
 
         loss.backward()
         optimizer.step()
 
         time_meter.update(time.time() - start_ts)
+        train_loss_meter.update(loss)
+        source_ce_loss_meter.update(loss_s)
+        target_ce_loss_meter.update(loss_t)
+        cr_loss_meter.update(loss_cr)
 
         # decrease lr
         if step == np.floor(args.steps * 0.75):
@@ -198,18 +196,22 @@ def main(args, wandb):
         if step % args.log_interval == 0:
             log_info = OrderedDict({
                 'Train Step': step,
-                'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, '{:.3f}')
-            })
-            log_info.update({
-                'CE Loss': FormattedLogItem(loss_ce.item(), '{:.6f}'),
-                'CR Loss': FormattedLogItem(loss_cr.item(), '{:.6f}'),
-                'CE + CR Loss': FormattedLogItem(loss.item(), '{:.6f}')
+                'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, '{:.3f}'),
+                'CE Source Loss': source_ce_loss_meter.avg,
+                'CE Target Loss': target_ce_loss_meter.avg,
+                'CR Loss': cr_loss_meter.avg,
+                'Train Loss': train_loss_meter.avg
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
             print(log_str)
             wandb.log(rm_format(log_info))
-        
+
+            source_ce_loss_meter.reset()
+            target_ce_loss_meter.reset()
+            cr_loss_meter.reset()
+            train_loss_meter.reset()
+            
         if step % args.val_interval == 0:
             model.eval()
             with torch.no_grad():
