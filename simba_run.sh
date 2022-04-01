@@ -28,4 +28,4 @@
 
 
 # ----- SSDA -----
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_test --net=lraspp_mobilenet --target_samples=100 --batch_size=8
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_test --net=lraspp_mobilenet --target_samples=100 --batch_size=8
