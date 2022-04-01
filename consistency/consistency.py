@@ -56,13 +56,14 @@ def cr_prob_distr(out_w, out_s, tau):
         return 0, 0
     
     # Apply only CE (between distributions!) where confidence > threshold    
+    pdb.set_trace()
     out_s = out_s[idxs].permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
-    
     pdb.set_trace()
+    
 
     loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = sum(pseudo_lbl.unique(return_counts=True)[1][:-1]) / len(pseudo_lbl) * 100
