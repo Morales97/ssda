@@ -23,7 +23,7 @@ def cr_one_hot(out_w, out_s, tau=0.9):
     assert len(pseudo_lbl) == out_s.size()[0]
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
-    return loss_cr, len(pseudo_lbl)
+    return loss_cr, sum(pseudo_lbl != 250)
     
 
 def cr_prob_distr(out_w, out_s, tau=0.9):
