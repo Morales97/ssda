@@ -54,6 +54,7 @@ def cr_prob_distr(out_w, out_s, tau):
     idxs = torch.where(max_prob > tau, 1, 0).nonzero()
 
     # Apply only CE (between distributions!) where confidence > threshold
+    pdb.set_trace()
     out_s = out_s[idxs].permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     p_w = p_w[idxs]
