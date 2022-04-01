@@ -68,7 +68,7 @@ class gtaLoader(data.Dataset):
         version="gta",
         test_mode=False,
         rotation=False,
-        do_crop=False,
+        do_crop=True,
         hflip=False
     ):
         self.image_path = image_path
