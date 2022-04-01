@@ -175,7 +175,7 @@ def main(args, wandb):
             outputs_w = outputs_w['out']
             outputs_strong = outputs_strong['out']
 
-        loss_cr, n_pseudo_lbl = cr_one_hot(outputs_w, outputs_strong)
+        loss_cr, percent_pl = cr_one_hot(outputs_w, outputs_strong)
         loss = loss_s + loss_t + loss_cr 
 
         loss.backward()
@@ -186,7 +186,7 @@ def main(args, wandb):
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
         cr_loss_meter.update(loss_cr)
-        pseudo_lbl_meter.update(n_pseudo_lbl)
+        pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
         if step == np.floor(args.steps * 0.75):
@@ -202,7 +202,7 @@ def main(args, wandb):
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
-                'Num pseudo lbl':FormattedLogItem(pseudo_lbl_meter.avg, '{:.1f}'),
+                'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
@@ -283,8 +283,8 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.finish()
