@@ -155,9 +155,9 @@ def main(args, wandb):
         if type(outputs_s) == OrderedDict:
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
-        loss = 0
-        loss += loss_fn(outputs_s, labels_s)
-        loss += loss_fn(outputs_t, labels_t)
+        loss_ce = 0
+        loss_ce += loss_fn(outputs_s, labels_s)
+        loss_ce += loss_fn(outputs_t, labels_t)
 
         # CR
         images_weak = images_t_unl[0].cuda()
@@ -179,10 +179,10 @@ def main(args, wandb):
         pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
         
         if len(pseudo_lbl.unique(return_counts=True)[0]) > 1:
-            pdb.set_trace()
+            pass #pdb.set_trace()
 
         loss_cr = loss_fn(outputs_strong, pseudo_lbl)
-        loss += loss_cr
+        loss = loss_cr + loss_ce
 
         loss.backward()
         optimizer.step()
@@ -201,7 +201,9 @@ def main(args, wandb):
                 'Time/Image [s]': FormattedLogItem(time_meter.val / args.batch_size, '{:.3f}')
             })
             log_info.update({
-                'CE_2D Loss': FormattedLogItem(loss.item(), '{:.6f}')
+                'CE Loss': FormattedLogItem(loss_ce.item(), '{:.6f}'),
+                'CR Loss': FormattedLogItem(loss_cr.item(), '{:.6f}'),
+                'CE + CR Loss': FormattedLogItem(loss.item(), '{:.6f}')
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
@@ -277,10 +279,10 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    #wandb.finish()
+    wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8
