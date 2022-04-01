@@ -163,7 +163,7 @@ def main(args, wandb):
         images_weak = images_t_unl[0].cuda()
         images_strong = images_t_unl[1].cuda()
         
-        outputs_w = model(images_weak).detach()           # (N, C, H, W)
+        outputs_w = model(images_weak)                   # (N, C, H, W)
         outputs_strong = model(images_strong)
         if type(outputs_w) == OrderedDict:
             outputs_w = outputs_w['out']
@@ -171,7 +171,7 @@ def main(args, wandb):
 
         outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
         outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
-        p_w = F.softmax(outputs_w, dim=1)                 # compute softmax along classes dimension
+        p_w = F.softmax(outputs_w, dim=1).detach()        # compute softmax along classes dimension
 
         # approach 1: turning into One-hot
         tau = 0.9
