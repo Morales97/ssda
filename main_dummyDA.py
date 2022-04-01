@@ -28,6 +28,10 @@ import wandb
 
 # import pdb
 
+'''
+Dummy DA: using only source samples and target LABELED samples. Not target unlabeled
+'''
+
 def main(args, wandb):
     torch.set_num_threads(args.max_num_threads)
 
@@ -39,10 +43,7 @@ def main(args, wandb):
     # TODO: rn loaders don't use augmentations. Probably should be using some
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
-   
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
-    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="train")
-    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
 
     source_loader = DataLoader(
         s_loader,
@@ -131,14 +132,14 @@ def main(args, wandb):
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
         
-        step += 1
-        start_ts = time.time()
-        model.train()
-        
         images_s = images_s.cuda()
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
+
+        step += 1
+        start_ts = time.time()
+        model.train()
 
         # train
         optimizer.zero_grad()
@@ -251,5 +252,3 @@ if __name__ == '__main__':
     wandb.finish()
     
 
-# python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
-# python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 &

@@ -7,10 +7,13 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
+from model.resnet_fcn import fcn_resnet50_densecl
+from model.deeplab import deeplabv3_resnet50_maskContrast
 from model.fcn import fcn8s
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -24,7 +27,7 @@ from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
-import pdb
+# import pdb
 
 def main(args, wandb):
     torch.set_num_threads(args.max_num_threads)
@@ -33,16 +36,14 @@ def main(args, wandb):
     torch.manual_seed(args.seed)
     #np.random.seed(args.seed)
     random.seed(args.seed)
-
+    
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", n_samples=args.target_samples)
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
+    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
     t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
+    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
 
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
-    #t_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="train")
-    #v_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
-
+   
     source_loader = DataLoader(
         s_loader,
         batch_size=args.batch_size,
@@ -70,13 +71,15 @@ def main(args, wandb):
         num_workers=args.num_workers,
         shuffle=True,
     )    
-
+    
     # Set up metrics
     running_metrics_val = runningScore(t_loader.n_classes)
-
+    
     # Init model
     if args.net == '' or args.net == 'resnet50_fcn':
         model = resnet50_FCN(args.pre_trained)
+    if args.net == 'denseCL_fcn_rn50':
+        model = fcn_resnet50_densecl()
     if args.net == 'fcn8':
         model = fcn8s()
     if args.net == 'rn34_up':
@@ -85,6 +88,8 @@ def main(args, wandb):
         model = resnet_50_upsampling(args.pre_trained)
     if args.net == 'deeplabv3':
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
+    if args.net == 'deeplabv3_mask_pt':
+        model = deeplabv3_resnet50_maskContrast(model_path=args.custom_pretrain_path)
     if args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     if args.net == 'lraspp_mobilenet':
@@ -122,31 +127,32 @@ def main(args, wandb):
 
     while step <= args.steps:
 
-        if step % len(target_loader) == 0:
-            data_iter_t = iter(target_loader)
-        if step % len(target_loader_unl) == 0:
-            data_iter_t_unl = iter(target_loader_unl)
+        # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % len(source_loader) == 0:
             data_iter_s = iter(source_loader)
-    
+        if step % len(target_loader) == 0:
+            data_iter_t = iter(target_loader)
+        if step % len(target_loader_unl) == 0 and step > 0:
+            data_iter_t_unl = iter(target_loader_unl)
+
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
         images_t_unl = next(data_iter_t_unl)
-        
-        step += 1
-        start_ts = time.time()
-        model.train()
-        
+
         images_s = images_s.cuda()
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
 
+        step += 1
+        start_ts = time.time()
+        model.train()
+
         # train
         optimizer.zero_grad()
         outputs_s = model(images_s)
         outputs_t = model(images_t)
-        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
+        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet' or args.net == 'deeplabv3_mask_pt':
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
         loss = 0
@@ -154,13 +160,25 @@ def main(args, wandb):
         loss += loss_fn(outputs_t, labels_t)
 
         # CR
-        x_weak = images_t_unl[0].cuda()
-        x_strong = images_t_unl[1].cuda()
+        images_weak = images_t_unl[0].cuda()
+        images_strong = images_t_unl[1].cuda()
 
-        # TODO fw pass, samples some random pixels, apply threshold, 
+        outputs_w = model(images_weak)                    # (N, C, H, W)
+        outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+        outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
+        p_w = F.softmax(outputs_w, dim=1)                 # compute softmax along classes dimension
 
+        # approach 1: turning into One-hot
+        tau = 0.9
+        pseudo_lbl = torch.argmax(p_w, dim=1)
+        below_tau = torch.where(torch.max(p_w, dim=1) < tau, 1, 0)
+        pseudo_lbl[below_tau.non_zero()] = 250          # 250 is the ignore index
+        
+        outputs_strong = model(images_strong)
+        loss_cr = loss_fn(outputs_strong, pseudo_lbl)
+        loss += loss_cr
 
-
+        pdb.set_trace()
         loss.backward()
         optimizer.step()
 
@@ -193,7 +211,7 @@ def main(args, wandb):
                     labels_val = labels_val.cuda()
 
                     outputs = model(images_val)
-                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet':
+                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet'  or args.net == 'deeplabv3_mask_pt':
                         outputs = outputs['out']
                     val_loss = loss_fn(input=outputs, target=labels_val)
 
@@ -254,13 +272,10 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir,
-    #           config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir,
+                config=args, reinit=True, project=args.project, entity=args.entity)
+
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    #wandb.join()
+    wandb.finish()
     
-
-# python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
-# python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 &
