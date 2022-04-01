@@ -178,10 +178,12 @@ def main(args, wandb):
         max_prob, pseudo_lbl = torch.max(p_w, dim=1)
         pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
         
+        if len(pseudo_lbl.unique(return_counts=True)[0]) > 1:
+            pdb.set_trace()
+
         loss_cr = loss_fn(outputs_strong, pseudo_lbl)
         loss += loss_cr
 
-        pdb.set_trace()
         loss.backward()
         optimizer.step()
 
