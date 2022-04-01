@@ -162,7 +162,7 @@ def main(args, wandb):
         # CR
         images_weak = images_t_unl[0].cuda()
         images_strong = images_t_unl[1].cuda()
-
+        pdb.set_trace()
         outputs_w = model(images_weak)                    # (N, C, H, W)
         outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
         outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
