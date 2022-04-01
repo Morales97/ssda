@@ -2,7 +2,16 @@ import torch
 import torch.nn.functional as F
 import pdb 
 
-def cr_one_hot(out_w, out_s, tau=0.9):
+def consistency_reg(cr_type, out_w, out_s, tau=0.9)
+    if cr_type == 'one_hot':
+        return cr_one_hot(out_w, out_s, tau)
+    elif cr_type == 'prob_distr':
+        return cr_prob_distr(out_w, out_s, tau)
+    else:
+        raise Exception('Consistancy regularization type not supported')
+
+
+def cr_one_hot(out_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
@@ -29,7 +38,7 @@ def cr_one_hot(out_w, out_s, tau=0.9):
     return loss_cr, percent_pl
     
 
-def cr_prob_distr(out_w, out_s, tau=0.9):
+def cr_prob_distr(out_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
@@ -51,4 +60,6 @@ def cr_prob_distr(out_w, out_s, tau=0.9):
     assert out_s.size() == p_w.size()
 
     loss_cr = F.cross_entropy(out_s, p_w, ignore_index=250)
-    return loss_cr
+    percent_pl = sum(pseudo_lbl.unique(return_counts=True)[1][:-1]) / len(pseudo_lbl) * 100
+
+    return loss_cr, percent_pl

@@ -24,7 +24,7 @@ from utils.ioutils import rm_format
 from loader.cityscapes_loader import cityscapesLoader
 from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
-from consistency.consistency import cr_one_hot
+from consistency.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
@@ -39,11 +39,10 @@ def main(args, wandb):
     random.seed(args.seed)
     
     # TODO: rn loaders don't use augmentations. Probably should be using some
+    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
     t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
     v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
-
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
    
     source_loader = DataLoader(
         s_loader,
@@ -126,11 +125,6 @@ def main(args, wandb):
     cr_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
 
-    # Iterators
-    data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
-
     while step <= args.steps:
 
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
@@ -138,8 +132,6 @@ def main(args, wandb):
             data_iter_s = iter(source_loader)
         if step % len(target_loader) == 0:
             data_iter_t = iter(target_loader)
-        if step % len(target_loader_unl) == 0 and step > 0:
-            data_iter_t_unl = iter(target_loader_unl)
 
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
@@ -166,18 +158,22 @@ def main(args, wandb):
         loss_t = loss_fn(outputs_t, labels_t)
 
         # CR
-        images_weak = images_t_unl[0].cuda()
-        images_strong = images_t_unl[1].cuda()
-        
-        outputs_w = model(images_weak)                   # (N, C, H, W)
-        outputs_strong = model(images_strong)
-        if type(outputs_w) == OrderedDict:
-            outputs_w = outputs_w['out']
-            outputs_strong = outputs_strong['out']
+        loss_cr = 0
+        if args.cr is not None:
+            if step % len(target_loader_unl) == 0:
+                data_iter_t_unl = iter(target_loader_unl)
+            images_weak = images_t_unl[0].cuda()
+            images_strong = images_t_unl[1].cuda()
+            
+            outputs_w = model(images_weak)                   # (N, C, H, W)
+            outputs_strong = model(images_strong)
+            if type(outputs_w) == OrderedDict:
+                outputs_w = outputs_w['out']
+                outputs_strong = outputs_strong['out']
 
-        loss_cr, percent_pl = cr_one_hot(outputs_w, outputs_strong)
+            loss_cr, percent_pl = consistency_reg(args.cr, outputs_w, outputs_strong)
+            
         loss = loss_s + loss_t + loss_cr 
-
         loss.backward()
         optimizer.step()
 
@@ -283,8 +279,8 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.finish()
