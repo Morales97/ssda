@@ -27,7 +27,7 @@ from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
-# import pdb
+import pdb
 
 def main(args, wandb):
     torch.set_num_threads(args.max_num_threads)
