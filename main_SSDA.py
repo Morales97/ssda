@@ -163,7 +163,7 @@ def main(args, wandb):
         images_weak = images_t_unl[0].cuda()
         images_strong = images_t_unl[1].cuda()
         
-        outputs_w = model(images_weak)                    # (N, C, H, W)
+        outputs_w = model(images_weak).detach()           # (N, C, H, W)
         outputs_strong = model(images_strong)
         if type(outputs_w) == OrderedDict:
             outputs_w = outputs_w['out']
