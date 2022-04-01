@@ -56,9 +56,9 @@ def cr_prob_distr(out_w, out_s, tau):
         return 0, 0
     
     # Apply only CE (between distributions!) where confidence > threshold    
-    pdb.set_trace()
-    out_s = out_s[idxs].permute(0, 2, 3, 1)
+    out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
+    out_s = out_s[idxs].squeeze()
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
