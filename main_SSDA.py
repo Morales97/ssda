@@ -272,10 +272,10 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir,
-                config=args, reinit=True, project=args.project, entity=args.entity)
-
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.finish()
+    #wandb.finish()
     
+# python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8
