@@ -13,7 +13,7 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
             input = F.interpolate(input, size=(ht, wt), mode="bilinear", align_corners=True)
     
     elif len(target.size()) == 1: # already flattened
-        assert target.size() == n*h*w
+        assert len(target) == n*h*w
 
     else:
         raise Exception('check target size')
