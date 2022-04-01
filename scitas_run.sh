@@ -30,4 +30,4 @@
 # python pretrain/rotation.py --batch_size=4 --lr=0.001 --project=rotation --expt_name=longer_run_lr_x10 --save_dir=pretrain/expts_rot/tmp_last --save_interval=2000 --steps=10001
 
 # ----- SSDA -----
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_test --net=lraspp_mobilenet --target_samples=100 --batch_size=8
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_test --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot

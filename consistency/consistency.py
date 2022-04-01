@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import pdb 
 
-def consistency_reg(cr_type, out_w, out_s, tau=0.9)
+def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     if cr_type == 'one_hot':
         return cr_one_hot(out_w, out_s, tau)
     elif cr_type == 'prob_distr':
