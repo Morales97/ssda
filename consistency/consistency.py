@@ -59,6 +59,7 @@ def cr_prob_distr(out_w, out_s, tau):
     out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     out_s = out_s[idxs].squeeze()
+    pdb.set_trace()
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
