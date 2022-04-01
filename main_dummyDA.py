@@ -145,7 +145,7 @@ def main(args, wandb):
         optimizer.zero_grad()
         outputs_s = model(images_s)
         outputs_t = model(images_t)
-        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet' or args.net == 'deeplabv3_mask_pt':
+        if type(outputs_s) == OrderedDict:
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
         loss = 0
@@ -183,7 +183,7 @@ def main(args, wandb):
                     labels_val = labels_val.cuda()
 
                     outputs = model(images_val)
-                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet'  or args.net == 'deeplabv3_mask_pt':
+                    if type(outputs) == OrderedDict:
                         outputs = outputs['out']
                     val_loss = loss_fn(input=outputs, target=labels_val)
 

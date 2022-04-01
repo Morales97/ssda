@@ -162,9 +162,13 @@ def main(args, wandb):
         # CR
         images_weak = images_t_unl[0].cuda()
         images_strong = images_t_unl[1].cuda()
+        
         outputs_w = model(images_weak)                    # (N, C, H, W)
+        outputs_strong = model(images_strong)
         if type(outputs_w) == OrderedDict:
             outputs_w = outputs_w['out']
+            outputs_strong = outputs_strong['out']
+
         outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
         outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
         p_w = F.softmax(outputs_w, dim=1)                 # compute softmax along classes dimension
@@ -174,7 +178,7 @@ def main(args, wandb):
         max_prob, pseudo_lbl = torch.max(p_w, dim=1)
         pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
         
-        outputs_strong = model(images_strong)
+        
         loss_cr = loss_fn(outputs_strong, pseudo_lbl)
         loss += loss_cr
 
@@ -211,7 +215,7 @@ def main(args, wandb):
                     labels_val = labels_val.cuda()
 
                     outputs = model(images_val)
-                    if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet'  or args.net == 'deeplabv3_mask_pt':
+                    if type(outputs) == OrderedDict:
                         outputs = outputs['out']
                     val_loss = loss_fn(input=outputs, target=labels_val)
 
