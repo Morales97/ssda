@@ -141,7 +141,6 @@ def main(args, wandb):
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
 
-        step += 1
         start_ts = time.time()
         model.train()
 
@@ -178,6 +177,7 @@ def main(args, wandb):
         loss = loss_s + loss_t + loss_cr 
         loss.backward()
         optimizer.step()
+        step += 1
 
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time.time() - start_ts_cr)
