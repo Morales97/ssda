@@ -152,7 +152,7 @@ def main(args, wandb):
         optimizer.zero_grad()
         outputs_s = model(images_s)
         outputs_t = model(images_t)
-        if args.net == '' or args.net == 'resnet50_fcn' or args.net == 'deeplabv3' or args.net == 'dl_mobilenet' or args.net == 'lraspp_mobilenet' or args.net == 'deeplabv3_mask_pt':
+        if type(outputs_s) == OrderedDict:
             outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
         loss = 0
@@ -162,8 +162,9 @@ def main(args, wandb):
         # CR
         images_weak = images_t_unl[0].cuda()
         images_strong = images_t_unl[1].cuda()
-        pdb.set_trace()
         outputs_w = model(images_weak)                    # (N, C, H, W)
+        if type(outputs_w) == OrderedDict:
+            outputs_w = outputs_w['out']
         outputs_w = outputs_w.permute(0, 2, 3, 1)         # (N, H, W, C)
         outputs_w = torch.flatten(outputs_w, end_dim=2)   # (N·H·W, C)
         p_w = F.softmax(outputs_w, dim=1)                 # compute softmax along classes dimension
