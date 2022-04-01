@@ -156,9 +156,9 @@ def main(args, wandb):
         loss_t = loss_fn(outputs_t, labels_t)
 
         # CR
-        loss_cr, percent_pl = 0, 0
-        start_ts_cr = time.time()
+        loss_cr, percent_pl, time_cr = 0, 0, 0
         if args.cr is not None:
+            start_ts_cr = time.time()
             if step % len(target_loader_unl) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
             
@@ -173,6 +173,7 @@ def main(args, wandb):
                 outputs_strong = outputs_strong['out']
 
             loss_cr, percent_pl = consistency_reg(args.cr, outputs_w, outputs_strong)
+            time_cr = time.time() - start_ts_cr)
             
         loss = loss_s + loss_t + loss_cr 
         loss.backward()
@@ -180,7 +181,7 @@ def main(args, wandb):
         step += 1
 
         time_meter.update(time.time() - start_ts)
-        time_meter_cr.update(time.time() - start_ts_cr)
+        time_meter_cr.update(time_cr)
         train_loss_meter.update(loss)
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)

@@ -59,7 +59,10 @@ def cr_prob_distr(out_w, out_s, tau):
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
-    loss_cr = F.cross_entropy(out_s, p_w, ignore_index=250)
+    if len(pseudo_lbl.unique(return_counts=True)[0]) > 1:
+        pdb.set_trace()
+
+    loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = sum(pseudo_lbl.unique(return_counts=True)[1][:-1]) / len(pseudo_lbl) * 100
 
     return loss_cr, percent_pl
