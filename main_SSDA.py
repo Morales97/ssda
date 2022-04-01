@@ -203,7 +203,7 @@ def main(args, wandb):
                 'CE Target Loss': target_ce_loss_meter.avg,
                 'CR Loss': cr_loss_meter.avg,
                 'Train Loss': train_loss_meter.avg,
-                'Num pseudo lbl:' pseudo_lbl_meter.avg
+                'Num pseudo lbl': pseudo_lbl_meter.avg,
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
