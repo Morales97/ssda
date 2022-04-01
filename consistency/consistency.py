@@ -64,5 +64,5 @@ def cr_prob_distr(out_w, out_s, tau):
 
     loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = len(idxs) / len(max_prob) * 100
-    pdb.set_trace()
+
     return loss_cr, percent_pl
