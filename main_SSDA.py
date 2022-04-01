@@ -156,7 +156,7 @@ def main(args, wandb):
         loss_t = loss_fn(outputs_t, labels_t)
 
         # CR
-        loss_cr = 0
+        loss_cr, percent_pl = 0, 0
         start_ts_cr = time.time()
         if args.cr is not None:
             if step % len(target_loader_unl) == 0:
