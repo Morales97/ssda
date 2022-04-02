@@ -62,7 +62,8 @@ def get_parser():
                         help='path to load pretrained model from')
     parser.add_argument('--cr', type=str, default=None,
                         help='consistency regularization type')
-                        
+    arser.add_argument('--lmbda', type=int, default=1,
+                        help='weight of consistency regularization loss')
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

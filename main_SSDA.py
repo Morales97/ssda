@@ -175,7 +175,7 @@ def main(args, wandb):
             loss_cr, percent_pl = consistency_reg(args.cr, outputs_w, outputs_strong)
             time_cr = time.time() - start_ts_cr
             
-        loss = loss_s + loss_t + loss_cr 
+        loss = loss_s + loss_t + args.lmbda * loss_cr 
         loss.backward()
         optimizer.step()
         step += 1
