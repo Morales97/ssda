@@ -19,8 +19,8 @@
 # python main_dummyDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_PASCAL_lr3 --net=deeplabv3_mask_pt --target_samples=100 --batch_size=8 --custom_pretrain_path=model/pretrained/VOCSegmentation_supervised_saliency_model.pth.tar 
 # -- LR-ASPP --
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600 --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
-#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_GTA --net=lraspp_mobilenet --target_samples=100 --batch_size=8  ---custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_100sup_top5 --net=lraspp_mobilenet --target_samples=100 --batch_size=8  ---custom_pretrain_path=model/pretrained/ckpt_mask_CS_100sup_top5.tar
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_GTA --net=lraspp_mobilenet --target_samples=100 --batch_size=8  --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_100sup_top5 --net=lraspp_mobilenet --target_samples=100 --batch_size=8  --custom_pretrain_path=model/pretrained/ckpt_mask_CS_100sup_top5.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=no_pt_GTA_crops --net=lraspp_mobilenet --target_samples=100 --batch_size=8 
 
 # Rotation pretrained backbone
