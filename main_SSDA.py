@@ -185,7 +185,7 @@ def main(args, wandb):
         train_loss_meter.update(loss)
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
-        cr_loss_meter.update(loss_cr)
+        cr_loss_meter.update(args.lmbda * loss_cr)
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
