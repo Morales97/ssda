@@ -290,4 +290,4 @@ if __name__ == '__main__':
     main(args, wandb)
     wandb.finish()
     
-# python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot
+# python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 

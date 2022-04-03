@@ -225,4 +225,4 @@ if __name__ == '__main__':
     
 
 # python main.py --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=no_pretrain &
-# python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 &
+# python main.py --resume=expts/tmp_last/checkpoint.pth.tar --steps=10001 --dataset=multi --source=real --target=sketch --backbone=expts/rot_pred/checkpoint.pth.tar --vat_tw=0 --expt_name=run4 & 

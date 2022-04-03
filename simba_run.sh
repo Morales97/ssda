@@ -33,3 +33,4 @@ python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_GTA --net=lr
 # ----- SSDA -----
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_no_pt_prob_distr_lambda5 --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=prob_distr --lmbda=5
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_300_CS_GTA --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
+  
