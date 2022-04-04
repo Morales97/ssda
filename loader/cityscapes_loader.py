@@ -231,7 +231,6 @@ class cityscapesLoader(data.Dataset):
 
         img = self.transforms(img)
         if self.unlabeled:
-            pdb.set_trace()
             return img
         else:
             raise Exception('to be used in unlabeled mode')
@@ -270,17 +269,20 @@ if __name__ == '__main__':
     img = t_unl_loader.viz_cr_augment(0)
     save_image(img[0], '/home/danmoral/test_w0.jpg')
     save_image(img[1], '/home/danmoral/test_s0.jpg')
-    '''
+    
     img = t_unl_loader.viz_cr_augment(1)
-    img[0].save('/home/danmoral/test_w1.jpg')
-    img[1].save('/home/danmoral/test_s1.jpg')
+    save_image(img[0], '/home/danmoral/test_w1.jpg')
+    save_image(img[1], '/home/danmoral/test_s1.jpg')
+    
     img = t_unl_loader.viz_cr_augment(2)
-    img[0].save('/home/danmoral/test_w2.jpg')
-    img[1].save('/home/danmoral/test_s2.jpg')
+    save_image(img[0], '/home/danmoral/test_w2.jpg')
+    save_image(img[1], '/home/danmoral/test_s2.jpg')
+    
     img = t_unl_loader.viz_cr_augment(3)
-    img[0].save('/home/danmoral/test_w3.jpg')
-    img[1].save('/home/danmoral/test_s3.jpg')
-    '''
+    save_image(img[0], '/home/danmoral/test_w3.jpg')
+    save_image(img[1], '/home/danmoral/test_s3.jpg')
+    
+    
     '''
     loader = DataLoader(
         s_loader,   
