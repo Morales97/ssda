@@ -264,7 +264,7 @@ if __name__ == '__main__':
     For the purpose of debugging
     '''
     t_unl_loader = cityscapesLoader(image_path='../data/cityscapes/leftImg8bit_tiny', label_path='../data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=0)
-    t_unl_loader.test()
+    t_unl_loader.viz_cr_augment(0)
 
     loader = DataLoader(
         s_loader,   
