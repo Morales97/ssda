@@ -231,6 +231,7 @@ class cityscapesLoader(data.Dataset):
 
         img = self.transforms(img)
         if self.unlabeled:
+            pdb.set_trace()
             return img
         else:
             raise Exception('to be used in unlabeled mode')

@@ -22,9 +22,12 @@ def get_parser():
 
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
-    parser.add_argument('--batch_size', type=int, default=8,
-                        help='Batch size of source labelled data to use. If not '
-                             'provided, certain default sizes used')
+    parser.add_argument('--batch_size_s', type=int, default=8,
+                        help='Batch size of source labelled data.')
+    parser.add_argument('--batch_size_tl', type=int, default=8,
+                        help='Batch size of target labelled data.')
+    parser.add_argument('--batch_size_tu', type=int, default=8,
+                        help='Batch size of target unlabelled data.')
     parser.add_argument('--num_workers', type=int, default=1,
                         help='Number of worker threads to use in each dataloader')
     parser.add_argument('--max_num_threads', type=int, default=12,

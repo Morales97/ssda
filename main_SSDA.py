@@ -46,28 +46,28 @@ def main(args, wandb):
    
     source_loader = DataLoader(
         s_loader,
-        batch_size=args.batch_size,
+        batch_size=args.batch_size_s,
         num_workers=args.num_workers,
         shuffle=True,
     )
 
     target_loader = DataLoader(
         t_loader,
-        batch_size=args.batch_size,
+        batch_size=args.batch_size_tl,
         num_workers=args.num_workers,
         shuffle=True,
     )    
 
     target_loader_unl = DataLoader(
         t_unl_loader,
-        batch_size=args.batch_size,
+        batch_size=args.batch_size_tu,
         num_workers=args.num_workers,
         shuffle=True,
     )   
 
     val_loader = DataLoader(
         v_loader,
-        batch_size=args.batch_size,
+        batch_size=args.batch_size_tl,
         num_workers=args.num_workers,
         shuffle=True,
     )    
