@@ -18,7 +18,7 @@
 # -- DeepLab --
 # python main_dummyDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_PASCAL_lr3 --net=deeplabv3_mask_pt --target_samples=100 --custom_pretrain_path=model/pretrained/VOCSegmentation_supervised_saliency_model.pth.tar 
 # -- LR-ASPP --
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_only100sup --net=lraspp_mobilenet --target_samples=100  --custom_pretrain_path=model/pretrained/ckpt_masks_lraspp_CS_only100sup.tar
 
 # Rotation pretrained backbone
@@ -31,4 +31,5 @@ python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600 --net=lr
 # ----- SSDA -----
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_no_pt_prob_distr_lambda5 --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --lmbda=5
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_300_CS_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
-  
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
+
