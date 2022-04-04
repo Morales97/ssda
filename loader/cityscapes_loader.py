@@ -222,6 +222,18 @@ class cityscapesLoader(data.Dataset):
 
         return img, lbl
 
+    def viz_cr_augment(self, index):
+        img_path = self.files[self.split][index].rstrip()
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        
+        if False and self.hflip and random.random() > 0.5:
+            img = TF.hflip(img)
+
+        img = self.transforms(img)
+        if self.unlabeled:
+            return img
+        else:
+            raise Exception('to be used in unlabeled mode')
 
     def decode_segmap(self, temp):
         r = temp.copy()

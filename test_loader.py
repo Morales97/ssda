@@ -41,8 +41,9 @@ def main(args, wandb):
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Cirrus_part1', label_path='data/retouch-dataset/pre_processed/Cirrus_part1', img_size=(512, 512))
     #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=100, rotation=False)
     #v_loader.test()
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
-    s_loader.test()
+    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
+    #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
+    t_unl_loader.test()
 
     loader = DataLoader(
         s_loader,   
@@ -50,6 +51,7 @@ def main(args, wandb):
         num_workers=args.num_workers,
         shuffle=False, 
     )
+
 
     for (images, labels) in loader:
         pdb.set_trace()
