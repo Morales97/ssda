@@ -259,3 +259,20 @@ class cityscapesLoader(data.Dataset):
             mask[mask == _validc] = self.class_map[_validc]
         return mask
 
+if __name__ == '__main__':
+    '''
+    For the purpose of debugging
+    '''
+    t_unl_loader = cityscapesLoader(image_path='../data/cityscapes/leftImg8bit_tiny', label_path='../data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
+    t_unl_loader.test()
+
+    loader = DataLoader(
+        s_loader,   
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=False, 
+    )
+
+
+    for (images, labels) in loader:
+        pdb.set_trace()
