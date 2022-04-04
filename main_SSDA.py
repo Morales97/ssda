@@ -148,7 +148,7 @@ def main(args, wandb):
         optimizer.zero_grad()
         #outputs_s = model(images_s)
         outputs_t = model(images_t)
-        if type(outputs_s) == OrderedDict:
+        if type(outputs_t) == OrderedDict:
             #outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
 
