@@ -10,7 +10,6 @@ import random
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
-pdb.set_trace()
 from loader.loader_utils import pil_loader
 from utils.transforms import get_transforms, WeakStrongAug
 
