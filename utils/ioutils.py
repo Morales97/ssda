@@ -68,8 +68,6 @@ def get_parser():
     parser.add_argument('--lmbda', type=int, default=1,
                         help='weight of consistency regularization loss')
 
-    parser.add_argument('--gpu_id', type=int, default=0,
-                        help='GPU to use')
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
