@@ -21,7 +21,7 @@
 # -- LR-ASPP --
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_100sup_top5_GTAcrops --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/ckpt_mask_CS_100sup_top5.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_300_CS_GTA_GTAcrops --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/ckpt_mask_lraspp_CS_GTA_300.tar
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600_scitas --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600_scitas --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_100sup_allclasses --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/ckpt_mask_CS_100sup_allclasses.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=no_pt_SCITAS_GTA_crops --net=lraspp_mobilenet --target_samples=100  
 
@@ -32,4 +32,4 @@ python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_600_scitas -
 # python pretrain/rotation.py --batch_size=4 --lr=0.001 --project=rotation --expt_name=longer_run_lr_x10 --save_dir=pretrain/expts_rot/tmp_last --save_interval=2000 --steps=10001
 
 # ----- SSDA -----
-#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_test --net=lraspp_mobilenet --target_samples=100 --cr=one_hot
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
