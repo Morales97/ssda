@@ -6,11 +6,11 @@ import pdb
 from PIL import Image
 import torchvision
 import torchvision.transforms.functional as TF
-from loader.loader_utils import pil_loader
 import random
 from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
+from loader.loader_utils import pil_loader
 from utils.transforms import get_transforms, WeakStrongAug
 
 def recursive_glob(rootdir=".", suffix=""):
