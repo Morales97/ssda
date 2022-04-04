@@ -34,7 +34,9 @@ def cr_one_hot(out_w, out_s, tau):
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
     percent_pl = sum(pseudo_lbl.unique(return_counts=True)[1][:-1]) / len(pseudo_lbl) * 100
-
+    percent_pl2 = (len(pseudo_lbl) - sum(pseudo_lbl == 250)) / len(pseudo_lbl) * 100
+    if percent_pl > 0:
+        pdb.set_trace()
     return loss_cr, percent_pl
     
 
