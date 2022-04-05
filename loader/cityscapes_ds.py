@@ -162,8 +162,6 @@ class cityscapesDataset(data.Dataset):
         if not self.files[split]:
             raise Exception("No files for split=[%s] found in %s" % (split, self.images_base))
 
-        print("Found %d %s images" % (len(self.files[split]), split))
-
     def __len__(self):
         """__len__"""
         return len(self.files[self.split])

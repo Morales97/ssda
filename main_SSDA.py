@@ -39,40 +39,7 @@ def main(args, wandb):
     
     # TODO: rn loaders don't use augmentations. Probably should be using some
     source_loader, target_loader, target_loader_unl, val_loader, indxs, indxs_lbl, indxs_unlbl = get_loaders(args)
-    '''
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
-    t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
-    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
-    v_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='val')
-   
-    source_loader = DataLoader(
-        s_loader,
-        batch_size=args.batch_size_s,
-        num_workers=args.num_workers,
-        shuffle=True,
-    )
-
-    target_loader = DataLoader(
-        t_loader,
-        batch_size=args.batch_size_tl,
-        num_workers=args.num_workers,
-        shuffle=True,
-    )    
-
-    target_loader_unl = DataLoader(
-        t_unl_loader,
-        batch_size=args.batch_size_tu,
-        num_workers=args.num_workers,
-        shuffle=True,
-    )   
-
-    val_loader = DataLoader(
-        v_loader,
-        batch_size=args.batch_size_tl,
-        num_workers=args.num_workers,
-        shuffle=True,
-    )    
-    '''
+    pdb.set_trace()
     
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)

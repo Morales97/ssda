@@ -8,9 +8,9 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2
 #SBATCH --mem=30000
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 
-CUDA_VISIBLE_DEVICES=0 python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=expt_1_CS_600 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar &
-CUDA_VISIBLE_DEVICES=1 python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=expt_2_CS_600 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
+CUDA_VISIBLE_DEVICES=0 python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_s1 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar &
+CUDA_VISIBLE_DEVICES=1 python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=mask_pt_CS_s2 --net=lraspp_mobilenet --target_samples=100 --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 
 #wait
