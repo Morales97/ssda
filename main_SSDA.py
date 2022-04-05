@@ -39,7 +39,6 @@ def main(args, wandb):
     
     # TODO: rn loaders don't use augmentations. Probably should be using some
     source_loader, target_loader, target_loader_unl, val_loader, indxs, indxs_lbl, indxs_unlbl = get_loaders(args)
-    pdb.set_trace()
     '''
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
@@ -76,7 +75,7 @@ def main(args, wandb):
     '''
     
     # Set up metrics
-    running_metrics_val = runningScore(t_loader.n_classes)
+    running_metrics_val = runningScore(target_loader.dataset.n_classes)
     
     # Init model
     if args.net == '' or args.net == 'resnet50_fcn':
