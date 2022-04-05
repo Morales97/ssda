@@ -336,7 +336,7 @@ class cityscapesDataset(data.Dataset):
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.sample_idxs is not None:
             files = np.array(self.files[split])
-            self.files[split] = files[sample_idxs]
+            self.files[split] = files[sample_idxs].tolist()     
         elif self.n_samples >= 0:
             # TODO delete this, only have sample_idxs left
             if not self.unlabeled:
@@ -390,7 +390,6 @@ class cityscapesDataset(data.Dataset):
             "motorcycle",
             "bicycle",
         ]
-
 
         self.ignore_index = 250
         self.class_map = dict(zip(self.valid_classes, range(19)))
