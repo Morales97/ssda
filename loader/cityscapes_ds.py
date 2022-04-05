@@ -335,6 +335,7 @@ class cityscapesDataset(data.Dataset):
 
         self.files[split] = sorted(recursive_glob(rootdir=self.images_base, suffix=".jpg"))
         if self.sample_idxs is not None:
+            pdb.set_trace()
             self.files[split] = self.files[split][sample_idxs]
         elif self.n_samples >= 0:
             # TODO delete this, only have sample_idxs left
