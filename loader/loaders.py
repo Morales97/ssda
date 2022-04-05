@@ -73,5 +73,5 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
     )    
     
 
-    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader, idxs, idxs_lbl, idxs_unlbl
+    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader #, idxs, idxs_lbl, idxs_unlbl
     

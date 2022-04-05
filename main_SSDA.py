@@ -38,8 +38,7 @@ def main(args, wandb):
     random.seed(args.seed)
     
     # TODO: rn loaders don't use augmentations. Probably should be using some
-    source_loader, target_loader, target_loader_unl, val_loader, indxs, indxs_lbl, indxs_unlbl = get_loaders(args)
-    pdb.set_trace()
+    source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
