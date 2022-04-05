@@ -27,6 +27,7 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
         num_workers=args.num_workers,
         shuffle=True,
     )
+    print('Loading %d source domain images, labelled, from %s' % (len(s_dataset), image_path_gta))
 
     # Get Target loader(s)
     # Fully supervised
@@ -39,6 +40,9 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
             shuffle=True,
         ) 
         t_unlbl_loader = None
+        print('Loading %d target domain images, labelled, from %s' % (len(t_dataset), image_path_cs))
+        print('No target domain unlabelled images')
+
     # Semi-supervised
     else:                       
         t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='train', sample_idxs=idxs_lbl)
@@ -55,6 +59,9 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
             num_workers=args.num_workers,
             shuffle=True,
         ) 
+        print('Loading %d target domain images, labelled, from %s' % (len(t_lbl_dataset), image_path_cs))
+        print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))
+
 
     # Get validation loader
     val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val')
