@@ -21,9 +21,8 @@ from utils.ioutils import gen_unique_name
 from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
-from loader.cityscapes_loader import cityscapesLoader
-from loader.gta_loader import gtaLoader
 from loss.loss import cross_entropy2d
+from loader.loader_utils import get_loaders
 from consistency.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
 import wandb
@@ -35,10 +34,13 @@ def main(args, wandb):
 
     # set random seed
     torch.manual_seed(args.seed)
-    #np.random.seed(args.seed)
+    np.random.seed(args.seed)
     random.seed(args.seed)
     
     # TODO: rn loaders don't use augmentations. Probably should be using some
+    source_loader, target_loader, target_loader_unl, val_loader, indxs, indxs_lbl, indxs_unlbl = get_loaders(args)
+    pdb.set_trace()
+    '''
     s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="all_gta")
     t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=args.target_samples)
     t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
@@ -71,6 +73,7 @@ def main(args, wandb):
         num_workers=args.num_workers,
         shuffle=True,
     )    
+    '''
     
     # Set up metrics
     running_metrics_val = runningScore(t_loader.n_classes)
@@ -284,8 +287,8 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.finish()

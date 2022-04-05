@@ -26,7 +26,7 @@ def recursive_glob(rootdir=".", suffix=""):
         if filename.endswith(suffix)
     ]
 
-class gtaLoader(data.Dataset):
+class gtaDataset(data.Dataset):
     """cityscapesLoader
     https://www.cityscapes-dataset.com
     Data is derived from CityScapes, and can be downloaded from here:
