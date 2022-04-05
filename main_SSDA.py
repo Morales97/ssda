@@ -22,7 +22,7 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.loss import cross_entropy2d
-from loader.loader_utils import get_loaders
+from loader.loaders import get_loaders
 from consistency.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
 import wandb
