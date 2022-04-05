@@ -146,13 +146,13 @@ def main(args, wandb):
 
         # train
         optimizer.zero_grad()
-        #outputs_s = model(images_s)
+        outputs_s = model(images_s)
         outputs_t = model(images_t)
         if type(outputs_t) == OrderedDict:
-            #outputs_s = outputs_s['out']  
+            outputs_s = outputs_s['out']  
             outputs_t = outputs_t['out']  
 
-        loss_s = 0#loss_fn(outputs_s, labels_s)
+        loss_s = loss_fn(outputs_s, labels_s)
         loss_t = loss_fn(outputs_t, labels_t)
 
         # CR
