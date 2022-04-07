@@ -59,7 +59,7 @@ def get_parser():
                         help='Backbone of the seg model pretrained, usually on ImageNet')
     parser.add_argument('--net', type=str, default='lraspp_mobilenet',
                         help='choose model architecture')
-    parser.add_argument('--target_samples', type=int, default=-1,
+    parser.add_argument('--target_samples', type=int, default=100,
                         help='how many target domain samples to use. Default -1: use all samples')
     parser.add_argument('--custom_pretrain_path', type=str, default=None,
                         help='path to load pretrained model from')
