@@ -9,7 +9,7 @@
 #SBATCH --qos=gpu_free
 #SBATCH --gres=gpu:1
 #SBATCH --mem=30000
-#SBATCH --time=06:00:00
+#SBATCH --time=03:00:00
 
 # ----- Fully supervised CS -----
 #python main.py --project=GTA_to_CS_tiny --expt_name=deeplab_rn50_FS_CS_pt_mask --net=deeplabv3_mask_pt --steps=5000
@@ -33,4 +33,4 @@
 
 # ----- SSDA -----
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
-python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=mask_pt_CS_GTA --seed=3 --custom_pretrain_path=model/pretrained/ckpt_mask_lraspp_CS_GTA_300.tar
+python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CR_oh_IN_bb --seed=1 --cr=one_hot
