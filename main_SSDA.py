@@ -65,7 +65,7 @@ def main(args, wandb):
     model.cuda()
     model.train()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9,
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
 
     # To resume from a checkpoint

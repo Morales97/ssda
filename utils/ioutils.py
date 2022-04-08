@@ -12,11 +12,11 @@ def get_parser():
     parser.add_argument('--expt_name', type=str, default='',
                         help='Name of the experiment for wandb')
     parser.add_argument('--steps', type=int, default=5000, metavar='N',
-                        help='maximum number of iterations '
-                             'to train (default: 50000)')
+                        help='maximum number of iterations to train')
     parser.add_argument('--wd', type=float, default=0.0005,
                         help='Weight decay used by optimizer')
-
+    parser.add_argument('--momentum', type=float, default=0.9,
+                        help='Momentum used by optimizer')
     parser.add_argument('--backbone_path', type=str, default='',
                         help='Path to checkpoint to load backbone from')
 
