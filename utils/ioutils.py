@@ -67,7 +67,10 @@ def get_parser():
                         help='consistency regularization type')
     parser.add_argument('--lmbda', type=int, default=1,
                         help='weight of consistency regularization loss')
-
+    parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
+                        help='Use pixel contrast regularization')
+    parser.add_argument('--gamma', type=int, default=1,
+                        help='weight of pixel contrast loss')
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

@@ -19,6 +19,7 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.loss import cross_entropy2d
+from loss.pixel_contrast import PixelContrastLoss
 from loader.loaders import get_loaders
 from consistency.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
@@ -61,6 +62,8 @@ def main(args, wandb):
 
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
+    if args.pixel_contrast:
+        pixel_contrast = PixelContrastLoss()
 
     best_mIoU = 0 
     step = start_step
@@ -96,11 +99,15 @@ def main(args, wandb):
         outputs_s = model(images_s)
         outputs_t = model(images_t)
         if type(outputs_t) == OrderedDict:
-            outputs_s = outputs_s['out']  
-            outputs_t = outputs_t['out']  
+            out_s = outputs_s['out'] 
+            out_t = outputs_t['out']  
+        else:
+            out_s = outputs_s
+            out_t = outputs_t
 
-        loss_s = loss_fn(outputs_s, labels_s)
-        loss_t = loss_fn(outputs_t, labels_t)
+        # CE
+        loss_s = loss_fn(out_s, labels_s)
+        loss_t = loss_fn(out_t, labels_t)
 
         # CR
         loss_cr, percent_pl, time_cr = 0, 0, 0
@@ -116,13 +123,29 @@ def main(args, wandb):
             outputs_w = model(images_weak)                   # (N, C, H, W)
             outputs_strong = model(images_strong)
             if type(outputs_w) == OrderedDict:
-                outputs_w = outputs_w['out']
-                outputs_strong = outputs_strong['out']
+                out_w = outputs_w['out']
+                out_strong = outputs_strong['out']
+            else:
+                out_w = outputs_w
+                out_strong = outputs_strong
 
-            loss_cr, percent_pl = consistency_reg(args.cr, outputs_w, outputs_strong)
+            loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong)
             time_cr = time.time() - start_ts_cr
             
-        loss = loss_s + loss_t + args.lmbda * loss_cr 
+        # CL
+        loss_cl_s, loss_cl_t = 0, 0
+        if args.pixel_contrast:
+            proj_s = outputs_s['proj']
+            proj_t = outputs_t['proj']
+
+            _, pred_s = torch.max(out_s, 1)
+            _, pred_t = torch.max(out_t, 1)
+
+            loss_cl_s = pixel_contrast(proj_s, labels_s, pred_s)
+            loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+
+        pdb.set_trace()
+        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         loss.backward()
         optimizer.step()
         step += 1

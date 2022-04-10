@@ -22,29 +22,28 @@ model_urls = {
     "lraspp_mobilenet_v3_large_coco": "https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth",
 }
 
-'''
-class LRASPP(nn.Module):
+
+class LRASPP_Contrast(nn.Module):
     """
-    Implements a Lite R-ASPP Network for semantic segmentation from
-    `"Searching for MobileNetV3"
-    <https://arxiv.org/abs/1905.02244>`_.
-    Args:
-        backbone (nn.Module): the network used to compute the features for the model.
-            The backbone should return an OrderedDict[Tensor], with the key being
-            "high" for the high level feature map and "low" for the low level feature map.
-        low_channels (int): the number of channels of the low level features.
-        high_channels (int): the number of channels of the high level features.
-        num_classes (int): number of output classes of the model (including the background).
-        inter_channels (int, optional): the number of channels for intermediate computations.
+    DM: modified to include projection head for Pixel Contrast
     """
 
     def __init__(
-        self, backbone: nn.Module, low_channels: int, high_channels: int, num_classes: int, inter_channels: int = 128
+        self, backbone: nn.Module, low_channels: int, high_channels: int, dim_embed: int, num_classes: int, inter_channels: int = 128
     ) -> None:
         super().__init__()
         #_log_api_usage_once(self)
         self.backbone = backbone
         self.classifier = LRASPPHead(low_channels, high_channels, num_classes, inter_channels)
+        
+        # NOTE this is an improvised pojection head for the LRASPP arch. Try both? In DeepLab, follow paper
+        #self.projection = LRASPPHead(low_channels, high_channels, dim_embed, high_channels)
+        self.projection = nn.Sequential(
+                            LRASPPHead(low_channels, high_channels, dim_embed, high_channels),
+                            nn.BatchNorm2d(dim_embed),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(dim_embed, dim_embed, 1, bias=False)
+                        )
 
     def forward(self, input: Tensor) -> Dict[str, Tensor]:
         features = self.backbone(input)
@@ -52,7 +51,12 @@ class LRASPP(nn.Module):
         out = F.interpolate(out, size=input.shape[-2:], mode="bilinear", align_corners=False)
 
         result = OrderedDict()
-        result["out"] = out
+        result['out'] = out
+
+        proj = self.projection(features)
+        proj = F.normalize(self.proj(x), p=2, dim=1)  #need to normalize the projection
+        proj = F.interpolate(proj, size=input.shape[-2:], mode="bilinear", align_corners=False)
+        result['proj'] = proj
 
         return result
 
@@ -85,7 +89,7 @@ class LRASPPHead(nn.Module):
         return self.low_classifier(low) + self.high_classifier(x)
 
 
-def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, num_classes: int) -> LRASPP:
+def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, dim_embed: int, num_classes: int) -> LRASPP_Contrast:
     backbone = backbone.features
     # Gather the indices of blocks which are strided. These are the locations of C1, ..., Cn-1 blocks.
     # The first and last blocks are always included because they are the C0 (conv1) and Cn.
@@ -98,16 +102,17 @@ def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, num_classes: int) -> 
     #pdb.set_trace()
     backbone = IntermediateLayerGetter(backbone, return_layers={str(low_pos): "low", str(high_pos): "high"})
 
-    return LRASPP(backbone, low_channels, high_channels, num_classes)
+    return LRASPP_Contrast(backbone, low_channels, high_channels, dim_embed, num_classes)
 
 
-def lraspp_mobilenet_v3_large(
+def lraspp_mobilenet_v3_large_contrast(
     pretrained: bool = False,
     progress: bool = True,
-    num_classes: int = 21,
+    dim_embed: int = 128,
+    num_classes: int = 19,
     pretrained_backbone: bool = True,
     **kwargs: Any,
-) -> LRASPP:
+) -> LRASPP_Contrast:
     """Constructs a Lite R-ASPP Network model with a MobileNetV3-Large backbone.
     Args:
         pretrained (bool): If True, returns a model pre-trained on COCO train2017 which
@@ -122,15 +127,15 @@ def lraspp_mobilenet_v3_large(
         pretrained_backbone = False
 
     backbone = mobilenetv3.mobilenet_v3_large(pretrained=pretrained_backbone, dilated=True)
-    model = _lraspp_mobilenetv3(backbone, num_classes)
+    model = _lraspp_mobilenetv3(backbone, dim_embed, num_classes)
 
     if pretrained:
         arch = "lraspp_mobilenet_v3_large_coco"
         raise Exception('load COCO not available')
         #_load_weights(arch, model, model_urls.get(arch, None), progress)
     return model
-'''
 
+'''
 def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
     model = torchvision.models.segmentation.lraspp_mobilenet_v3_large(
         pretrained=False,
@@ -184,7 +189,7 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
         model.load_state_dict(new_dict, strict=False)
 
     return model
-
+'''
 
 
 
@@ -192,5 +197,5 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
 
 
 #mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
-#lr_mn = lraspp_mobilenet_v3_large(num_classes=19)
-#pdb.set_trace()
+lr_mn = lraspp_mobilenet_v3_large_contrast(num_classes=19)
+pdb.set_trace()
