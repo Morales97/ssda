@@ -33,4 +33,4 @@
 
 # ----- SSDA -----
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
-python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CR_pd_COCO_bb --seed=1 --cr=prob_distr --net=lraspp_mobilenet --pre_trained=True
+python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CR_pd_COCO_bb --seed=2 --cr=prob_distr --net=lraspp_mobilenet --pre_trained=True
