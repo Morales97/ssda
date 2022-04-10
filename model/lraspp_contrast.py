@@ -197,5 +197,5 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
 
 
 #mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
-lr_mn = lraspp_mobilenet_v3_large_contrast(num_classes=19)
-pdb.set_trace()
+#lr_mn = lraspp_mobilenet_v3_large_contrast(num_classes=19)
+#pdb.set_trace()
