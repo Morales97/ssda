@@ -134,7 +134,7 @@ def lraspp_mobilenet_v3_large(
 
 def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
     model = torchvision.models.segmentation.lraspp_mobilenet_v3_large(
-        pretrained=pretrained,
+        pretrained=False,
         num_classes=19,
         pretrained_backbone=pretrained_backbone
     )
