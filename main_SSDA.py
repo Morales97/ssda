@@ -157,8 +157,8 @@ def main(args, wandb):
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
         cr_loss_meter.update(args.lmbda * loss_cr)
-        constrast_s_loss_meter(args.gamma * loss_cl_s)
-        constrast_t_loss_meter(args.gamma * loss_cl_t)
+        constrast_s_loss_meter.update(args.gamma * loss_cl_s)
+        constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         
         pseudo_lbl_meter.update(percent_pl)
 
