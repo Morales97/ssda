@@ -33,5 +33,5 @@
 
 # ----- SSDA -----
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
-#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_warmup --net=lraspp_mobilenet_contrast --pixel_contrast=True 
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_no_warmup_0.1 --net=lraspp_mobilenet_contrast --pixel_contrast=True --warmup_steps=0 --gamma=0.1
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_warmup_0.1 --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_no_warmup_0.1 --net=lraspp_mobilenet_contrast --pixel_contrast=True --warmup_steps=0 --gamma=0.1
