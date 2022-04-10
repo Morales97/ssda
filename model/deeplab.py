@@ -179,6 +179,25 @@ def deeplabv3_resnet50(
     return model
 
 
+
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
+        pretrained=pretrained, 
+        num_classes=19, 
+        pretrained_backbone=pretrained_backbone
+    )
+    return model
+
+
+
+def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
+    model = torchvision.models.segmentation.deeplabv3_mobilenet_v3_large(
+        pretrained=pretrained,
+        num_classes=19,
+        pretrained_backbone=pretrained_backbone
+    )
+    return model
+
 def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     # Load a pretrained DeepLabV3_rn50 on PASCAL VOC.
     # pretrained model from https://github.com/wvangansbeke/Unsupervised-Semantic-Segmentation (on PASCAL VOC unsupervised saliency)

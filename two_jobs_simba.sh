@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=test_simba
+#SBATCH --job-name=two_jobs
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=2

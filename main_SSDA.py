@@ -11,10 +11,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
-from model.resnet_fcn import fcn_resnet50_densecl
-from model.deeplab import deeplabv3_resnet50_maskContrast
-from model.fcn import fcn8s
+from model.model import get_model
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
@@ -43,25 +40,7 @@ def main(args, wandb):
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
     
-    # Init model
-    if args.net == '' or args.net == 'resnet50_fcn':
-        model = resnet50_FCN(args.pre_trained)
-    if args.net == 'denseCL_fcn_rn50':
-        model = fcn_resnet50_densecl()
-    if args.net == 'fcn8':
-        model = fcn8s()
-    if args.net == 'rn34_up':
-        model = resnet_34_upsampling(args.pre_trained)
-    if args.net == 'rn50_up':
-        model = resnet_50_upsampling(args.pre_trained)
-    if args.net == 'deeplabv3':
-        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
-    if args.net == 'deeplabv3_mask_pt':
-        model = deeplabv3_resnet50_maskContrast(model_path=args.custom_pretrain_path)
-    if args.net == 'dl_mobilenet':
-        model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
-    if args.net == 'lraspp_mobilenet':
-        model = lraspp_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
+    model = get_model(args)
     model.cuda()
     model.train()
 

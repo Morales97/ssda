@@ -7,7 +7,7 @@ from typing import Any, Dict
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
-
+import torchvision
 #from torchvision.utils import _log_api_usage_once
 from torchvision.models import mobilenetv3
 from torchvision.models._utils import IntermediateLayerGetter
@@ -22,7 +22,7 @@ model_urls = {
     "lraspp_mobilenet_v3_large_coco": "https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth",
 }
 
-
+'''
 class LRASPP(nn.Module):
     """
     Implements a Lite R-ASPP Network for semantic segmentation from
@@ -98,7 +98,6 @@ def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, num_classes: int) -> 
     #pdb.set_trace()
     backbone = IntermediateLayerGetter(backbone, return_layers={str(low_pos): "low", str(high_pos): "high"})
 
-    pdb.set_trace()
     return LRASPP(backbone, low_channels, high_channels, num_classes)
 
 
@@ -130,7 +129,80 @@ def lraspp_mobilenet_v3_large(
         raise Exception('load COCO not available')
         #_load_weights(arch, model, model_urls.get(arch, None), progress)
     return model
+'''
 
-mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
-lr_mn = lraspp_mobilenet_v3_large()
-pdb.set_trace()
+
+def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
+    model = torchvision.models.segmentation.lraspp_mobilenet_v3_large(
+        pretrained=pretrained,
+        num_classes=19,
+        pretrained_backbone=pretrained_backbone
+    )
+
+    if pretrained:
+        # load COCO's weights
+        model_coco = torchvision.models.segmentation.lraspp_mobilenet_v3_large(pretrained=True)
+
+        sd = model.state_dict()
+        sd_coco = model_coco.state_dict()
+        for k, v in sd_coco.items():
+            if not (k.startswith('classifier.low_classifier') or k.startswith('classifier.high_classifier')):
+                # Copy all parameters but for linear classifier, which has different number of classes
+                sd[k] = v
+
+        model.load_state_dict(sd)
+        return model
+
+    if custom_pretrain_path is not None:
+        # load pretrained backbone
+        checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        print('Loading model from ' + custom_pretrain_path)
+
+        if 'model_state_dict' in checkpoint.keys():
+            # Rotations pretrain (?)
+            state_dict = checkpoint['model_state_dict']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('backbone.0'):
+                    new_key = k.rsplit('.0')[0] + k.rsplit('.0')[1]     # remove '.0'
+                    new_dict[new_key] = v 
+        
+        elif 'model' in checkpoint.keys():
+            # MaskContrast pretrain with head embedding dim = 32
+            # Replace last layer of head with a new layer of output_dim=n_class
+            state_dict = checkpoint['model']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('model_q.backbone'):
+                    new_dict[k.rsplit('model_q.')[1]] = v
+                if k.startswith('model_q.decoder') and 'low' not in k and 'high' not in k:
+                    new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
+
+        elif False: #'model' in checkpoint.keys():
+            # MaskContrast pretrain with head embedding dim = n_classes
+            state_dict = checkpoint['model']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('model_q.backbone'):
+                    new_dict[k.rsplit('model_q.')[1]] = v
+                if k.startswith('model_q.decoder') and 'saliency' not in k:
+                    new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
+        
+        # copy matching keys of state dict -- all but for LRASPP head
+        model.cuda()
+        model.load_state_dict(new_dict, strict=False)
+
+    return model
+
+
+
+
+
+
+
+#mnv3 = mobilenetv3.mobilenet_v3_large(pretrained=False, dilated=True)
+#lr_mn = lraspp_mobilenet_v3_large(num_classes=19)
+#pdb.set_trace()
