@@ -71,6 +71,8 @@ def get_parser():
                         help='Use pixel contrast regularization')
     parser.add_argument('--gamma', type=int, default=1,
                         help='weight of pixel contrast loss')
+    parser.add_argument('--warmup_steps', type=int, default=2500,
+                        help='number of warm up steps before pixel contrast loss')              
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

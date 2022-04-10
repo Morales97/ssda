@@ -74,6 +74,8 @@ def main(args, wandb):
     source_ce_loss_meter = averageMeter()
     target_ce_loss_meter = averageMeter()
     cr_loss_meter = averageMeter()
+    constrast_s_loss_meter = averageMeter()
+    constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
 
     while step <= args.steps:
@@ -134,7 +136,7 @@ def main(args, wandb):
             
         # CL
         loss_cl_s, loss_cl_t = 0, 0
-        if args.pixel_contrast:
+        if args.pixel_contrast and step >= args.warmup_steps:
             proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
 
@@ -144,7 +146,6 @@ def main(args, wandb):
             loss_cl_s = pixel_contrast(proj_s, labels_s, pred_s)
             loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
 
-        pdb.set_trace()
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         loss.backward()
         optimizer.step()
@@ -156,6 +157,9 @@ def main(args, wandb):
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
         cr_loss_meter.update(args.lmbda * loss_cr)
+        constrast_s_loss_meter(args.gamma * loss_cl_s)
+        constrast_t_loss_meter(args.gamma * loss_cl_t)
+        
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
@@ -172,6 +176,8 @@ def main(args, wandb):
                 'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}'),
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
+                'Constrast S Loss': FormattedLogItem(constrast_s_loss_meter.avg, '{:.3f}'),
+                'Constrast T Loss': FormattedLogItem(constrast_t_loss_meter.avg, '{:.3f}'),
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
             })
@@ -183,6 +189,8 @@ def main(args, wandb):
             source_ce_loss_meter.reset()
             target_ce_loss_meter.reset()
             cr_loss_meter.reset()
+            constrast_s_loss_meter.reset()
+            constrast_t_loss_meter.reset()
             train_loss_meter.reset()
             
         if step % args.val_interval == 0:
@@ -254,8 +262,8 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.finish()
