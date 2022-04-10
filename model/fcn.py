@@ -337,7 +337,7 @@ def _fcn_resnet(backbone: resnet.ResNet, num_classes: int) -> FCN:
 def fcn_resnet50(pretrained=False, pretrained_backbone=True, num_classes=19):    
     # Return torch's model with COCO weights
     if pretrained:
-        return model = torchvision.models.segmentation.fcn_resnet50(pretrained=True, num_classes=19)
+        return torchvision.models.segmentation.fcn_resnet50(pretrained=True, num_classes=19)
 
     backbone = nn.Sequential(*list(
         resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True]).children())[:-2])
