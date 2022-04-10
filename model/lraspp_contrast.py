@@ -54,7 +54,7 @@ class LRASPP_Contrast(nn.Module):
         result['out'] = out
 
         proj = self.projection(features)
-        proj = F.normalize(self.proj(x), p=2, dim=1)  #need to normalize the projection
+        proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
         proj = F.interpolate(proj, size=input.shape[-2:], mode="bilinear", align_corners=False)
         result['proj'] = proj
 
