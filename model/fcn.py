@@ -329,7 +329,7 @@ class FCNHead(nn.Sequential):
 
 
 # NOTE auxiliary classifier removed -- compared to torch's implementation
-def _fcn_resnet(backbone: resnet.ResNet, num_classes: int) -> FCN:
+def _fcn_resnet(backbone, num_classes) -> FCN:
     classifier = FCNHead(2048, num_classes)
     return FCN(backbone, classifier)
 
