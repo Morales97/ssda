@@ -5,7 +5,7 @@ from torch.nn.functional import conv2d, pad as torch_pad
     From torch's functional_tensor
     https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
 '''
-
+'''
 def _cast_squeeze_in(img: Tensor, req_dtypes: List[torch.dtype]) -> Tuple[Tensor, bool, bool, torch.dtype]:
     need_squeeze = False
     # make image NCHW
@@ -51,3 +51,4 @@ def _get_gaussian_kernel2d(
     kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(device, dtype=dtype)
     kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
     return 
+'''

@@ -4,7 +4,7 @@ import torch
 from utils.blur_helpers import *
 
 
-
+'''
 def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
     '''
         From torch's functional_tensor
@@ -31,7 +31,7 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 
     img = _cast_squeeze_out(img, need_cast, need_squeeze, out_dtype)
     return img
-
+'''
 
 class GaussianBlur(torch.nn.Module):
     """Blurs image with randomly chosen Gaussian blur.
