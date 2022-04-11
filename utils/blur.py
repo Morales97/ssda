@@ -6,10 +6,10 @@ from utils.blur_helpers import *
 
 '''
 def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
-    '''
+    """
         From torch's functional_tensor
         https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
-    '''
+    """
     if not (isinstance(img, torch.Tensor)):
         raise TypeError(f"img should be Tensor. Got {type(img)}")
 
