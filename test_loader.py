@@ -40,7 +40,7 @@ def main(args, wandb):
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Cirrus_part1', label_path='data/retouch-dataset/pre_processed/Cirrus_part1', img_size=(512, 512))
     t_ds = cityscapesDataset(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=100,
                             unlabeled=True, # to use weak-strong augs
-                            strong_aug_level=4)
+                            strong_aug_level=5)
     #v_loader.test()
     #t_unl_ds = cityscapesDataset(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
     #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
