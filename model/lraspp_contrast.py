@@ -130,9 +130,40 @@ def lraspp_mobilenet_v3_large_contrast(
     model = _lraspp_mobilenetv3(backbone, dim_embed, num_classes)
 
     if pretrained:
-        arch = "lraspp_mobilenet_v3_large_coco"
-        raise Exception('load COCO not available')
-        #_load_weights(arch, model, model_urls.get(arch, None), progress)
+        # load COCO's weights
+        model_coco = torchvision.models.segmentation.lraspp_mobilenet_v3_large(pretrained=True)
+
+        sd = model.state_dict()
+        sd_coco = model_coco.state_dict()
+        for k, v in sd_coco.items():
+            if not (k.startswith('classifier.low_classifier') or k.startswith('classifier.high_classifier') or k.startswith('projection')):
+                # Copy parameters in all common layers
+                sd[k] = v
+
+        model.load_state_dict(sd)
+        return model
+
+    if custom_pretrain_path is not None:
+        # load pretrained backbone
+        checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        print('Loading model from ' + custom_pretrain_path)
+        
+        if 'model' in checkpoint.keys():
+            # MaskContrast pretrain with head embedding dim = 32
+            # Replace last layer of head with a new layer of output_dim=n_class
+            state_dict = checkpoint['model']
+
+            new_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith('model_q.backbone'):
+                    new_dict[k.rsplit('model_q.')[1]] = v
+                if k.startswith('model_q.decoder') and 'low' not in k and 'high' not in k:
+                    new_dict['classifier' + k.rsplit('model_q.decoder')[1]] = v
+        
+        # copy matching keys of state dict -- all but for LRASPP head
+        model.cuda()
+        model.load_state_dict(new_dict, strict=False)
+
     return model
 
 '''

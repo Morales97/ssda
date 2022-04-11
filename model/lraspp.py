@@ -156,18 +156,8 @@ def lraspp_mobilenetv3_large(pretrained=False, pretrained_backbone=True, custom_
         # load pretrained backbone
         checkpoint = torch.load(custom_pretrain_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         print('Loading model from ' + custom_pretrain_path)
-
-        if 'model_state_dict' in checkpoint.keys():
-            # Rotations pretrain (?)
-            state_dict = checkpoint['model_state_dict']
-
-            new_dict = {}
-            for k, v in state_dict.items():
-                if k.startswith('backbone.0'):
-                    new_key = k.rsplit('.0')[0] + k.rsplit('.0')[1]     # remove '.0'
-                    new_dict[new_key] = v 
         
-        elif 'model' in checkpoint.keys():
+        if 'model' in checkpoint.keys():
             # MaskContrast pretrain with head embedding dim = 32
             # Replace last layer of head with a new layer of output_dim=n_class
             state_dict = checkpoint['model']

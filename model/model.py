@@ -27,7 +27,7 @@ def get_model(args):
     elif args.net == 'lraspp_mobilenet':
         model = lraspp_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
     elif args.net == 'lraspp_mobilenet_contrast':
-        model = lraspp_mobilenet_v3_large_contrast(args.pre_trained, args.pre_trained_backbone)
+        model = lraspp_mobilenet_v3_large_contrast(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
 
     return model
 
