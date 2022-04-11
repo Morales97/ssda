@@ -124,6 +124,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 4:
             transform_list = [
+                transforms.ToTensor(),
                 GaussianBlur(kernel_size=(3,3)),
             ]
 
