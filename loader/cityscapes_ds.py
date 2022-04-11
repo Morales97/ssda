@@ -62,14 +62,17 @@ class cityscapesDataset(data.Dataset):
         unlabeled=False,
         do_crop=False,
         hflip=False,
-        strong_aug_level = 4
+        strong_aug_level = 3
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
         self.rot = rotation
+
+        self.do_crop = True if size == 'small' else do_crop
         if size == "small":
             self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
+            self.crop_size = (512, 512)
         elif size == "tiny":
             self.img_size = (512, 256)
             self.crop_size = (256, 256)
@@ -93,7 +96,7 @@ class cityscapesDataset(data.Dataset):
         self.files = {}
         self.unlabeled = unlabeled
 
-        self.do_crop = do_crop
+        
         self.hflip = hflip
 
         self.images_base = os.path.join(self.image_path, self.split)

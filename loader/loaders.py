@@ -5,12 +5,14 @@ from loader.gta_ds import gtaDataset
 import pdb
 
 
-def get_loaders(args, num_t_samples=2975, size='tiny'):
+def get_loaders(args, num_t_samples=2975):
     image_path_gta = 'data/gta5/images_tiny'
     label_path_gta = 'data/gta5/labels'
     image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
     label_path_cs = 'data/cityscapes/gtFine'
     n_lbl_samples = args.target_samples
+    size = args.size
+    assert size in ['tiny', 'small']
  
     # Select randomly labelled samples 
     if n_lbl_samples != -1:

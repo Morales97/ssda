@@ -27,6 +27,7 @@ import wandb
 
 import pdb
 
+
 def main(args, wandb):
     torch.set_num_threads(args.max_num_threads)
 
@@ -163,6 +164,8 @@ def main(args, wandb):
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
+
+
         if step == np.floor(args.steps * 0.75):
             for param_group in optimizer.param_groups:
                 param_group['lr'] = param_group['lr'] * 0.1

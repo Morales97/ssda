@@ -77,7 +77,7 @@ class gtaDataset(data.Dataset):
         self.rot = rotation
         if size == "small":
             self.img_size = (1280, 720)
-            self.crop_size = (512, 1024)
+            self.crop_size = (512, 512)
         elif size == "tiny":
             self.img_size = (640, 360)  # w, h -- PIL uses (w, h) format
             self.crop_size = (256, 512) # (256, 256) # h, w -- Torch's transforms uses (h, w) format

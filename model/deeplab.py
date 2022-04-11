@@ -182,10 +182,26 @@ def deeplabv3_resnet50(
 
 def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
-        pretrained=pretrained, 
+        pretrained=False, 
         num_classes=19, 
         pretrained_backbone=pretrained_backbone
     )
+
+    if pretrained:
+        # load COCO's weights
+        model_coco = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
+
+        sd = model.state_dict()
+        sd_coco = model_coco.state_dict()
+        for k, v in sd_coco.items():
+            if not (k.startswith('classifier.4') or k.startswith('aux_classifier')):
+                # Copy all parameters but for linear classifier, which has different number of classes
+                sd[k] = v
+
+        pdb.set_trace()
+        model.load_state_dict(sd)
+        return model
+        
     return model
 
 
@@ -225,7 +241,6 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     model.load_state_dict(new_state_dict, strict=False) 
     return model
 
-'''
-model = deeplabv3_resnet50_maskContrast(model_path='model/pretrained/VOCSegmentation_unsupervised_saliency_model.pth.tar')
-pdb.set_trace()
-'''
+if __name__ == '__main__':
+    model = deeplabv3_rn50(pretrained=True)
+    pdb.set_trace()
