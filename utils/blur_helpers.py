@@ -8,18 +8,6 @@ from typing import Tuple, List, Optional
 	https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
 '''
 
-def _setup_size(size, error_msg):
-	if isinstance(size, numbers.Number):
-		return int(size), int(size)
-
-	if isinstance(size, Sequence) and len(size) == 1:
-		return size[0], size[0]
-
-	if len(size) != 2:
-		raise ValueError(error_msg)
-
-	return size
-
 def _cast_squeeze_in(img: Tensor, req_dtypes: List[torch.dtype]) -> Tuple[Tensor, bool, bool, torch.dtype]:
 	need_squeeze = False
 	# make image NCHW

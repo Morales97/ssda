@@ -100,6 +100,14 @@ class GaussianBlur(torch.nn.Module):
 		s = f"{self.__class__.__name__}(kernel_size={self.kernel_size}, sigma={self.sigma})"
 		return s
 
+def _setup_size(size, error_msg):
+	if isinstance(size, numbers.Number):
+		return int(size), int(size)
 
+	if isinstance(size, Sequence) and len(size) == 1:
+		return size[0], size[0]
 
+	if len(size) != 2:
+		raise ValueError(error_msg)
 
+	return size
