@@ -53,6 +53,8 @@ def main(args, wandb):
         shuffle=False, 
     )
 
+    for images in loader:
+        pdb.set_trace()
 
     for (images, labels) in loader:
         pdb.set_trace()
