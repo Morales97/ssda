@@ -146,7 +146,6 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 4:
             transform_list = [
-                #Blur(blur_type='horizontal', kernel_size=(5,5)),
                 RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
                 RandAugmentBlur(blur_augment_pool()),
                 transforms.RandomApply([
