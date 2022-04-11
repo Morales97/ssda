@@ -124,9 +124,9 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 4:
             transform_list = [
-                transforms.ToTensor(),  # GaussianBlur works with Tensor, not PIL
+                #transforms.ToTensor(),  # GaussianBlur works with Tensor, not PIL
                 GaussianBlur(kernel_size=(3,3)),
-                transforms.ToPILImage()
+                #transforms.ToPILImage()
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
