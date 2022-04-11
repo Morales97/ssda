@@ -25,7 +25,7 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
         s_dataset,
         batch_size=args.batch_size_s,
         num_workers=args.num_workers,
-        shuffle=False,
+        shuffle=True,
     )
     print('Loading %d source domain images, labelled, from %s' % (len(s_dataset), image_path_gta))
 
@@ -37,7 +37,7 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
             t_dataset,
             batch_size=args.batch_size_tl,
             num_workers=args.num_workers,
-            shuffle=False,
+            shuffle=True,
         ) 
         t_unlbl_loader = None
         print('Loading %d target domain images, labelled, from %s' % (len(t_dataset), image_path_cs))
@@ -51,13 +51,13 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
             t_lbl_dataset,
             batch_size=args.batch_size_tl,
             num_workers=args.num_workers,
-            shuffle=False,
+            shuffle=True,
         ) 
         t_unlbl_loader = DataLoader(
             t_unlbl_dataset,
             batch_size=args.batch_size_tu,
             num_workers=args.num_workers,
-            shuffle=False,
+            shuffle=True,
         ) 
         print('Loading %d target domain images, labelled, from %s' % (len(t_lbl_dataset), image_path_cs))
         print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))
@@ -69,7 +69,7 @@ def get_loaders(args, num_t_samples=2975, size='tiny'):
         val_dataset,
         batch_size=args.batch_size_tl,
         num_workers=args.num_workers,
-        shuffle=False,
+        shuffle=True,
     )    
     
 

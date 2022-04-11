@@ -144,7 +144,7 @@ def main(args, wandb):
             _, pred_s = torch.max(out_s, 1)
             _, pred_t = torch.max(out_t, 1)
 
-            loss_cl_s = pixel_contrast(proj_s, labels_s, pred_s)
+            #loss_cl_s = pixel_contrast(proj_s, labels_s, pred_s)
             loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
 
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
