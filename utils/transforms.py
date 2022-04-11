@@ -1,6 +1,7 @@
 # Borrowed from PAC
 # https://github.com/venkatesh-saligrama/PAC 
 
+from __future__ import absolute_import
 
 import random
 
@@ -12,7 +13,6 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 
-from __future__ import absolute_import
 from utils.blur import GaussianBlur
 
 def Brightness(img, v, max_v, bias=0):
