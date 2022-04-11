@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-
+from torchvision.utils import save_image
 
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
@@ -53,9 +53,16 @@ def main(args, wandb):
         shuffle=False, 
     )
 
+    # for unlabeled loader
     for images in loader:
+        img_weak = images[0]
+        img_strong = images[1]
+        save_image(img_weak[0], 'img_weak.jpg')
+        save_image(img_strong[0], 'img_strong.jpg')
+
         pdb.set_trace()
 
+    # for labeled loader
     for (images, labels) in loader:
         pdb.set_trace()
 
