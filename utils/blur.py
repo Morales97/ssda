@@ -4,7 +4,8 @@ import torch
 from utils.blur_helpers import *
 from torch import Tensor
 from typing import Tuple, List, Optional
-
+import numbers
+from collections.abc import Sequence
 
 
 def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
