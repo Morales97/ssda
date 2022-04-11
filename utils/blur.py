@@ -21,7 +21,7 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
 	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) # tensor of size (3, 3)
-	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			# tensor of size (3, 3, 3) -- replicate the same kernel for each channel
+	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			# tensor of size (3, 1, 3, 3) -- replicate the same kernel for each channel
 	print(kernel.size())
 	img, need_cast, need_squeeze, out_dtype = _cast_squeeze_in(
 		img,
@@ -32,7 +32,9 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 
 	# padding = (left, right, top, bottom)
 	padding = [kernel_size[0] // 2, kernel_size[0] // 2, kernel_size[1] // 2, kernel_size[1] // 2]
+	print(img.size())
 	img = torch_pad(img, padding, mode="reflect")
+	print(img.size())
 	img = conv2d(img, kernel, groups=img.shape[-3])
 
 	img = _cast_squeeze_out(img, need_cast, need_squeeze, out_dtype)
