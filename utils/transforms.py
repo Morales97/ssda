@@ -92,10 +92,7 @@ class RandAugmentBlur(object):
         blurs = random.choices(self.augment_pool, k=1)
         for blur_type in blurs:
             kernel_size = random.choices(self.kernel_sizes, k=1)[0]
-            print(blur_type)
-            print(kernel_size)
             blur = Blur(blur_type=blur_type, kernel_size=kernel_size)
-            print(Blur)
             img = blur(img)
         #img = CutoutAbs(img, 16)
         return img
@@ -148,7 +145,11 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
         elif aug_level == 4:
             transform_list = [
                 #Blur(kernel_size=(5,5)),
-                RandAugmentBlur(blur_augment_pool())
+                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
+                RandAugmentBlur(blur_augment_pool()),
+                transforms.RandomApply([
+                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+                ], p=0.8)
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
