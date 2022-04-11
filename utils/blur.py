@@ -21,7 +21,9 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
 	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device)
+	print(kernel)
 	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])
+	print(img.shape[-3])
 	print(kernel)
 	img, need_cast, need_squeeze, out_dtype = _cast_squeeze_in(
 		img,

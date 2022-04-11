@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 from typing import Tuple, List, Optional
-
+import pdb
 '''
 	From torch's functional_tensor
 	https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
@@ -53,3 +53,6 @@ def _get_gaussian_kernel2d(
 	kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
 	return kernel2d
 
+if __name__ == '__main__':
+	kernel = _get_gaussian_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
+	pdb.set_trace()
