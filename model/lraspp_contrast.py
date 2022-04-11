@@ -123,8 +123,6 @@ def lraspp_mobilenet_v3_large_contrast(
     """
     if kwargs.pop("aux_loss", False):
         raise NotImplementedError("This model does not use auxiliary loss")
-    if pretrained:
-        pretrained_backbone = False
 
     backbone = mobilenetv3.mobilenet_v3_large(pretrained=pretrained_backbone, dilated=True)
     model = _lraspp_mobilenetv3(backbone, dim_embed, num_classes)
