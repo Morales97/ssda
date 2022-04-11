@@ -121,7 +121,7 @@ def _gaussian_blur(img: Tensor, kernel_size: List[int], sigma: Optional[List[flo
 	https://pytorch.org/vision/main/_modules/torchvision/transforms/functional.html#gaussian_blur
     """
     if not torch.jit.is_scripting() and not torch.jit.is_tracing():
-        _log_api_usage_once(gaussian_blur)
+        pass #_log_api_usage_once(gaussian_blur)
     if not isinstance(kernel_size, (int, list, tuple)):
         raise TypeError(f"kernel_size should be int or a sequence of integers. Got {type(kernel_size)}")
     if isinstance(kernel_size, int):
