@@ -43,7 +43,7 @@ def get_loaders(args, num_t_samples=2975):
         ) 
         print('Loading %d target domain images, labelled, from %s' % (len(t_dataset), image_path_cs))
         print('No target domain unlabelled images')
-        return t_lbl_loader
+        t_unlbl_loader = None
 
     # Semi-supervised
     else:                       

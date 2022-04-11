@@ -38,7 +38,7 @@ def main(args, wandb):
     
     # Load data
     args.target_samples = -1
-    target_loader = get_loaders(args)
+    _, target_loader, _, val_loader = get_loaders(args)
     
     # Load model
     model = get_model(args)
