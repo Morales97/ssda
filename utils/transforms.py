@@ -154,8 +154,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 5:
             transform_list = [
-                Blur(blur_type='horizontal', kernel_size=(5,5)),
-
+                Blur(blur_type='vertical', kernel_size=(5,5)),
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
