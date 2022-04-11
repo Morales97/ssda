@@ -64,6 +64,8 @@ def blur_augment_pool():
     augs = ['gaussian',
             'diagonal',
             'diagonal_flip',
+            'horizontal',
+            'vertical',
             ]
     return augs
 
@@ -85,11 +87,11 @@ class RandAugmentMC(object):
         return img
 
 class RandAugmentBlur(object):
-    def __init__(self, augment_pool, kernel_sizes=[(3,3), (5,5)]):
+    def __init__(self, augment_pool, kernel_sizes=[(7,7), (5,5)]):
         self.augment_pool = augment_pool
         self.kernel_sizes = kernel_sizes
     def __call__(self, img):
-        blurs = random.choices(self.augment_pool, k=1)
+        blurs = random.choices(self.augment_pool, k=2)
         for blur_type in blurs:
             kernel_size = random.choices(self.kernel_sizes, k=1)[0]
             blur = Blur(blur_type=blur_type, kernel_size=kernel_size)
@@ -146,7 +148,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             transform_list = [
                 #Blur(blur_type='horizontal', kernel_size=(5,5)),
                 RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
-                RandAugmentBlur(blur_augment_pool(), kernel_sizes=[(5,5), (7,7)]),
+                RandAugmentBlur(blur_augment_pool()),
                 transforms.RandomApply([
                     transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
                 ], p=0.8)
@@ -154,8 +156,8 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 5:
             transform_list = [
-                Blur(blur_type='horizontal', kernel_size=(5,5)),
-                Blur(blur_type='diagonal', kernel_size=(5,5)),
+                Blur(blur_type='horizontal', kernel_size=(7,7)),
+                Blur(blur_type='diagonal', kernel_size=(7,7)),
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
