@@ -6,6 +6,8 @@ from torch import Tensor
 from typing import Tuple, List, Optional
 import numbers
 from collections.abc import Sequence
+from torch.nn.functional import conv2d, pad as torch_pad
+
 
 
 def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
