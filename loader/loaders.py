@@ -41,9 +41,9 @@ def get_loaders(args, num_t_samples=2975):
             num_workers=args.num_workers,
             shuffle=True,
         ) 
-        t_unlbl_loader = None
         print('Loading %d target domain images, labelled, from %s' % (len(t_dataset), image_path_cs))
         print('No target domain unlabelled images')
+        return t_lbl_loader
 
     # Semi-supervised
     else:                       

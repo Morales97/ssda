@@ -39,4 +39,5 @@
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --batch_size_tl=16 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 
 # -- DeepLabV3 ---
-python main_SSDA.py --lr=0.001 --steps=40000 --size=small --project=GTA_to_CS_small --expt_name=CR_IN_bb_dl_rn50 --net=deeplabv3_rn50 --cr=prob_distr --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4
+#python main_SSDA.py --lr=0.001 --steps=40000 --size=small --project=GTA_to_CS_small --expt_name=CR_IN_bb_dl_rn50 --net=deeplabv3_rn50 --cr=prob_distr --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4
+python main_FS.py --lr=0.001 --steps=40000 --size=small --project=GTA_to_CS_small --expt_name=IN_bb_dl_rn50_FS --net=deeplabv3_rn50 --batch_size_tl=4
