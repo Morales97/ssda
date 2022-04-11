@@ -52,3 +52,4 @@ def _get_gaussian_kernel2d(
 	kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(device, dtype=dtype)
 	kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
 	return kernel2d
+

@@ -22,6 +22,33 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
 	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device)
 	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])
+	pdb.set_trace()
+	img, need_cast, need_squeeze, out_dtype = _cast_squeeze_in(
+		img,
+		[
+			kernel.dtype,
+		],
+	)
+
+	# padding = (left, right, top, bottom)
+	padding = [kernel_size[0] // 2, kernel_size[0] // 2, kernel_size[1] // 2, kernel_size[1] // 2]
+	img = torch_pad(img, padding, mode="reflect")
+	img = conv2d(img, kernel, groups=img.shape[-3])
+
+	img = _cast_squeeze_out(img, need_cast, need_squeeze, out_dtype)
+	return img
+
+def mean_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
+	"""
+		From torch's functional_tensor
+		https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
+	"""
+	if not (isinstance(img, torch.Tensor)):
+		raise TypeError(f"img should be Tensor. Got {type(img)}")
+
+	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
+	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device)
+	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])
 
 	img, need_cast, need_squeeze, out_dtype = _cast_squeeze_in(
 		img,
