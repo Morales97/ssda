@@ -71,6 +71,17 @@ def _get_diagonal_kernel2d(
 	kernel2d /= kernel2d.sum()
 	return kernel2d
 
+# DM
+def _get_line_kernel2d(
+	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device, do_vertical=False
+) -> Tensor:
+	kernel2d = torch.zeros(kernel_size)
+	if do_vertical:
+		kernel2d[:, kernel_size[0]//2] = 1
+	else:
+		kernel2d[kernel_size[0]//2] = 1
+	kernel2d /= kernel2d.sum()
+	return kernel2d
 
 if __name__ == '__main__':
 	kernel = _get_gaussian_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')

@@ -28,6 +28,10 @@ def blur(img: Tensor, kernel_size: List[int], blur_type, sigma: List[float]) -> 
 		kernel = _get_diagonal_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) 
 	elif blur_type == 'diagonal_flip':
 		kernel = _get_diagonal_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device, do_flip=True) 
+	elif blur_type == 'horizontal':
+		kernel = _get_line_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) 
+	elif blur_type == 'vertical':
+		kernel = _get_line_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device, do_vertical=True) 
 	else:
 		raise Exception('blur type not supported')
 	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			
