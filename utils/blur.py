@@ -99,7 +99,6 @@ class GaussianBlur(torch.nn.Module):
 		"""
 		sigma = self.get_params(self.sigma[0], self.sigma[1])
 		out = _gaussian_blur(img, self.kernel_size, [sigma, sigma])
-		pdb.set_trace()
 		return out
 
 	def __repr__(self) -> str:
