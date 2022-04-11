@@ -12,6 +12,8 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 
+from __future__ import absolute_import
+from utils.blur import GaussianBlur
 
 def Brightness(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
@@ -119,6 +121,10 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
                 transforms.RandomApply([
                     transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
                 ], p=0.8)
+            ]
+        elif aug_level == 4:
+            transform_list = [
+                GaussianBlur(kernel_size=(3,3)),
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations

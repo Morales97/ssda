@@ -10,8 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model.resnet import resnet50_FCN, resnet_34_upsampling, resnet_50_upsampling, deeplabv3_rn50, deeplabv3_mobilenetv3_large, lraspp_mobilenetv3_large
-from model.fcn import fcn8s
+
 #from utils.eval import test
 from utils.ioutils import FormattedLogItem
 from utils.ioutils import gen_unique_name
@@ -19,8 +18,8 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loader.oct_loader import octLoader
-from loader.gta_loader import gtaLoader
-from loader.cityscapes_loader import cityscapesLoader
+from loader.gta_ds import gtaDataset
+from loader.cityscapes_ds import cityscapesDataset
 
 from loss.loss import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
@@ -39,14 +38,16 @@ def main(args, wandb):
 
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Spectralis_part1', label_path='data/retouch-dataset/pre_processed/Spectralis_part1', img_size=(512, 512))
     #t_loader = octLoader(image_path='data/retouch-dataset/pre_processed/Cirrus_part1', label_path='data/retouch-dataset/pre_processed/Cirrus_part1', img_size=(512, 512))
-    #t_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=100, rotation=False)
+    t_ds = cityscapesDataset(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", split='train', n_samples=100,
+                            unlabeled=True, # to use weak-strong augs
+                            strong_aug_level=4)
     #v_loader.test()
-    t_unl_loader = cityscapesLoader(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
+    #t_unl_ds = cityscapesDataset(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
     #s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
-    t_unl_loader.test()
+    #t_unl_loader.test()
 
     loader = DataLoader(
-        s_loader,   
+        t_ds,   
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=False, 

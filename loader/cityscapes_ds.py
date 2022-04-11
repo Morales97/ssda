@@ -61,7 +61,8 @@ class cityscapesDataset(data.Dataset):
         rotation=False,
         unlabeled=False,
         do_crop=False,
-        hflip=False
+        hflip=False,
+        strong_aug_level = 3
     ):
         self.image_path = image_path
         self.label_path = label_path
@@ -83,7 +84,7 @@ class cityscapesDataset(data.Dataset):
                 self.transforms = get_transforms(aug_level=0)
             if unlabeled:
                 weak = get_transforms(aug_level=0)
-                strong = get_transforms(aug_level=3)
+                strong = get_transforms(aug_level=strong_aug_level)
                 self.transforms = WeakStrongAug(weak, strong)
 
         self.n_samples = n_samples
