@@ -12,8 +12,9 @@ import PIL.ImageOps
 import numpy as np
 from PIL import Image
 from torchvision import transforms
+import pdb
 
-from utils.blur import GaussianBlur
+from utils.blur import Blur
 
 def Brightness(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
@@ -41,7 +42,7 @@ def Solarize(img, v, max_v, bias=0):
 
 
 
-def cr_augment_pool():
+def color_augment_pool():
     augs = [# (AutoContrast, None, None),
             (Brightness, 0.9, 0.05),
             (Color, 0.9, 0.05),
@@ -59,6 +60,12 @@ def cr_augment_pool():
             ]
     return augs
 
+def blur_augment_pool():
+    augs = ['gaussian',
+            'diagonal',
+            'diagonal_flip',
+            ]
+    return augs
 
 class RandAugmentMC(object):
     def __init__(self, n, m, augment_pool):
@@ -74,6 +81,20 @@ class RandAugmentMC(object):
             v = np.random.randint(1, self.m)
             if random.random() < 0.5:
                 img = op(img, v=v, max_v=max_v, bias=bias)
+        #img = CutoutAbs(img, 16)
+        return img
+
+class RandAugmentBlur(object):
+    def __init__(self, augment_pool, kernel_sizes=[(3,3), (5,5)]):
+        self.augment_pool = augment_pool
+        self.kernel_sizes = kernel_sizes
+    def __call__(self, img):
+        blurs = random.choices(self.augment_pool, k=1)
+        for blur_type in blurs:
+            kernel_size = random.choices(self.kernel_sizes, k=1)
+            blur = Blur(blur_type=blur_type, kernel_size=kernel_size)
+            print(Blur)
+            img = blur(img)
         #img = CutoutAbs(img, 16)
         return img
 
@@ -117,14 +138,15 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
         elif aug_level == 3:
             # Strong augmentation for CR: Color Jitter + RandAugment
             transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=cr_augment_pool()),
+                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
                 transforms.RandomApply([
                     transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
                 ], p=0.8)
             ]
         elif aug_level == 4:
             transform_list = [
-                GaussianBlur(kernel_size=(5,5)),
+                #Blur(kernel_size=(5,5)),
+                RandAugmentBlur(blur_augment_pool)
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
@@ -148,3 +170,7 @@ def _float_parameter(v, max_v):
 
 def _int_parameter(v, max_v):
     return int(v * max_v / 10)
+
+if __name__ == '__main__':
+    ra = RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool())
+    pdb.set_trace()
