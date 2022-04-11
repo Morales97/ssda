@@ -32,7 +32,8 @@
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_no_pt_one_hot_lambda5 --net=lraspp_mobilenet --target_samples=100 --cr=one_hot --lmbda=5
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_300_CS_GTA --net=lraspp_mobilenet --target_samples=100 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_GTA.pth.tar
 #python main_SSDA.py --project=GTA_to_CS_tiny--expt_name=CL_no_warmup --net=lraspp_mobilenet_contrast --pixel_contrast=True --warmup_steps=0
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_warmup --net=lraspp_mobilenet_contrast --pixel_contrast=True 
+#python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CL_warmup --net=lraspp_mobilenet_contrast --pixel_contrast=True 
+python main_SSDA.py --project=test_seeds --expt_name=CL_CR_mask_pt_simba --seed=1 --net=lraspp_mobilenet_contrast --pixel_contrast=True 
 
 # -- Only on CS --
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_prob_distr_mask_pt_CS_NO_GTA --net=lraspp_mobilenet --target_samples=100 --batch_size_tl=16 --cr=prob_distr --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
