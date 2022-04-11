@@ -1,6 +1,7 @@
 import torch
 from torch.nn.functional import conv2d, pad as torch_pad
 from torch import Tensor
+from typing import Tuple, List, Optional
 
 '''
 	From torch's functional_tensor
