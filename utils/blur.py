@@ -9,6 +9,7 @@ from collections.abc import Sequence
 from torch.nn.functional import conv2d, pad as torch_pad
 from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image
+import pdb 
 
 def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Tensor:
 	"""
@@ -97,7 +98,9 @@ class GaussianBlur(torch.nn.Module):
 			PIL Image or Tensor: Gaussian blurred image
 		"""
 		sigma = self.get_params(self.sigma[0], self.sigma[1])
-		return _gaussian_blur(img, self.kernel_size, [sigma, sigma])
+		out = _gaussian_blur(img, self.kernel_size, [sigma, sigma])
+		pdb.set_trace()
+		return out
 
 	def __repr__(self) -> str:
 		s = f"{self.__class__.__name__}(kernel_size={self.kernel_size}, sigma={self.sigma})"
