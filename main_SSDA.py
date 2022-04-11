@@ -35,12 +35,10 @@ def main(args, wandb):
     np.random.seed(args.seed)
     random.seed(args.seed)
     
-    # TODO: rn loaders don't use augmentations. Probably should be using some
+    # Load data
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
-    # Set up metrics
-    running_metrics_val = runningScore(target_loader.dataset.n_classes)
-    
+    # Load model
     model = get_model(args)
     model.cuda()
     model.train()
@@ -65,6 +63,8 @@ def main(args, wandb):
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
 
+    # Set up metrics
+    running_metrics_val = runningScore(target_loader.dataset.n_classes)
     best_mIoU = 0 
     step = start_step
     time_meter = averageMeter()
@@ -78,6 +78,7 @@ def main(args, wandb):
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
 
+    # Training loop
     while step <= args.steps:
 
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
@@ -96,7 +97,7 @@ def main(args, wandb):
         start_ts = time.time()
         model.train()
 
-        # train
+
         optimizer.zero_grad()
         outputs_s = model(images_s)
         outputs_t = model(images_t)
@@ -159,7 +160,6 @@ def main(args, wandb):
         cr_loss_meter.update(args.lmbda * loss_cr)
         constrast_s_loss_meter.update(args.gamma * loss_cl_s)
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
-        
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
