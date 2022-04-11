@@ -128,7 +128,11 @@ def lraspp_mobilenet_v3_large_contrast(
     backbone = mobilenetv3.mobilenet_v3_large(pretrained=pretrained_backbone, dilated=True)
     model = _lraspp_mobilenetv3(backbone, dim_embed, num_classes)
 
+    if pretrained and custom_pretrain_path is not None:
+        raise Exception('Choose either COCO pretrained or a custom model.')
+
     if pretrained:
+        print('Loading model pretrained on COCO')
         # load COCO's weights
         model_coco = torchvision.models.segmentation.lraspp_mobilenet_v3_large(pretrained=True)
 
