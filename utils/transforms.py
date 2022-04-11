@@ -91,7 +91,7 @@ class RandAugmentBlur(object):
     def __call__(self, img):
         blurs = random.choices(self.augment_pool, k=1)
         for blur_type in blurs:
-            kernel_size = random.choices(self.kernel_sizes, k=1)
+            kernel_size = random.choices(self.kernel_sizes, k=1)[0]
             print(blur_type)
             print(kernel_size)
             blur = Blur(blur_type=blur_type, kernel_size=kernel_size)
