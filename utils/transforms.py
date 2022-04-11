@@ -124,7 +124,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
             ]
         elif aug_level == 4:
             transform_list = [
-                transforms.ToTensor(),
+                transforms.ToTensor(),  # GaussianBlur works with Tensor, not PIL
                 GaussianBlur(kernel_size=(3,3)),
             ]
 
