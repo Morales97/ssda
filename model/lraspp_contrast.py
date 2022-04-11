@@ -107,10 +107,11 @@ def _lraspp_mobilenetv3(backbone: mobilenetv3.MobileNetV3, dim_embed: int, num_c
 
 def lraspp_mobilenet_v3_large_contrast(
     pretrained: bool = False,
+    pretrained_backbone: bool = True,
+    custom_pretrain_path = None,
     progress: bool = True,
     dim_embed: int = 128,
     num_classes: int = 19,
-    pretrained_backbone: bool = True,
     **kwargs: Any,
 ) -> LRASPP_Contrast:
     """Constructs a Lite R-ASPP Network model with a MobileNetV3-Large backbone.
