@@ -53,6 +53,26 @@ def _get_gaussian_kernel2d(
 	kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
 	return kernel2d
 
+# DM
+def _get_mean_kernel2d(
+	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device
+) -> Tensor:
+	kernel2d = torch.ones((kernel_size[0], kernel_size[1]))
+	kernel2d /= kernel2d.sum()
+	return kernel2d
+
+# DM
+def _get_diagonal_kernel2d(
+	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device, do_flip=False
+) -> Tensor:
+	kernel2d = torch.eye(kernel_size[0])
+	if do_flip:
+		kernel2d = torch.flip(kernel2d, [0])
+	kernel2d /= kernel2d.sum()
+	return kernel2d
+
+
 if __name__ == '__main__':
 	kernel = _get_gaussian_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
+	kernel_mean = _get_mean_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
 	pdb.set_trace()
