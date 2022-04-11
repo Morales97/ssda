@@ -48,7 +48,7 @@ def main(args, wandb):
 
     loader = DataLoader(
         t_ds,   
-        batch_size=args.batch_size,
+        batch_size=args.batch_size_tl,
         num_workers=args.num_workers,
         shuffle=False, 
     )
