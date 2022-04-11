@@ -20,11 +20,9 @@ def gaussian_blur(img: Tensor, kernel_size: List[int], sigma: List[float]) -> Te
 		raise TypeError(f"img should be Tensor. Got {type(img)}")
 
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
-	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device)
-	print(kernel)
-	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])
-	print(img.shape[-3])
-	print(kernel)
+	kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) # tensor of size (3, 3)
+	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			# tensor of size (3, 3, 3) -- replicate the same kernel for each channel
+	print(kernel.size())
 	img, need_cast, need_squeeze, out_dtype = _cast_squeeze_in(
 		img,
 		[
