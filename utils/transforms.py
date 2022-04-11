@@ -146,7 +146,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
         elif aug_level == 4:
             transform_list = [
                 #Blur(kernel_size=(5,5)),
-                RandAugmentBlur(blur_augment_pool)
+                RandAugmentBlur(blur_augment_pool())
             ]
 
         # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
