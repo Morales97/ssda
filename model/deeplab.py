@@ -198,7 +198,6 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
                 # Copy all parameters but for linear classifier, which has different number of classes
                 sd[k] = v
 
-        pdb.set_trace()
         model.load_state_dict(sd)
         return model
         
