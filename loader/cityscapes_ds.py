@@ -62,7 +62,7 @@ class cityscapesDataset(data.Dataset):
         unlabeled=False,
         do_crop=False,
         hflip=False,
-        strong_aug_level = 3
+        strong_aug_level = 4
     ):
         self.image_path = image_path
         self.label_path = label_path

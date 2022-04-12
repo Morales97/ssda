@@ -25,6 +25,7 @@ from consistency.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
+from torchvision.utils import save_image
 import pdb
 
 
@@ -133,6 +134,8 @@ def main(args, wandb):
                 out_w = outputs_w
                 out_strong = outputs_strong
 
+            save_image(out_strong, 'strong.jpg')
+            pdb.set_trace()
             loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong)
             time_cr = time.time() - start_ts_cr
             
@@ -265,8 +268,8 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
     wandb.finish()
