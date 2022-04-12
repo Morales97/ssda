@@ -80,6 +80,9 @@ def main(args, wandb):
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
 
+    data_iter_s = iter(source_loader)
+    data_iter_t = iter(target_loader)
+
     # Training loop
     while step <= args.steps:
 
