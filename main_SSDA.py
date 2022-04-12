@@ -138,7 +138,6 @@ def main(args, wandb):
                 out_w = outputs_w
                 out_strong = outputs_strong
 
-            pdb.set_trace()
             loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong)
             time_cr = time.time() - start_ts_cr
             
