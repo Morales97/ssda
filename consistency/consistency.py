@@ -74,7 +74,7 @@ def cr_prob_distr(out_w, out_s, tau, loss='JS'):
         loss_cr = F.cross_entropy(out_s, p_w)
         print(loss_cr)
     elif loss == 'JS':
-        out_s = F.softmax(out_s)    # convert to probabilities
+        out_s = F.softmax(out_s, dim=1)    # convert to probabilities
         m = (out_s + p_w)/2
         kl1 = F.kl_div(out_s.log(), m, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
         kl2 = F.kl_div(p_w.log(), m, reduction='batchmean')
