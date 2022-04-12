@@ -12,5 +12,5 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=IN_bb_lr3 --lr=0.001 --steps=10000 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=IN_bb_lr3_part2 --lr=0.001 --steps=10000 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 --resume=model/pretrained/ckpt_dlrn50_CS_5k.tar
 
