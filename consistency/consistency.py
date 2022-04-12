@@ -5,9 +5,9 @@ import pdb
 def cr_multiple_augs(args, images):
     # NOTE for the moment only support 2 augmentations
     assert args.n_augmentations == 2 and args.cr == 'js'
-    images_weak = images_t_unl[0].cuda()
-    images_strong1 = images_t_unl[1].cuda()
-    images_strong2 = images_t_unl[2].cuda()
+    images_weak = images[0].cuda()
+    images_strong1 = images[1].cuda()
+    images_strong2 = images[2].cuda()
 
     outputs_w = model(images_weak)                   # (N, C, H, W)
     outputs_strong1 = model(images_strong1)
