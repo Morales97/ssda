@@ -165,6 +165,5 @@ def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     kl3 = F.kl_div(p_s2.log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2 + kl3)/3
     
-    pdb.set_trace()
     percent_pl = 100
     return loss_cr, percent_pl
