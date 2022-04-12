@@ -52,6 +52,7 @@ def cr_prob_distr(out_w, out_s, tau):
 
     max_prob, _ = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
+    pdb.set_trace()
     if len(idxs) == 0:  
         return 0, 0
     
