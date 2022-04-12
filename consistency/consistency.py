@@ -152,7 +152,7 @@ def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     out_s1 = out_s1.permute(0, 2, 3, 1)
     out_s1 = torch.flatten(out_s1, end_dim=2)
-    out_s2 = out_s1.permute(0, 2, 3, 1)
+    out_s2 = out_s2.permute(0, 2, 3, 1)
     out_s2 = torch.flatten(out_s2, end_dim=2)
 
     p_w = F.softmax(out_w, dim=1)   
