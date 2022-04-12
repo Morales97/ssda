@@ -21,7 +21,7 @@ from utils.ioutils import rm_format
 from loss.loss import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loader.loaders import get_loaders
-from consistency.consistency import consistency_reg
+from consistency.consistency import consistency_reg, cr_multiple_augs
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
@@ -143,7 +143,7 @@ def main(args, wandb):
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
-                pass
+                cr_multiple_augs(args, images_t_unl)
 
             time_cr = time.time() - start_ts_cr
             
@@ -276,11 +276,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.finish()
+    #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
