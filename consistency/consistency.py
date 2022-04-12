@@ -62,10 +62,11 @@ def cr_prob_distr(out_w, out_s, tau):
     p_w = p_w[idxs]
     
     if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+        idxs = idxs.unsqueeze(0)
         out_s = out_s.unsqueeze(0)
         p_w = p_w.unsqueeze(0)
     assert out_s.size() == p_w.size()
-    
+
     loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = len(idxs) / len(max_prob) * 100
 
