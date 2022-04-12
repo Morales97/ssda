@@ -11,7 +11,7 @@ from torch.utils import data
 
 sys.path.append(os.path.abspath('..'))
 from loader.loader_utils import pil_loader
-from utils.transforms import get_transforms, WeakStrongAug
+from utils.transforms import get_transforms, WeakStrongAug, WeakStrongAug2
 
 def recursive_glob(rootdir=".", suffix=""):
     """Performs recursive glob with given suffix and rootdir
@@ -60,6 +60,7 @@ class cityscapesDataset(data.Dataset):
         size="tiny",
         rotation=False,
         unlabeled=False,
+        n_augmentations=1,
         do_crop=False,
         hflip=False,
         strong_aug_level = 3
@@ -88,7 +89,11 @@ class cityscapesDataset(data.Dataset):
             if unlabeled:
                 weak = get_transforms(aug_level=0)
                 strong = get_transforms(aug_level=strong_aug_level)
-                self.transforms = WeakStrongAug(weak, strong)
+                if n_augmentations == 1:
+                    self.transforms = WeakStrongAug(weak, strong)
+                if n_augmentations == 2:
+                    self.transforms = WeakStrongAug2(weak, strong)
+
 
         self.n_samples = n_samples
         self.sample_idxs = sample_idxs

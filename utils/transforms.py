@@ -101,8 +101,6 @@ class RandAugmentBlur(object):
 
 
 class WeakStrongAug:
-    """Take two random crops of one image as the query and key."""
-
     def __init__(self, base_transform1, base_transform2):
         self.base_transform1 = base_transform1
         self.base_transform2 = base_transform2
@@ -112,6 +110,16 @@ class WeakStrongAug:
         img2 = self.base_transform2(x)
         return [img1, img2]
 
+class WeakStrongAug2:
+    def __init__(self, base_transform1, base_transform2):
+        self.base_transform1 = base_transform1
+        self.base_transform2 = base_transform2
+
+    def __call__(self, x):
+        img1 = self.base_transform1(x)
+        img2 = self.base_transform2(x)
+        img3 = self.base_transform2(x)
+        return [img1, img2, img3]
 
 def get_transforms(crop_size=256, split='train', aug_level=0):
 
