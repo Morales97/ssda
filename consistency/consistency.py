@@ -38,7 +38,7 @@ def cr_one_hot(out_w, out_s, tau):
     return loss_cr, percent_pl
     
 
-def cr_prob_distr(out_w, out_s, tau, loss='CE'):
+def cr_prob_distr(out_w, out_s, tau, loss='JS'):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
