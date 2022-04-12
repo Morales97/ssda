@@ -72,7 +72,6 @@ def cr_prob_distr(out_w, out_s, tau, loss='JS'):
 
     if loss == 'CE':
         loss_cr = F.cross_entropy(out_s, p_w)
-        print(loss_cr)
     elif loss == 'JS':
         out_s = F.softmax(out_s, dim=1)    # convert to probabilities
         m = (out_s + p_w)/2
@@ -80,6 +79,7 @@ def cr_prob_distr(out_w, out_s, tau, loss='JS'):
         kl2 = F.kl_div(p_w.log(), m, reduction='batchmean')
         loss_cr = (kl1 + kl2)/2
     
+    print(loss_cr)
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
