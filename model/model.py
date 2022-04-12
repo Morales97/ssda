@@ -19,9 +19,7 @@ def get_model(args):
     elif args.net == 'fcn8':
         model = fcn8s()
     elif args.net == 'deeplabv3_rn50':
-        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone)
-    elif args.net == 'deeplabv3_mask_pt':
-        model = deeplabv3_resnet50_maskContrast(model_path=args.custom_pretrain_path)
+        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
     elif args.net == 'dl_mobilenet':
         model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     elif args.net == 'lraspp_mobilenet':

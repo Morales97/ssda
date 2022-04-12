@@ -233,6 +233,9 @@ def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
     return model
 
 def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
+    '''
+    deprecated
+    '''
     # Load a pretrained DeepLabV3_rn50 on PASCAL VOC.
     # pretrained model from https://github.com/wvangansbeke/Unsupervised-Semantic-Segmentation (on PASCAL VOC unsupervised saliency)
     
