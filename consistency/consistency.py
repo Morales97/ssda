@@ -38,7 +38,7 @@ def cr_one_hot(out_w, out_s, tau):
     return loss_cr, percent_pl
     
 
-def cr_prob_distr(out_w, out_s, tau):
+def cr_prob_distr(out_w, out_s, tau, loss='CE'):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
@@ -65,9 +65,16 @@ def cr_prob_distr(out_w, out_s, tau):
         idxs = idxs.unsqueeze(0)
         out_s = out_s.unsqueeze(0)
         p_w = p_w.unsqueeze(0)
+        pdb.set_trace()
     assert out_s.size() == p_w.size()
 
-    loss_cr = F.cross_entropy(out_s, p_w)
+
+    if loss == 'CE':
+        loss_cr = F.cross_entropy(out_s, p_w)
+    elif loss == 'JS':
+        pass #loss_cr = 
     percent_pl = len(idxs) / len(max_prob) * 100
 
     return loss_cr, percent_pl
+
+
