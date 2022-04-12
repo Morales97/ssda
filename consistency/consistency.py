@@ -68,7 +68,7 @@ def cr_prob_distr(out_w, out_s, tau, loss='CE'):
     assert out_s.size() == p_w.size()
 
     if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-        pdb.set_trace()
+        pass #pdb.set_trace()
 
     if loss == 'CE':
         loss_cr = F.cross_entropy(out_s, p_w)
