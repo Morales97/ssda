@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import pdb 
 
-def cr_multiple_augs(args, images):
+def cr_multiple_augs(args, images, model):
     # NOTE for the moment only support 2 augmentations
     assert args.n_augmentations == 2 and args.cr == 'js'
     images_weak = images[0].cuda()

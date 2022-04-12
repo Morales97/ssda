@@ -143,7 +143,7 @@ def main(args, wandb):
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
-                cr_multiple_augs(args, images_t_unl)
+                cr_multiple_augs(args, images_t_unl, model)
 
             time_cr = time.time() - start_ts_cr
             
