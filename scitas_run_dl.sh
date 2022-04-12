@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_JS_IN_bb_tau_0 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 --cr=js --tau=0
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_JS_IN_bb_tau_0_lmbda_20 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 --cr=js --tau=0 --lmbda=20
 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS.tar 
 
 #python main_FS.py --project=GTA_to_CS_tiny --expt_name=FS_IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 
