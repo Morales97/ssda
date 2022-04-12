@@ -65,6 +65,8 @@ def get_parser():
                         help='path to load pretrained model from')
     parser.add_argument('--cr', type=str, default=None,
                         help='consistency regularization type')
+    parser.add_argument('--tau', type=float, default=0.9,
+                        help='threshold for pseudolabels')
     parser.add_argument('--lmbda', type=float, default=1,
                         help='weight of consistency regularization loss')
     parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
