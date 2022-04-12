@@ -181,6 +181,25 @@ def deeplabv3_resnet50(
 
 
 def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
+    
+    if custom_pretrain_path is not None:
+        print('Loading model from %s' % custom_pretrain_path)
+        maskContrast_pretrained = torch.load(custom_pretrain_path)
+        model = deeplabv3_resnet50(num_classes=19)   
+        sd = maskContrast_pretrained['model']
+
+        # Create a new state_dict
+        new_state_dict = {}
+        for key, param in sd.items():
+            if 'module.model_q.' in key:
+                if 'backbone' in key:
+                    new_state_dict[key[15:]] = param  # remove the 'module.model_q.' part
+                elif 'decoder' in key:
+                    new_state_dict['classifier' + key[22:]] = param
+
+        model.load_state_dict(new_state_dict, strict=False) 
+        return model
+    
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=False, 
         num_classes=19, 
