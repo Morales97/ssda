@@ -36,7 +36,7 @@
 #python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CL_mask_CS --seed=2 --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1 --pre_trained=True --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 #python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CL_no_warmup_0.1 --net=lraspp_mobilenet_contrast --pixel_contrast=True --warmup_steps=0 --gamma=0.1
 
-python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=IN_bb --net=deeplabv3_rn50 --cr=prob_distr --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1
+python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1
 #python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=CR_IN_bb_blurrer --seed=3 --net=lraspp_mobilenet --cr=prob_distr
 #python main_SSDA.py --project=GTA_CS_tiny_seeds --expt_name=PC_mask_CS --seed=3 --net=lraspp_mobilenet_contrast --custom_pretrain_path=model/pretrained/checkpoint_mask_lraspp_CS_600.pth.tar
 
