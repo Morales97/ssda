@@ -69,6 +69,8 @@ def get_parser():
                         help='threshold for pseudolabels')
     parser.add_argument('--lmbda', type=float, default=1,
                         help='weight of consistency regularization loss')
+    parser.add_argument('--n_augmentations', type=int, default=1,
+                        help='number of augmentations in CR')                       
     parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
                         help='Use pixel contrast regularization')
     parser.add_argument('--gamma', type=float, default=1,

@@ -126,19 +126,25 @@ def main(args, wandb):
                 data_iter_t_unl = iter(target_loader_unl)
             
             images_t_unl = next(data_iter_t_unl)
-            images_weak = images_t_unl[0].cuda()
-            images_strong = images_t_unl[1].cuda()
 
-            outputs_w = model(images_weak)                   # (N, C, H, W)
-            outputs_strong = model(images_strong)
-            if type(outputs_w) == OrderedDict:
-                out_w = outputs_w['out']
-                out_strong = outputs_strong['out']
+            if args.n_augmentations == 1:
+                images_weak = images_t_unl[0].cuda()
+                images_strong = images_t_unl[1].cuda()
+
+                outputs_w = model(images_weak)                   # (N, C, H, W)
+                outputs_strong = model(images_strong)
+                if type(outputs_w) == OrderedDict:
+                    out_w = outputs_w['out']
+                    out_strong = outputs_strong['out']
+                else:
+                    out_w = outputs_w
+                    out_strong = outputs_strong
+                
+                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
-                out_w = outputs_w
-                out_strong = outputs_strong
+                assert args.n_augmentations >= 1
+                pass
 
-            loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             time_cr = time.time() - start_ts_cr
             
         # CL
