@@ -54,6 +54,8 @@ def cr_prob_distr(out_w, out_s, tau):
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
     if idxs.nelement() == 0:  
         return 0, 0
+    if idxs.nelement() == 1:
+        idxs.unsqueeze(0)   # when a single pixel is above the threshold, need to add a dimension
     
     # Apply only CE (between distributions!) where confidence > threshold    
     out_s = out_s.permute(0, 2, 3, 1)
@@ -62,8 +64,6 @@ def cr_prob_distr(out_w, out_s, tau):
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
-    if idxs.nelement() == 1:
-        pdb.set_trace()
     loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = len(idxs) / len(max_prob) * 100
 
