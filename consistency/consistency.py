@@ -112,7 +112,7 @@ def cr_prob_distr(out_w, out_s, tau):
 def cr_JS(out_w, out_s, tau):
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1)             # Do not detach!! as opposed to prob_distr 
+    p_w = F.softmax(out_w, dim=1).detach()              
 
     max_prob, _ = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
@@ -155,7 +155,7 @@ def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     out_s2 = out_s2.permute(0, 2, 3, 1)
     out_s2 = torch.flatten(out_s2, end_dim=2)
 
-    p_w = F.softmax(out_w, dim=1)   
+    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
     p_s1 = F.softmax(out_s1, dim=1)    
     p_s2 = F.softmax(out_s2, dim=1)   
 
