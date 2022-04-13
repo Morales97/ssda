@@ -8,6 +8,7 @@ from torchsummary import summary
 
 from model.fcn import fcn8s, fcn_resnet50, fcn_resnet50_densecl
 from model.deeplabv3 import deeplabv3_resnet50_maskContrast, deeplabv3_rn50, deeplabv3_mobilenetv3_large
+from model.deeplabv2 import deeplabv2_rn101
 from model.lraspp import lraspp_mobilenetv3_large
 from model.lraspp_contrast import lraspp_mobilenet_v3_large_contrast
 
