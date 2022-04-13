@@ -238,7 +238,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
         raise Exception('custom DeepLabv2 + ResNet-101 is not available')
         return model
 
-    if pre_trained_backbone:
+    if pretrained_backbone:
         print('*** Loading ImageNet weights to DeepLabv2 + ResNet-101')
         sd_imagenet = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth')  # ImageNet pretrained rn101
         new_params = model.state_dict().copy()
