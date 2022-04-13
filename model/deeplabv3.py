@@ -77,7 +77,7 @@ class DeepLabV3(_SimpleSegmentationModel):
     pass
 
 class DeepLabV3Contrast(nn.Module):
-        def __init__(self, backbone: nn.Module, classifier: nn.Module, dim_feat: int, dim_embed: int) -> None:
+    def __init__(self, backbone: nn.Module, classifier: nn.Module, dim_feat: int, dim_embed: int) -> None:
         super().__init__()
         self.backbone = backbone
         self.classifier = classifier
