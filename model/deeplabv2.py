@@ -202,12 +202,21 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     if pretrained_backbone:
         print('*** Loading ImageNet weights to DeepLabv2 + ResNet-101 ***')
         sd_imagenet = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth')  # ImageNet pretrained rn101
+
+        new_dict = {}
+        for k, v in sd_imagenet.items():
+            if not k.startswith('fc'):
+                new_dict[k] = v
+        model.load_state_dict(new_dict, strict=False)
+    
+        '''
         new_params = model.state_dict().copy()
         for name, param in new_params.items():
             if name in sd_imagenet and param.size() == sd_imagenet[name].size():
                 new_params[name].copy_(sd_imagenet[name])
+                print(name)
         model.load_state_dict(new_params)
-
+        '''
     return model
 
 
