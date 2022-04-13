@@ -90,16 +90,14 @@ def main(args, wandb):
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % len(source_loader) == 0:
             data_iter_s = iter(source_loader)
-        #if step % len(target_loader) == 0:
-        #    data_iter_t = iter(target_loader)
+        if step % len(target_loader) == 0:
+            data_iter_t = iter(target_loader)
+
+        images_s, labels_s = next(data_iter_s)
         try:
             images_t, labels_t = next(data_iter_t)
         except:
-            data_iter_t = iter(target_loader)
-            images_t, labels_t = next(data_iter_t)
-
-        images_s, labels_s = next(data_iter_s)
-        images_t, labels_t = next(data_iter_t)
+            pdb.set_trace()
         images_s = images_s.cuda()
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
