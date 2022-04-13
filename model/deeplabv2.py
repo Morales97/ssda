@@ -207,6 +207,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
         for k, v in sd_imagenet.items():
             if not k.startswith('fc'):
                 new_dict[k] = v
+                print(k)
         model.load_state_dict(new_dict, strict=False)
     
         '''

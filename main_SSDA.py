@@ -162,7 +162,6 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         loss.backward()
         optimizer.step()
-        step += 1
 
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
@@ -264,6 +263,7 @@ def main(args, wandb):
                     wandb.log_artifact(model_artifact)
                 best_mIoU = score['mIoU']
             
+            step += 1
         if step >= args.steps:
             break
 

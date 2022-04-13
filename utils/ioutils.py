@@ -47,7 +47,7 @@ def get_parser():
     parser.add_argument('--log_interval', type=int, default=50, metavar='N',
                         help='how many batches to wait before logging '
                              'training status')
-    parser.add_argument('--val_interval', type=int, default=100, metavar='N',
+    parser.add_argument('--val_interval', type=int, default=500, metavar='N',
                         help='how many batches to wait before validation')
     parser.add_argument('--save_interval', type=int, default=1000, metavar='N',
                         help='how many batches to wait before saving a model')
