@@ -155,7 +155,6 @@ def main(args, wandb):
         # CL
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
-            pdb.set_trace()
             proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
 
