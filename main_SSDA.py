@@ -177,7 +177,7 @@ def main(args, wandb):
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
-        if args.lr_decay == 'poly' and step % args.log_interval:
+        if args.lr_decay == 'poly' and step % args.log_interval == 0:
             lr_min = args.lr/50
             lr = (args.lr - lr_min) * pow(1 - step/args.steps, 0.9) + lr_min
             print('*** Learning rate set to %.6f ***' % lr)
