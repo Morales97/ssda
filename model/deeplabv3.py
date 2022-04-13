@@ -217,7 +217,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
         maskContrast_pretrained = torch.load(custom_pretrain_path)
-        model = deeplabv3_resnet50(num_classes=19, pixel_contrast)   
+        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict
