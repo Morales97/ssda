@@ -10,6 +10,7 @@ Code taken from https://github.com/WilhelmT/ClassMix, slightly modified
 import torch.nn as nn
 from torch.utils import model_zoo
 import numpy as np
+from torch.nn import functional as F
 import pdb
 affine_par = True
 
