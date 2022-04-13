@@ -208,6 +208,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
 
     if pretrained:
         # load COCO's weights
+        print('Loading COCO pretrained weights for DeepLabv3 + ResNet-50')
         model_coco = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
         sd = model.state_dict().copy()
@@ -215,7 +216,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         for k, v in sd_coco.items():
             if not (k.startswith('classifier.4') or k.startswith('aux_classifier')):
                 # Copy all parameters but for linear classifier, which has different number of classes
-                sd[k] = v
+                sd[k].copy_(v)
 
         model.load_state_dict(sd)
         return model
