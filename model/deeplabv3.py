@@ -101,7 +101,7 @@ class DeepLabV3Contrast(nn.Module):
 
         proj = self.projection(features["out"])
         proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
-        proj = F.interpolate(proj, size=input.shape[-2:], mode="bilinear", align_corners=False)
+        proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
         result["proj"] = proj
 
         return result
