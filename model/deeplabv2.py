@@ -73,23 +73,25 @@ class Bottleneck(nn.Module):
 
         return out
 
-class Classifier_Module(nn.Module):
+class _ASPP(nn.Module):
+    """
+    Atrous spatial pyramid pooling (ASPP)
+    """
 
-    def __init__(self, dilation_series, padding_series, num_classes):
-        super(Classifier_Module, self).__init__()
-        self.conv2d_list = nn.ModuleList()
-        for dilation, padding in zip(dilation_series, padding_series):
-            self.conv2d_list.append(nn.Conv2d(2048, num_classes, kernel_size=3, stride=1, padding=padding, dilation=dilation, bias = True))
+    def __init__(self, in_ch, out_ch, rates):
+        super(_ASPP, self).__init__()
+        for i, rate in enumerate(rates):
+            self.add_module(
+                "c{}".format(i),
+                nn.Conv2d(in_ch, out_ch, 3, 1, padding=rate, dilation=rate, bias=True),
+            )
 
-        for m in self.conv2d_list:
-            m.weight.data.normal_(0, 0.01)
+        for m in self.children():
+            nn.init.normal_(m.weight, mean=0, std=0.01)
+            nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        out = self.conv2d_list[0](x)
-        for i in range(len(self.conv2d_list)-1):
-            out += self.conv2d_list[i+1](x)
-            return out
-
+        return sum([stage(x) for stage in self.children()])
 
 
 class ResNet(nn.Module):
@@ -109,7 +111,7 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4)
-        self.layer5 = self._make_pred_layer(Classifier_Module, [6,12,18,24],[6,12,18,24],num_classes)
+        self.layer5 = _ASPP(2048, num_classes, [6,12,18,24])
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -136,8 +138,6 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _make_pred_layer(self,block, dilation_series, padding_series,num_classes):
-        return block(dilation_series,padding_series,num_classes)
 
     def forward(self, x, return_features=False):
         x = self.conv1(x)
@@ -206,3 +206,8 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
         model.load_state_dict(new_params)
 
     return model
+
+
+if __name__ == '__main__':
+    model = deeplabv2_rn101()
+    pdb.set_trace()

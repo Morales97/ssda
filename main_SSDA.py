@@ -117,6 +117,7 @@ def main(args, wandb):
         # CE
         loss_s = loss_fn(out_s, labels_s)
         loss_t = loss_fn(out_t, labels_t)
+        pdb.set_trace()
 
         # CR
         loss_cr, percent_pl, time_cr = 0, 0, 0
