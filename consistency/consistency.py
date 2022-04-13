@@ -33,6 +33,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_prob_distr(out_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(out_w, out_s, tau)
+    elif cr_type == 'kl':
+        return cr_KL(out_w, out_s)
     else:
         raise Exception('Consistancy regularization type not supported')
 
@@ -141,6 +143,7 @@ def cr_JS(out_w, out_s, tau):
     return loss_cr, percent_pl
 
 
+
 def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     # NOTE only implented for tau = 0
     assert tau == 0
@@ -161,6 +164,25 @@ def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     kl2 = F.kl_div(p_s1.log(), m, reduction='batchmean')
     kl3 = F.kl_div(p_s2.log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2 + kl3)/3
+    
+    percent_pl = 100
+    return loss_cr, percent_pl
+
+
+def cr_KL(out_w, out_s):
+    '''
+    TODO generalize to n augmentations
+    '''
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    out_s = out_s.permute(0, 2, 3, 1)
+    out_s = torch.flatten(out_s, end_dim=2)
+
+    p_w = F.softmax(out_w, dim=1).detach()              
+    p_s = F.softmax(out_s, dim=1)    
+
+    kl = F.kl_div(p_s.log(), p_w, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
+    loss_cr = kl
     
     percent_pl = 100
     return loss_cr, percent_pl
