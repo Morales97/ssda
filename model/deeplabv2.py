@@ -8,6 +8,7 @@ Code taken from https://github.com/Shathe/SemiSeg-Contrastive, slightly modified
 """
 
 import torch.nn as nn
+from torch.utils import model_zoo
 import numpy as np
 affine_par = True
 
