@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --save_model=False --project=GTA_to_CS_tiny --expt_name=dlv2_rn101 --net=deeplabv2_rn101 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
+python main_SSDA.py --save_model=False --project=GTA_to_CS_tiny --expt_name=dlv2_rn101_no_IN --pre_trained_backbone=False --steps=500 --net=deeplabv2_rn101 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 
 #python main_SSDA.py --project=GTA_to_CS_tiny --expt_name=CR_JS_IN_bb_2_augs_detach --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 --cr=js --tau=0 --n_augmentations=2 
 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS.tar 
