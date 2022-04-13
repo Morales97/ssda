@@ -76,6 +76,35 @@ class DeepLabV3(_SimpleSegmentationModel):
 
     pass
 
+class DeepLabV3Contrast(nn.Module):
+        def __init__(self, backbone: nn.Module, classifier: nn.Module, dim_feat: int, dim_embed: int) -> None:
+        super().__init__()
+        self.backbone = backbone
+        self.classifier = classifier
+        self.projection = nn.Sequential(
+                            nn.Conv2d(dim_feat, dim_feat, 1, bias=False)
+                            nn.BatchNorm2d(dim_feat),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(dim_feat, dim_embed, 1, bias=False)
+                        )
+
+    def forward(self, x: Tensor) -> Dict[str, Tensor]:
+        input_shape = x.shape[-2:]
+        # contract: features is a dict of tensors
+        features = self.backbone(x)
+
+        result = OrderedDict()
+        x = features["out"]
+        x = self.classifier(x)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        result["out"] = x
+
+        proj = self.projection(features["out"])
+        proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
+        proj = F.interpolate(proj, size=input.shape[-2:], mode="bilinear", align_corners=False)
+        result["proj"] = proj
+
+        return result
 
 class DeepLabHead(nn.Sequential):
     def __init__(self, in_channels: int, num_classes: int) -> None:
@@ -148,19 +177,22 @@ class ASPP(nn.Module):
 def _deeplabv3_resnet(
     backbone: resnet.ResNet,
     num_classes: int,
+    pixel_contrast: bool
 ) -> DeepLabV3:
     return_layers = {"layer4": "out"}
     backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
 
     classifier = DeepLabHead(2048, num_classes)
-    return DeepLabV3(backbone, classifier, None)
+    if pixel_contrast:
+        return DeepLabV3Contrast(backbone, classifier, 2048, 256)
+    else:
+        return DeepLabV3(backbone, classifier, None)
 
 
 def deeplabv3_resnet50(
-    pretrained: bool = False,
-    progress: bool = True,
     num_classes: int = 21,
     pretrained_backbone: bool = True,
+    pixel_contrast: bool = False
 ) -> DeepLabV3:
     """Constructs a DeepLabV3 model with a ResNet-50 backbone.
     Args:
@@ -174,18 +206,18 @@ def deeplabv3_resnet50(
     # DM: modified to remove aux classifier
 
     backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
-    model = _deeplabv3_resnet(backbone, num_classes)
+    model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast)
 
     return model
 
 
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None):
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False):
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
         maskContrast_pretrained = torch.load(custom_pretrain_path)
-        model = deeplabv3_resnet50(num_classes=19)   
+        model = deeplabv3_resnet50(num_classes=19, pixel_contrast)   
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict

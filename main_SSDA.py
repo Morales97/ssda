@@ -90,8 +90,13 @@ def main(args, wandb):
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % len(source_loader) == 0:
             data_iter_s = iter(source_loader)
-        if step % len(target_loader) == 0:
+        #if step % len(target_loader) == 0:
+        #    data_iter_t = iter(target_loader)
+        try:
+            images_t, labels_t = next(data_iter_t)
+        except:
             data_iter_t = iter(target_loader)
+            images_t, labels_t = next(data_iter_t)
 
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
@@ -174,8 +179,6 @@ def main(args, wandb):
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
-
-
         if step == np.floor(args.steps * 0.75):
             for param_group in optimizer.param_groups:
                 param_group['lr'] = param_group['lr'] * 0.1
@@ -243,7 +246,7 @@ def main(args, wandb):
             val_loss_meter.reset()
             running_metrics_val.reset()
 
-
+        step += 1
         if step % args.save_interval == 0:
             if args.save_model:
                 torch.save({
@@ -263,7 +266,7 @@ def main(args, wandb):
                     wandb.log_artifact(model_artifact)
                 best_mIoU = score['mIoU']
             
-            step += 1
+            
         if step >= args.steps:
             break
 
