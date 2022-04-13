@@ -82,7 +82,7 @@ class DeepLabV3Contrast(nn.Module):
         self.backbone = backbone
         self.classifier = classifier
         self.projection = nn.Sequential(
-                            nn.Conv2d(dim_feat, dim_feat, 1, bias=False)
+                            nn.Conv2d(dim_feat, dim_feat, 1, bias=False),
                             nn.BatchNorm2d(dim_feat),
                             nn.ReLU(inplace=True),
                             nn.Conv2d(dim_feat, dim_embed, 1, bias=False)
