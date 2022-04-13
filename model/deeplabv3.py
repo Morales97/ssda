@@ -232,6 +232,10 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         model.load_state_dict(new_state_dict, strict=False) 
         return model
     
+    if pixel_contrast:
+        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
+        return model
+
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=False, 
         num_classes=19, 
