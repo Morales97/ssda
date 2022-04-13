@@ -96,20 +96,17 @@ def cr_prob_distr(out_w, out_s, tau):
     #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
     #    pdb.set_trace()
 
-    if loss == 'CE':
-        loss_cr = F.cross_entropy(out_s, p_w)
-    elif loss == 'JS':
-        out_s = F.softmax(out_s, dim=1)    # convert to probabilities
-        m = (out_s + p_w)/2
-        kl1 = F.kl_div(out_s.log(), m, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
-        kl2 = F.kl_div(p_w.log(), m, reduction='batchmean')
-        loss_cr = (kl1 + kl2)/2
+
+    loss_cr = F.cross_entropy(out_s, p_w)
     
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
 
 def cr_JS(out_w, out_s, tau):
+    '''
+    TODO generalize to n augmentations
+    '''
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     p_w = F.softmax(out_w, dim=1).detach()              
