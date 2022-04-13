@@ -4,12 +4,13 @@ This is the implementation of DeepLabv2 without multi-scale inputs. This impleme
 This deeplab is used with imagenet pretraining to match the current pytorch implementation that provides these weights.
 This implementation follows the new implementation of Resnet bottleneck module where the stride is performed in the 3x3 conv.
 
-Code taken from https://github.com/Shathe/SemiSeg-Contrastive, slightly modified
+Code taken from https://github.com/WilhelmT/ClassMix, slightly modified
 """
 
 import torch.nn as nn
 from torch.utils import model_zoo
 import numpy as np
+import pdb
 affine_par = True
 
 
@@ -109,39 +110,6 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4)
         self.layer5 = self._make_pred_layer(Classifier_Module, [6,12,18,24],[6,12,18,24],num_classes)
-        dim_in = 2048
-        feat_dim = 256
-        self.projection_head = nn.Sequential(
-            nn.Linear(dim_in, feat_dim),
-            nn.BatchNorm1d(feat_dim),
-            nn.ReLU(inplace=True),
-            nn.Linear(feat_dim, feat_dim)
-        )
-        self.prediction_head = nn.Sequential(
-            nn.Linear(feat_dim, feat_dim),
-            nn.BatchNorm1d(feat_dim),
-            nn.ReLU(inplace=True),
-            nn.Linear(feat_dim, feat_dim)
-        )
-
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
-
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
-
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -170,13 +138,6 @@ class ResNet(nn.Module):
 
     def _make_pred_layer(self,block, dilation_series, padding_series,num_classes):
         return block(dilation_series,padding_series,num_classes)
-
-
-    def forward_projection_head(self, features):
-        return self.projection_head(features)
-
-    def forward_prediction_head(self, features):
-        return self.prediction_head(features)
 
     def forward(self, x, return_features=False):
         x = self.conv1(x)
@@ -211,12 +172,8 @@ class ResNet(nn.Module):
         b.append(self.layer3)
         b.append(self.layer4)
         b.append(self.layer5)
-        b.append(self.projection_head)
+        #b.append(self.projection_head)
         b.append(self.prediction_head)
-
-        for class_c in range(self.num_classes):
-            b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))
-            b.append(self.__getattr__('contrastive_class_selector_memory' + str(class_c)))
 
         for i in range(len(b)):
             for k in b[i].parameters():
