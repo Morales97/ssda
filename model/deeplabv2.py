@@ -234,11 +234,17 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
     model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes)
     
-    sd_imagenet = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth')  # ImageNet pretrained rn101
-    new_params = model.state_dict().copy()
-    for name, param in new_params.items():
-        if name in saved_state_dict and param.size() == saved_state_dict[name].size():
-            new_params[name].copy_(saved_state_dict[name])
-    model.load_state_dict(new_params)
+    if custom_pretrain_path is not None:
+        raise Exception('custom DeepLabv2 + ResNet-101 is not available')
+        return model
+
+    if pre_trained_backbone:
+        print('*** Loading ImageNet weights to DeepLabv2 + ResNet-101')
+        sd_imagenet = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth')  # ImageNet pretrained rn101
+        new_params = model.state_dict().copy()
+        for name, param in new_params.items():
+            if name in sd_imagenet and param.size() == sd_imagenet[name].size():
+                new_params[name].copy_(sd_imagenet[name])
+        model.load_state_dict(new_params)
 
     return model
