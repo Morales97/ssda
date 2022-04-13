@@ -177,9 +177,15 @@ def main(args, wandb):
         pseudo_lbl_meter.update(percent_pl)
 
         # decrease lr
-        if step == np.floor(args.steps * 0.75):
+        if args.lr_decay == 'poly':
+            lr_min = args.lr/50
+            lr = (args.lr - lr_min) * pow(1 - step/args.steps, 0.9) + lr_min
             for param_group in optimizer.param_groups:
-                param_group['lr'] = param_group['lr'] * 0.1
+                param_group['lr'] = lr
+        elif args.lr_decay == 'det':
+            if step == np.floor(args.steps * 0.75):
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = param_group['lr'] * 0.1
 
     
         if step % args.log_interval == 0:

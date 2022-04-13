@@ -22,6 +22,8 @@ def get_parser():
 
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
+    parser.add_argument('--lr_decay', type=str, default='poly',
+                        help='wandb project to use')         
     parser.add_argument('--batch_size_s', type=int, default=8,
                         help='Batch size of source labelled data.')
     parser.add_argument('--batch_size_tl', type=int, default=8,
@@ -47,7 +49,7 @@ def get_parser():
     parser.add_argument('--log_interval', type=int, default=50, metavar='N',
                         help='how many batches to wait before logging '
                              'training status')
-    parser.add_argument('--val_interval', type=int, default=500, metavar='N',
+    parser.add_argument('--val_interval', type=int, default=250, metavar='N',
                         help='how many batches to wait before validation')
     parser.add_argument('--save_interval', type=int, default=1000, metavar='N',
                         help='how many batches to wait before saving a model')
