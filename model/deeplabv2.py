@@ -140,6 +140,7 @@ class ResNet(nn.Module):
 
 
     def forward(self, x, return_features=False):
+        input_shape = x.shape[-2:]
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -149,6 +150,7 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         features = self.layer4(x)
         x = self.layer5(features)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
         if return_features:
             return x, features
