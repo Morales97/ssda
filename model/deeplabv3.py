@@ -210,7 +210,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         # load COCO's weights
         model_coco = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
-        sd = model.state_dict()
+        sd = model.state_dict().copy()
         sd_coco = model_coco.state_dict()
         for k, v in sd_coco.items():
             if not (k.startswith('classifier.4') or k.startswith('aux_classifier')):
