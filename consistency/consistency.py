@@ -32,11 +32,11 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'prob_distr':
         return cr_prob_distr(out_w, out_s, tau)
     elif cr_type == 'js':
-        return cr_JS(out_w, out_s, tau)
+        return cr_JS(out_w, out_s, tau=0)
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
     else:
-        raise Exception('Consistancy regularization type not supported')
+        raise Exception('Consistency regularization type not supported')
 
 
 def cr_one_hot(out_w, out_s, tau):
