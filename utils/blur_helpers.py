@@ -83,6 +83,9 @@ def _get_line_kernel2d(
 	kernel2d /= kernel2d.sum()
 	return kernel2d
 
+
+
+
 if __name__ == '__main__':
 	kernel = _get_gaussian_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
 	kernel_mean = _get_mean_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')

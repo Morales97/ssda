@@ -22,8 +22,8 @@ def get_parser():
 
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
-    parser.add_argument('--lr_decay', type=str, default='poly',
-                        help='wandb project to use')         
+    parser.add_argument('--lr_decay', type=str, default='det',
+                        help='lr decay to use (det/poly')         
     parser.add_argument('--batch_size_s', type=int, default=8,
                         help='Batch size of source labelled data.')
     parser.add_argument('--batch_size_tl', type=int, default=8,
@@ -77,7 +77,7 @@ def get_parser():
                         help='number of augmentations in CR')                       
     parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
                         help='Use pixel contrast regularization')
-    parser.add_argument('--gamma', type=float, default=1,
+    parser.add_argument('--gamma', type=float, default=0.1,
                         help='weight of pixel contrast loss')
     parser.add_argument('--warmup_steps', type=int, default=1000,
                         help='number of warm up steps before pixel contrast loss')    
