@@ -10,7 +10,7 @@ def cr_multiple_augs(args, images, model):
     images_weak = images[0].cuda()
     images_strong1 = images[1].cuda()
     images_strong2 = images[2].cuda()
-
+    pdb.set_trace()
     outputs_w = model(images_weak)                   # (N, C, H, W)
     outputs_strong1 = model(images_strong1)
     outputs_strong2 = model(images_strong2)
