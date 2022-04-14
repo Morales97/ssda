@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import pdb 
 from collections import OrderedDict
+from torchvision.utils import save_image
 
 
 def cr_multiple_augs(args, images, model):
