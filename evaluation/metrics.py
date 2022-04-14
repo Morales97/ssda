@@ -64,7 +64,7 @@ class runningScore(object):
                 "FreqW Acc": fwavacc,
                 "mIoU": mean_iu,
             },
-            #cls_iu,
+            cls_iu,
         )
 
     def reset(self):

@@ -236,8 +236,7 @@ def main(args, wandb):
                 'Validation loss': val_loss_meter.avg
             })
             
-            #score, class_iou = running_metrics_val.get_scores()
-            score = running_metrics_val.get_scores()
+            score, class_iou = running_metrics_val.get_scores()
             for k, v in score.items():
                 log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
