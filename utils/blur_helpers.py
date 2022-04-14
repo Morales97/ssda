@@ -2,6 +2,8 @@ import torch
 from torch import Tensor
 from typing import Tuple, List, Optional
 import pdb
+import torchvision.transforms.functional as TF
+
 '''
 	From torch's functional_tensor
 	https://github.com/pytorch/vision/blob/main/torchvision/transforms/functional_tensor.py
@@ -46,16 +48,16 @@ def _get_gaussian_kernel1d(kernel_size: int, sigma: float) -> Tensor:
 
 
 def _get_gaussian_kernel2d(
-	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device
+	kernel_size: List[int], sigma: List[float]
 ) -> Tensor:
-	kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0]).to(device, dtype=dtype)
-	kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(device, dtype=dtype)
+	kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0])
+	kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1])
 	kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
 	return kernel2d
 
 # DM
 def _get_mean_kernel2d(
-	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device
+	kernel_size: List[int]
 ) -> Tensor:
 	kernel2d = torch.ones((kernel_size[0], kernel_size[1]))
 	kernel2d /= kernel2d.sum()
@@ -63,7 +65,7 @@ def _get_mean_kernel2d(
 
 # DM
 def _get_diagonal_kernel2d(
-	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device, do_flip=False
+	kernel_size: List[int], do_flip=False
 ) -> Tensor:
 	kernel2d = torch.eye(kernel_size[0])
 	if do_flip:
@@ -73,7 +75,7 @@ def _get_diagonal_kernel2d(
 
 # DM
 def _get_line_kernel2d(
-	kernel_size: List[int], sigma: List[float], dtype: torch.dtype, device: torch.device, do_vertical=False
+	kernel_size: List[int], do_vertical=False
 ) -> Tensor:
 	kernel2d = torch.zeros(kernel_size)
 	if do_vertical:
@@ -83,10 +85,24 @@ def _get_line_kernel2d(
 	kernel2d /= kernel2d.sum()
 	return kernel2d
 
-
+def _get_hpf_kernel2d(
+	kernel_size: List[int]
+) -> Tensor:
+	kernel2d = torch.ones(kernel_size) * -1
+	for i in range(kernel_size[0]):
+		if i % 2 == 0:
+			kernel2d[i, :] += 1
+	for i in range(kernel_size[1]):
+		if i % 2 == 0:
+			kernel2d[:, i] += 1
+	gauss = _get_gaussian_kernel2d([5,5], [1, 1])
+	kernel2d = kernel2d * gauss
+	kernel2d /= kernel2d.sum()
+	return kernel2d
 
 
 if __name__ == '__main__':
-	kernel = _get_gaussian_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
-	kernel_mean = _get_mean_kernel2d([3,3], [0.5, 1], torch.float32, 'cpu')
+	kernel = _get_gaussian_kernel2d([5,5], [1, 1])
+	kernel_mean = _get_mean_kernel2d([3,3])
+	kernel_hpf = _get_hpf_kernel2d([5,5])
 	pdb.set_trace()

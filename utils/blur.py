@@ -1,14 +1,15 @@
 from __future__ import absolute_import
 
 import torch
-from utils.blur_helpers import _get_gaussian_kernel2d, _cast_squeeze_in, _cast_squeeze_out, _get_mean_kernel2d, _get_diagonal_kernel2d, _get_line_kernel2d
+from utils.blur_helpers import _get_gaussian_kernel2d, _cast_squeeze_in, _cast_squeeze_out, _get_mean_kernel2d, _get_diagonal_kernel2d, _get_line_kernel2d, _get_hpf_kernel2d
 from torch import Tensor
 from typing import Tuple, List, Optional
 import numbers
 from collections.abc import Sequence
 from torch.nn.functional import conv2d, pad as torch_pad
 from PIL import Image
-from torchvision.transforms.functional import pil_to_tensor, to_pil_image
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
+from torchvision.utils import save_image
 import pdb 
 
 def blur(img: Tensor, kernel_size: List[int], blur_type, sigma: List[float]) -> Tensor:
@@ -21,17 +22,19 @@ def blur(img: Tensor, kernel_size: List[int], blur_type, sigma: List[float]) -> 
 
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
 	if blur_type == 'gaussian':
-		kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) # tensor of size (3, 3)
+		kernel = _get_gaussian_kernel2d(kernel_size, sigma) # tensor of size (3, 3)
 	elif blur_type == 'mean':
-		kernel = _get_mean_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) 
+		kernel = _get_mean_kernel2d(kernel_size)
 	elif blur_type == 'diagonal':
-		kernel = _get_diagonal_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) 
+		kernel = _get_diagonal_kernel2d(kernel_size)
 	elif blur_type == 'diagonal_flip':
-		kernel = _get_diagonal_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device, do_flip=True) 
+		kernel = _get_diagonal_kernel2d(kernel_size, do_flip=True) 
 	elif blur_type == 'horizontal':
-		kernel = _get_line_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) 
+		kernel = _get_line_kernel2d(kernel_size)
 	elif blur_type == 'vertical':
-		kernel = _get_line_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device, do_vertical=True) 
+		kernel = _get_line_kernel2d(kernel_size, do_vertical=True) 
+	elif blur_type == 'hpf':
+		kernel = _get_hpf_kernel2d(kernel_size)
 	else:
 		raise Exception('blur type not supported')
 	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			
@@ -191,3 +194,13 @@ def _call_blur(img: Tensor, kernel_size: List[int], blur_type, sigma: Optional[L
     if not isinstance(img, torch.Tensor):
         output = to_pil_image(output, mode=img.mode)
     return output
+
+if __name__ == '__main__':
+
+	image = Image.open('/Users/dani/Desktop/sample_img.jpg')
+	image = to_tensor(image)
+
+	image_blurred = blur(image, [5,5], 'hpf', [1,1])
+	save_image(image_blurred, '/Users/dani/Desktop/sample_blurred.jpg')
+
+	pdb.set_trace()

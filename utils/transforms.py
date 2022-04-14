@@ -66,6 +66,7 @@ def blur_augment_pool():
             'diagonal_flip',
             'horizontal',
             'vertical',
+            'hpf',
             ]
     return augs
 
