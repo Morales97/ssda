@@ -88,6 +88,7 @@ def _get_line_kernel2d(
 def _get_hpf_kernel2d(
 	kernel_size: List[int]
 ) -> Tensor:
+	print('High Pass Filter !!')
 	kernel2d = torch.ones(kernel_size) * -1
 	for i in range(kernel_size[0]):
 		if i % 2 == 0:
