@@ -22,7 +22,7 @@ def blur(img: Tensor, kernel_size: List[int], blur_type, sigma: List[float]) -> 
 
 	dtype = img.dtype if torch.is_floating_point(img) else torch.float32
 	if blur_type == 'gaussian':
-		kernel = _get_gaussian_kernel2d(kernel_size, sigma) # tensor of size (3, 3)
+		kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=img.device) # tensor of size (3, 3)
 	elif blur_type == 'mean':
 		kernel = _get_mean_kernel2d(kernel_size)
 	elif blur_type == 'diagonal':
