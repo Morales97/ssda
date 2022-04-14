@@ -87,7 +87,7 @@ class RandAugmentMC(object):
         return img
 
 class RandAugmentBlur(object):
-    def __init__(self, augment_pool, kernel_sizes=[(7,7), (5,5)]):
+    def __init__(self, augment_pool, kernel_sizes=[(5,5)]):
         self.augment_pool = augment_pool
         self.kernel_sizes = kernel_sizes
     def __call__(self, img):

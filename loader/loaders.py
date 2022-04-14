@@ -47,8 +47,20 @@ def get_loaders(args, num_t_samples=2975):
 
     # Semi-supervised
     else:                       
-        t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='train', sample_idxs=idxs_lbl)
-        t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='train', sample_idxs=idxs_unlbl, unlabeled=True, n_augmentations=args.n_augmentations)
+        t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                          label_path=label_path_cs, 
+                                          size=size, 
+                                          split='train', 
+                                          sample_idxs=idxs_lbl)
+                                          
+        t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                            label_path=label_path_cs, 
+                                            size=size, 
+                                            split='train', 
+                                            sample_idxs=idxs_unlbl, 
+                                            unlabeled=True, 
+                                            strong_aug_level=args.aug_level, 
+                                            n_augmentations=args.n_augmentations)
         t_lbl_loader = DataLoader(
             t_lbl_dataset,
             batch_size=args.batch_size_tl,
