@@ -91,7 +91,6 @@ class RandAugmentBlur(object):
     def __init__(self, augment_pool, kernel_sizes=[(5,5)]):
         self.augment_pool = augment_pool
         self.kernel_sizes = kernel_sizes
-        print('RandAugmentBlur')
     def __call__(self, img):
         blurs = random.choices(self.augment_pool, k=2)
         for blur_type in blurs:
@@ -155,8 +154,6 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
                 ], p=0.8)
             ]
         elif aug_level == 4:
-            print('level 4')
-
             # Strong augmentation for CR: Color Jitter + RandAugment + Blur
             transform_list = [
                 RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),

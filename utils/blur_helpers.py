@@ -86,9 +86,8 @@ def _get_line_kernel2d(
 	return kernel2d
 
 def _get_hpf_kernel2d(
-	kernel_size: List[int]
+	kernel_size: List[int], dtype: torch.dtype, device: torch.device
 ) -> Tensor:
-	print('High Pass Filter !!')
 	kernel2d = torch.ones(kernel_size) * -1
 	for i in range(kernel_size[0]):
 		if i % 2 == 0:
@@ -96,7 +95,7 @@ def _get_hpf_kernel2d(
 	for i in range(kernel_size[1]):
 		if i % 2 == 0:
 			kernel2d[:, i] += 1
-	gauss = _get_gaussian_kernel2d([5,5], [1, 1])
+	gauss = _get_gaussian_kernel2d([5,5], [1, 1], dtype, device)
 	kernel2d = kernel2d * gauss
 	kernel2d /= kernel2d.sum()
 	return kernel2d

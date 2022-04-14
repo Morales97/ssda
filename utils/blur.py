@@ -34,7 +34,7 @@ def blur(img: Tensor, kernel_size: List[int], blur_type, sigma: List[float]) -> 
 	elif blur_type == 'vertical':
 		kernel = _get_line_kernel2d(kernel_size, do_vertical=True) 
 	elif blur_type == 'hpf':
-		kernel = _get_hpf_kernel2d(kernel_size)
+		kernel = _get_hpf_kernel2d(kernel_size, dtype=dtype, device=img.device)
 	else:
 		raise Exception('blur type not supported')
 	kernel = kernel.expand(img.shape[-3], 1, kernel.shape[0], kernel.shape[1])			
@@ -200,7 +200,7 @@ if __name__ == '__main__':
 	image = Image.open('/Users/dani/Desktop/sample_img.jpg')
 	image = to_tensor(image)
 
-	image_blurred = blur(image, [5,5], 'hpf', [1,1])
+	image_blurred = blur(image, [5,5], 'hpf', [1,1], image.dtype, image.device)
 	save_image(image_blurred, '/Users/dani/Desktop/sample_blurred.jpg')
 
 	pdb.set_trace()

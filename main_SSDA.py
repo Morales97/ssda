@@ -142,7 +142,6 @@ def main(args, wandb):
                 else:
                     out_w = outputs_w
                     out_strong = outputs_strong
-                pdb.set_trace()
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
