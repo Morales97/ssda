@@ -188,7 +188,7 @@ def main(args, wandb):
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
-    
+        step += 1
         if step % args.log_interval == 0:
             log_info = OrderedDict({
                 'Train Step': step,
@@ -250,8 +250,7 @@ def main(args, wandb):
 
             val_loss_meter.reset()
             running_metrics_val.reset()
-
-        step += 1
+        
         if step % args.save_interval == 0:
             if args.save_model:
                 torch.save({
