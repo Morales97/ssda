@@ -94,10 +94,8 @@ def main(args, wandb):
             data_iter_t = iter(target_loader)
 
         images_s, labels_s = next(data_iter_s)
-        try:
-            images_t, labels_t = next(data_iter_t)
-        except:
-            pdb.set_trace()
+        images_t, labels_t = next(data_iter_t)
+
         images_s = images_s.cuda()
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
@@ -164,7 +162,7 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         loss.backward()
         optimizer.step()
-        pdb.set_trace()
+        print(loss)
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
         train_loss_meter.update(loss)
