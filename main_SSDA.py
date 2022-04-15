@@ -162,7 +162,7 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         loss.backward()
         optimizer.step()
-        print(loss)
+
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
         train_loss_meter.update(loss)
