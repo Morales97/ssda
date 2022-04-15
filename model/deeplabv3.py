@@ -6,7 +6,7 @@ from torch.nn import functional as F
 import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
-from dsbn import resnet_dsbn
+from model.dsbn import resnet_dsbn
 from collections import OrderedDict
 
 
