@@ -6,7 +6,7 @@ from torch.nn import functional as F
 import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
-
+from dsbn import resnet_dsbn
 from collections import OrderedDict
 
 
@@ -192,7 +192,8 @@ def _deeplabv3_resnet(
 def deeplabv3_resnet50(
     num_classes: int = 21,
     pretrained_backbone: bool = True,
-    pixel_contrast: bool = False
+    pixel_contrast: bool = False,
+    dsbn: bool = False
 ) -> DeepLabV3:
     """Constructs a DeepLabV3 model with a ResNet-50 backbone.
     Args:
@@ -205,7 +206,10 @@ def deeplabv3_resnet50(
     """
     # DM: modified to remove aux classifier
 
-    backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
+    if dsbn:
+        backbone = resnet_dsbn.resnet50dsbn(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
+    else:
+        backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
     model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast)
 
     return model
@@ -300,5 +304,6 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     return model
 
 if __name__ == '__main__':
-    model = deeplabv3_rn50(pretrained=True)
+    #model = deeplabv3_rn50(pretrained=True)
+    model = deeplabv3_resnet50(num_classes=19, dsbn=True)
     pdb.set_trace()
