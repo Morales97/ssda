@@ -19,4 +19,4 @@
 #python main_FS.py --save_model=True --save_interval=5000 --steps=25000 --lr=0.001 --project=GTA_to_CS_tiny --expt_name=FS_25k_lr3 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 
 # DLv2
-python main_FS.py --seed=1 -save_interval=10000 --steps=100000 --lr=0.001 --lr_decay=poly --project=GTA_to_CS_tiny --expt_name=dlv2_FS_100k --net=deeplabv2_rn101 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 
+python main_FS.py --seed=1 --save_interval=10000 --steps=100000 --lr=0.001 --lr_decay=poly --project=GTA_to_CS_tiny --expt_name=dlv2_FS_100k --net=deeplabv2_rn101 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 
