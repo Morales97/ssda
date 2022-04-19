@@ -303,6 +303,7 @@ def deeplabv3_rn50_densecl(pixel_contrast=False, dsbn=False):
     pt_sd = torch.load('model/pretrained/densecl_r50_imagenet_200ep.pth')['state_dict']
     model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, dsbn=dsbn)   
     model.load_state_dict(pt_sd, strict=False)
+    print('Loading model pretrained densly on ImageNet with DenseCL')
     return model
 
 
@@ -316,8 +317,8 @@ def deeplabv3_rn50_pixpro(pixel_contrast=False, dsbn=False):
     for key, param in pt_sd.items():
         if 'module.encoder.' in key:
             new_state_dict[key[15:]] = param  # remove the 'module.encoder.' part
-            print(key[15:])
             
+    print('Loading model pretrained densly on ImageNet with PixPro')
     model.load_state_dict(new_state_dict, strict=False)
     return model
 
