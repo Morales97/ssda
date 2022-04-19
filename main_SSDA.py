@@ -107,8 +107,8 @@ def main(args, wandb):
 
         optimizer.zero_grad()
         if args.dsbn:
-            outputs_s = model(images_s, 0*torch.ones(x.shape[0], dtype=torch.long))
-            outputs_t = model(images_t, 1*torch.ones(x.shape[0], dtype=torch.long))
+            outputs_s = model(images_s, 0*torch.ones(outputs_s.shape[0], dtype=torch.long))
+            outputs_t = model(images_t, 1*torch.ones(outputs_t.shape[0], dtype=torch.long))
         else:
             outputs_s = model(images_s)
             outputs_t = model(images_t)
