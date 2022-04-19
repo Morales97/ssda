@@ -6,8 +6,8 @@ from torch.nn import functional as F
 import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
-#from dsbn import resnet_dsbn
-from model.dsbn import resnet_dsbn
+from dsbn import resnet_dsbn
+#from model.dsbn import resnet_dsbn
 from collections import OrderedDict
 from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
@@ -298,6 +298,29 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
     return model
 
 
+def deeplabv3_rn50_densecl(pixel_contrast=False, dsbn=False):
+    # TODO merge this with deeplabv3_rn50()
+    pt_sd = torch.load('model/pretrained/densecl_r50_imagenet_200ep.pth')['state_dict']
+    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, dsbn=dsbn)   
+    model.load_state_dict(pt_sd, strict=False)
+    return model
+
+
+def deeplabv3_rn50_pixpro(pixel_contrast=False, dsbn=False):
+    # TODO merge this with deeplabv3_rn50()
+    pt_sd = torch.load('model/pretrained/pixpro_base_r50_400ep.pth')['model']
+    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, dsbn=dsbn)   
+
+    # Create a new state_dict
+    new_state_dict = {}
+    for key, param in pt_sd.items():
+        if 'module.encoder.' in key:
+            new_state_dict[key[15:]] = param  # remove the 'module.encoder.' part
+            print(key[15:])
+            
+    model.load_state_dict(new_state_dict, strict=False)
+    return model
+
 
 def deeplabv3_mobilenetv3_large(pretrained=False, pretrained_backbone=True):
     model = torchvision.models.segmentation.deeplabv3_mobilenet_v3_large(
@@ -339,9 +362,12 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
 
 if __name__ == '__main__':
     #model = deeplabv3_rn50(pretrained=True)
+    '''
     model = deeplabv3_resnet50(num_classes=19, dsbn=True)
 
     image = Image.open('/Users/dani/Desktop/sample_img.jpg')
     image = to_tensor(image).unsqueeze(0)
     model(image, 0)
+    '''
+    model = deeplabv3_rn50_pixpro()
     pdb.set_trace()

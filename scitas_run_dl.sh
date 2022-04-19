@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_dsbn --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --dsbn=True #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
+python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=denseCL --net=deeplabv3_rn50_densecl --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 #python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 
 #python main_FS.py --project=GTA_to_CS_tiny --expt_name=FS_IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 
