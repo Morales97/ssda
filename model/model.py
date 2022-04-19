@@ -20,7 +20,7 @@ def get_model(args):
     elif args.net == 'fcn8':
         model = fcn8s()
     elif args.net == 'deeplabv3_rn50':
-        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path, args.pixel_contrast)
+        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path, args.pixel_contrast, args.dsbn)
     elif args.net == 'deeplabv2_rn101':
         model = deeplabv2_rn101(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
     elif args.net == 'dl_mobilenet':
