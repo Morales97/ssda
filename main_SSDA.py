@@ -137,8 +137,13 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
-                outputs_w = model(images_weak)                   # (N, C, H, W)
-                outputs_strong = model(images_strong)
+                if args.dsbn:
+                    outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
+                    outputs_strong = model(images_strong, 1*torch.ones(images_s.shape[0], dtype=torch.long))
+                else:
+                    outputs_w = model(images_weak)     # (N, C, H, W)
+                    outputs_strong = model(images_strong)
+
                 if type(outputs_w) == OrderedDict:
                     out_w = outputs_w['out']
                     out_strong = outputs_strong['out']
@@ -147,7 +152,7 @@ def main(args, wandb):
                     out_strong = outputs_strong
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
-                assert args.n_augmentations >= 1
+                assert args.n_augmentations >= 1 and not args.dsbn
                 cr_multiple_augs(args, images_t_unl, model)
 
             time_cr = time.time() - start_ts_cr
