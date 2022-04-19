@@ -82,7 +82,9 @@ def get_parser():
     parser.add_argument('--warmup_steps', type=int, default=1000,
                         help='number of warm up steps before pixel contrast loss')    
     parser.add_argument('--size', type=str, default='tiny',
-                        help='size of the dataset (tiny/small)')          
+                        help='size of the dataset (tiny/small)')     
+    parser.add_argument('--dsbn', type=boolfromstr, default=False,
+                        help='Use or not Adaptive Batch Norm')     
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

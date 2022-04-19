@@ -245,7 +245,7 @@ def deeplabv3_resnet50(
 
 
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False):
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False, dsbn=False):
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
@@ -265,9 +265,14 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         model.load_state_dict(new_state_dict, strict=False) 
         return model
     
+    if dsbn:
+        model = deeplabv3_resnet50(num_classes=19, dsbn=dsbn)   
+        return model 
+
     if pixel_contrast:
         model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
         return model
+
 
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=False, 
