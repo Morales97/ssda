@@ -4,7 +4,7 @@ Replaced norm_layers with DSBN from https://github.com/wgchang/DSBN/blob/master/
 '''
 
 from functools import partial
-from typing import Type, Any, Callable, Union, List, Optional
+from typing import Any, Dict, Optional, TypeVar, Callable, Tuple, Union, Type, List, OrderedDict
 
 import torch
 import torch.nn as nn
@@ -14,6 +14,7 @@ from torch.nn.modules.conv import _ConvNd
 import torch.nn.functional as F
 from torch.nn.modules.utils import _ntuple
 from model.dsbn.dsbn import  DomainSpecificBatchNorm2d
+#from dsbn.dsbn import  DomainSpecificBatchNorm2d
 
 _pair = _ntuple(2)
 
@@ -40,14 +41,14 @@ def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, d
     )
 
 
-class Conv2d(_ConvNd):
+class Conv2dDSBN(_ConvNd):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True):
         kernel_size = _pair(kernel_size)
         stride = _pair(stride)
         padding = _pair(padding)
         dilation = _pair(dilation)
-        super(Conv2d, self).__init__(
+        super(Conv2dDSBN, self).__init__(
             in_channels, out_channels, kernel_size, stride, padding, dilation,
             False, _pair(0), groups, bias, padding_mode='zeros')
 
@@ -61,7 +62,7 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 def conv1x1DSBN(in_planes: int, out_planes: int, stride: int = 1):
-    return Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+    return Conv2dDSBN(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -153,27 +154,27 @@ class Bottleneck(nn.Module):
         identity = x
 
         out = self.conv1(x)
-        out = self.bn1(out, domain)
+        out, domain = self.bn1(out, domain)
         out = self.relu(out)
 
         out = self.conv2(out)
-        out = self.bn2(out, domain)
+        out, domain = self.bn2(out, domain)
         out = self.relu(out)
 
         out = self.conv3(out)
-        out = self.bn3(out, domain)
+        out, domain = self.bn3(out, domain)
 
         if self.downsample is not None:
-            identity = self.downsample(x, domain)
+            identity, domain = self.downsample(x, domain)
 
         out += identity
         out = self.relu(out)
 
-        return out
+        return out, domain
 
 
 class TwoInputSequential(nn.Module):
-    r"""A sequential container forward with two inputs.
+    """A sequential container forward with two inputs.
     """
 
     def __init__(self, *args):
@@ -222,14 +223,13 @@ class TwoInputSequential(nn.Module):
 
     def forward(self, input1, input2):
         for module in self._modules.values():
-            try:
+            if type(module) is DomainSpecificBatchNorm2d or type(module) is Conv2dDSBN or type(module) is Bottleneck : 
                 input1, input2 = module(input1, input2)
-            except: # DM this is a cheap fix, should
+            else: # DM this is a cheap fix, should
                 input1 = module(input1)
         return input1, input2
 
     
-
 
 class DSBNResNet(nn.Module):
     def __init__(
@@ -422,3 +422,44 @@ def resnet101dsbn(pretrained=False, **kwargs):
         model.load_state_dict(updated_state_dict, strict=False)
 
     return model
+
+
+class IntermediateLayerGetterDSBN(nn.ModuleDict):
+    """
+    from https://github.com/pytorch/vision/blob/main/torchvision/models/_utils.py 
+    modified so that forward takes also domain
+    """
+    _version = 2
+    __annotations__ = {
+        "return_layers": Dict[str, str],
+    }
+
+    def __init__(self, model: nn.Module, return_layers: Dict[str, str]) -> None:
+        if not set(return_layers).issubset([name for name, _ in model.named_children()]):
+            raise ValueError("return_layers are not present in model")
+        orig_return_layers = return_layers
+        return_layers = {str(k): str(v) for k, v in return_layers.items()}
+        layers = OrderedDict()
+        for name, module in model.named_children():
+            layers[name] = module
+            if name in return_layers:
+                del return_layers[name]
+            if not return_layers:
+                break
+
+        super().__init__(layers)
+        self.return_layers = orig_return_layers
+
+    def forward(self, x, domain):
+        out = OrderedDict()
+        for name, module in self.items():
+            if type(module) is DomainSpecificBatchNorm2d or type(module) is TwoInputSequential or type(module) is Bottleneck :
+                #print('True')
+                x, _ = module(x, domain)
+            else:
+                #print('False')
+                x = module(x)
+            if name in self.return_layers:
+                out_name = self.return_layers[name]
+                out[out_name] = x
+        return out

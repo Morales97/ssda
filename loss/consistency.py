@@ -112,7 +112,7 @@ def cr_JS(out_w, out_s, tau):
     '''
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1)#.detach()              
+    p_w = F.softmax(out_w, dim=1).detach()              
 
     max_prob, _ = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()

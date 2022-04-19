@@ -6,8 +6,11 @@ from torch.nn import functional as F
 import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
-from model.dsbn import resnet_dsbn
+from dsbn import resnet_dsbn
+#from model.dsbn import resnet_dsbn
 from collections import OrderedDict
+from PIL import Image
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
 
 
 '''
@@ -106,6 +109,27 @@ class DeepLabV3Contrast(nn.Module):
 
         return result
 
+class DeepLabV3DSBN(nn.Module):
+
+    def __init__(self, backbone: nn.Module, classifier: nn.Module) -> None:
+        super().__init__()
+        self.backbone = backbone
+        self.classifier = classifier
+
+    def forward(self, x: Tensor, domain) -> Dict[str, Tensor]:
+        input_shape = x.shape[-2:]
+        # contract: features is a dict of tensors
+        features = self.backbone(x, domain)
+
+        result = OrderedDict()
+        x = features["out"]
+        x = self.classifier(x)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        result["out"] = x
+
+        return result
+
+
 class DeepLabHead(nn.Sequential):
     def __init__(self, in_channels: int, num_classes: int) -> None:
         super().__init__(
@@ -177,12 +201,17 @@ class ASPP(nn.Module):
 def _deeplabv3_resnet(
     backbone: resnet.ResNet,
     num_classes: int,
-    pixel_contrast: bool
+    pixel_contrast: bool,
+    dsbn: bool
 ) -> DeepLabV3:
     return_layers = {"layer4": "out"}
     backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
 
     classifier = DeepLabHead(2048, num_classes)
+    if dsbn:
+        backbone = resnet_dsbn.IntermediateLayerGetterDSBN(backbone, return_layers=return_layers)
+        assert not pixel_contrast, 'both dsbn and pixel contrast not supported yet'
+        return DeepLabV3DSBN(backbone, classifier)
     if pixel_contrast:
         return DeepLabV3Contrast(backbone, classifier, 2048, 256)
     else:
@@ -210,7 +239,7 @@ def deeplabv3_resnet50(
         backbone = resnet_dsbn.resnet50dsbn(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
     else:
         backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
-    model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast)
+    model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast, dsbn)
 
     return model
 
@@ -306,4 +335,8 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
 if __name__ == '__main__':
     #model = deeplabv3_rn50(pretrained=True)
     model = deeplabv3_resnet50(num_classes=19, dsbn=True)
+
+    image = Image.open('/Users/dani/Desktop/sample_img.jpg')
+    image = to_tensor(image).unsqueeze(0)
+    model(image, 0)
     pdb.set_trace()

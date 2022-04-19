@@ -106,8 +106,13 @@ def main(args, wandb):
 
 
         optimizer.zero_grad()
-        outputs_s = model(images_s)
-        outputs_t = model(images_t)
+        if args.dsbn:
+            outputs_s = model(images_s, 0*torch.ones(x.shape[0], dtype=torch.long))
+            outputs_t = model(images_t, 1*torch.ones(x.shape[0], dtype=torch.long))
+        else:
+            outputs_s = model(images_s)
+            outputs_t = model(images_t)
+            
         if type(outputs_t) == OrderedDict:
             out_s = outputs_s['out'] 
             out_t = outputs_t['out']  
