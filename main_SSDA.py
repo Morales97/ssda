@@ -224,7 +224,7 @@ def main(args, wandb):
                     labels_val = labels_val.cuda()
 
                     if args.dsbn:
-                        outputs = model(images_val, 0*torch.ones(images_val.shape[0], dtype=torch.long))
+                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
                     else:
                         outputs = model(images_val)
                     
