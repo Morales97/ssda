@@ -15,9 +15,9 @@ from model.lraspp_contrast import lraspp_mobilenet_v3_large_contrast
 def get_model(args):
     if args.net == 'deeplabv3_rn50':
         model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path, args.pixel_contrast, args.dsbn)
-    elif args.net == 'deeplabv3_rn50_densecl'
+    elif args.net == 'deeplabv3_rn50_densecl':
         model = deeplabv3_rn50_densecl()
-    elif args.net == 'deeplabv3_rn50_pixpro'
+    elif args.net == 'deeplabv3_rn50_pixpro':
         model = deeplabv3_rn50_pixpro()
     elif args.net == 'deeplabv2_rn101':
         model = deeplabv2_rn101(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain_path)
