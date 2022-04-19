@@ -14,8 +14,8 @@ import torch.utils.model_zoo as model_zoo
 from torch.nn.modules.conv import _ConvNd
 import torch.nn.functional as F
 from torch.nn.modules.utils import _ntuple
-#from model.dsbn.dsbn import  DomainSpecificBatchNorm2d
-from dsbn.dsbn import  DomainSpecificBatchNorm2d
+from model.dsbn.dsbn import  DomainSpecificBatchNorm2d
+#from dsbn.dsbn import  DomainSpecificBatchNorm2d
 
 _pair = _ntuple(2)
 
