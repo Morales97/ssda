@@ -223,7 +223,11 @@ def main(args, wandb):
                     images_val = images_val.cuda()
                     labels_val = labels_val.cuda()
 
-                    outputs = model(images_val)
+                    if args.dsbn:
+                        outputs = model(images_val, 0*torch.ones(images_val.shape[0], dtype=torch.long))
+                    else:
+                        outputs = model(images_val)
+                    
                     if type(outputs) == OrderedDict:
                         outputs = outputs['out']
                     val_loss = loss_fn(input=outputs, target=labels_val)
@@ -284,11 +288,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    #wandb.finish()
+    wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
