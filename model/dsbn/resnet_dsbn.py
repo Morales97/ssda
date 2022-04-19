@@ -4,7 +4,8 @@ Replaced norm_layers with DSBN from https://github.com/wgchang/DSBN/blob/master/
 '''
 
 from functools import partial
-from typing import Any, Dict, Optional, TypeVar, Callable, Tuple, Union, Type, List, OrderedDict
+from typing import Any, Dict, Optional, TypeVar, Callable, Tuple, Union, Type, List
+from collections import OrderedDict
 
 import torch
 import torch.nn as nn
