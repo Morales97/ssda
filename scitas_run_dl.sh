@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-#python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=JS_no_detach --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=js  #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_no_neg.tar
+python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_PC_maskC --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 #python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 
 #python main_FS.py --project=GTA_to_CS_tiny --expt_name=FS_IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --seed=1 
@@ -24,4 +24,4 @@
 #python main_SSDA.py --seed=1 --save_interval=25000 --steps=100000 --lr=0.01 --lr_decay=poly --project=GTA_to_CS_tiny --expt_name=dlv3_KL_100k_lr2 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl
 
 #python main_SSDA.py --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --dsbn=True --log_interval=2
-python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=dsbn_IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --dsbn=True
+#python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=dsbn_IN_bb --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --dsbn=True
