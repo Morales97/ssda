@@ -63,14 +63,15 @@ class cityscapesDataset(data.Dataset):
         n_augmentations=1,
         do_crop=False,
         hflip=False,
-        strong_aug_level = 4
+        strong_aug_level = 4,
+        downsample_gt = True
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
         self.rot = rotation
 
-        self.do_crop = True if size == 'small' else do_crop
+        self.do_crop = True if size == 'small' and split == 'train' else do_crop
         if size == "small":
             self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
             self.crop_size = (512, 512)
@@ -79,6 +80,8 @@ class cityscapesDataset(data.Dataset):
             self.crop_size = (256, 256)
         else:
             raise Exception('size not valid')
+        
+        self.orig_size = (2048, 1024)
 
         if self.rot:
             self.transforms = get_transforms(crop_size=min(self.img_size), split='train', aug_level=1)
@@ -200,7 +203,10 @@ class cityscapesDataset(data.Dataset):
             
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-        lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        if downsample_gt:
+            lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        else:
+            lbl = pil_loader(lbl_path, self.orig_size[0], self.orig_size[1], is_segmentation=True)
 
         # Data Augmentation
         # Crop
