@@ -78,7 +78,7 @@ class BasicBlock(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        num_domains: int = 2,
+        num_domains: int = 3,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -134,7 +134,7 @@ class Bottleneck(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        num_domains: int = 2
+        num_domains: int = 3
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -243,7 +243,7 @@ class DSBNResNet(nn.Module):
         width_per_group: int = 64,
         replace_stride_with_dilation: Optional[List[bool]] = None,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        num_domains: int = 2
+        num_domains: int = 3
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -299,7 +299,7 @@ class DSBNResNet(nn.Module):
         blocks: int,
         stride: int = 1,
         dilate: bool = False,
-        num_domains: int = 2
+        num_domains: int = 3
     ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
