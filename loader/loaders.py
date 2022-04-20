@@ -6,14 +6,20 @@ import pdb
 
 
 def get_loaders(args, num_t_samples=2975):
-    image_path_gta = 'data/gta5/images_tiny'
-    label_path_gta = 'data/gta5/labels'
-    image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
-    label_path_cs = 'data/cityscapes/gtFine'
+    
     n_lbl_samples = args.target_samples
     size = args.size
     assert size in ['tiny', 'small']
- 
+
+    if size == 'tiny':
+        image_path_gta = 'data/gta5/images_tiny'
+        image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
+    elif size == 'small':
+        image_path_gta = 'data/gta5/images_small'
+        image_path_cs = 'data/cityscapes/leftImg8bit_small'
+    label_path_gta = 'data/gta5/labels'
+    label_path_cs = 'data/cityscapes/gtFine'
+    
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
         idxs = np.arange(num_t_samples)
