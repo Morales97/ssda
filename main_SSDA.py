@@ -101,7 +101,6 @@ def main(args, wandb):
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
 
-        pdb.set_trace()
         start_ts = time.time()
         model.train()
 
