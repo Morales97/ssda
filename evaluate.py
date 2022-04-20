@@ -59,7 +59,7 @@ def evaluate(args):
     # --- Model ---
     model = get_model(args)
     model.cuda()
-    
+
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -85,17 +85,15 @@ def evaluate(args):
                 outputs = outputs['out']
 
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
-            val_loss = loss_fn(input=outputs, target=labels_val)
 
             pred = outputs.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
             running_metrics_val.update(gt, pred)
-            val_loss_meter.update(val_loss.item())
 
     log_info = OrderedDict({
         'Train Step': step,
-        'Validation loss': val_loss_meter.avg
+        #'Validation loss': val_loss_meter.avg
     })
     
     score, class_iou = running_metrics_val.get_scores()
