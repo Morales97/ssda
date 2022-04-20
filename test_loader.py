@@ -21,7 +21,7 @@ from loader.oct_loader import octLoader
 from loader.gta_ds import gtaDataset
 from loader.cityscapes_ds import cityscapesDataset
 
-from loss.loss import cross_entropy2d
+from loss.cross_entropy import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 import tqdm
