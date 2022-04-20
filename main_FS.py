@@ -97,6 +97,7 @@ def main(args, wandb):
         # CE
         loss = loss_fn(out_t, labels_t)
         loss.backward()
+        norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         step += 1
 
@@ -121,6 +122,7 @@ def main(args, wandb):
                 'Train Step': step,
                 'Time/Image [s]': round(time_meter.avg / args.batch_size_s, 3),
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
+                'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
