@@ -170,7 +170,7 @@ class gtaDataset(data.Dataset):
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
-
+        pdb.set_trace()
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
