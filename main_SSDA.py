@@ -139,7 +139,7 @@ def main(args, wandb):
 
                 if args.dsbn:
                     outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
-                    outputs_strong = model(images_strong, 1*torch.ones(images_s.shape[0], dtype=torch.long))
+                    outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
                 else:
                     outputs_w = model(images_weak)     # (N, C, H, W)
                     outputs_strong = model(images_strong)
