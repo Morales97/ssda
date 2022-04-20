@@ -48,7 +48,7 @@ def evaluate(args):
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
     label_path_cs = 'data/cityscapes/gtFine'
 
-    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', downsample_gt=False)
+    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', downsample_gt=True)
     val_loader = DataLoader(
         val_dataset,
         batch_size=8,
@@ -87,7 +87,7 @@ def evaluate(args):
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             pred = outputs.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
-
+            pdb.set_trace()
             running_metrics_val.update(gt, pred)
 
     log_info = OrderedDict({
@@ -122,4 +122,4 @@ if __name__ == '__main__':
     #wandb.finish()
 
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=tiny
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_50k_FS_tiny.tar --size=tiny
