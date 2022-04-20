@@ -43,7 +43,7 @@ def main(args, wandb):
                             strong_aug_level=5)'''
     #v_loader.test()
     #t_unl_ds = cityscapesDataset(image_path='data/cityscapes/leftImg8bit_tiny', label_path='data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=args.target_samples)
-    s_loader = gtaLoader(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
+    s_loader = gtaDataset(image_path='data/gta5/images_tiny', label_path='data/gta5/labels', size="tiny", split="val")
     s_loader.test()
     #t_unl_loader.test()
 
