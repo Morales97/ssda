@@ -35,6 +35,8 @@ def get_parser():
     parser.add_argument('--max_num_threads', type=int, default=12,
                         help='Maximum number of threads that the process should '
                              'use. Uses torch.set_num_threads()')
+    parser.add_argument('--clip_norm', type=float, default=10,
+                        help='norm for gradient clipping')
 
     parser.add_argument('--project', type=str, default='GTA_to_CS_tiny',
                         help='wandb project to use')

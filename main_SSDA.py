@@ -163,14 +163,16 @@ def main(args, wandb):
             proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
 
-            _, pred_s = torch.max(out_s, 1)
+            _, pred_s = torch.max(out_s, 1) # NOTE should we be detaching this?
             _, pred_t = torch.max(out_t, 1)
 
             loss_cl_s = pixel_contrast(proj_s, labels_s, pred_s)
             loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
 
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
+        
         loss.backward()
+        norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
 
         time_meter.update(time.time() - start_ts)
@@ -208,6 +210,7 @@ def main(args, wandb):
                 'Constrast T Loss': FormattedLogItem(constrast_t_loss_meter.avg, '{:.3f}'),
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
+                'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
