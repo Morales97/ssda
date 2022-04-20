@@ -69,7 +69,7 @@ class gtaDataset(data.Dataset):
         test_mode=False,
         rotation=False,
         do_crop=True,
-        hflip=False
+        hflip=True
     ):
         self.image_path = image_path
         self.label_path = label_path

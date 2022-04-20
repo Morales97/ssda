@@ -58,19 +58,18 @@ class cityscapesDataset(data.Dataset):
         n_samples= -1,        # Select only few samples for training
         sample_idxs=None,
         size="tiny",
-        rotation=False,
         unlabeled=False,
         n_augmentations=1,
         do_crop=False,
-        hflip=False,
+        hflip=True,
         strong_aug_level = 4,
         downsample_gt = True
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
-        self.rot = rotation
-
+        
+        self.hflip = hflip
         self.do_crop = True if size == 'small' and split == 'train' else do_crop
         if size == "small":
             self.img_size = (1024, 512) # w, h -- PIL uses (w, h) format
@@ -84,29 +83,21 @@ class cityscapesDataset(data.Dataset):
         self.orig_size = (2048, 1024)
         self.downsample_gt = downsample_gt
 
-        if self.rot:
-            self.transforms = get_transforms(crop_size=min(self.img_size), split='train', aug_level=1)
-            print('Images with random square crops of size ', str(min(self.img_size)))
-        else:
-            if not unlabeled:
-                self.transforms = get_transforms(aug_level=0)
-            if unlabeled:
-                weak = get_transforms(aug_level=0)
-                strong = get_transforms(aug_level=strong_aug_level)
-                if n_augmentations == 1:
-                    self.transforms = WeakStrongAug(weak, strong)
-                if n_augmentations == 2:
-                    self.transforms = WeakStrongAug2(weak, strong)
-
+        if not unlabeled:
+            self.transforms = get_transforms(aug_level=0)
+        if unlabeled:
+            weak = get_transforms(aug_level=0)
+            strong = get_transforms(aug_level=strong_aug_level)
+            if n_augmentations == 1:
+                self.transforms = WeakStrongAug(weak, strong)
+            if n_augmentations == 2:
+                self.transforms = WeakStrongAug2(weak, strong)
 
         self.n_samples = n_samples
         self.sample_idxs = sample_idxs
         self.n_classes = 19
         self.files = {}
         self.unlabeled = unlabeled
-
-        
-        self.hflip = hflip
 
         self.images_base = os.path.join(self.image_path, self.split)
         self.annotations_base = os.path.join(self.label_path, self.split)
@@ -189,18 +180,6 @@ class cityscapesDataset(data.Dataset):
             img_path.split(os.sep)[-2],
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
-
-        # Rotation pretask
-        if self.rot:
-            img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-            all_rotated_imgs = [
-                self.transforms(TF.rotate(img, -90)),
-                self.transforms(img),
-                self.transforms(TF.rotate(img, 90)),
-                self.transforms(TF.rotate(img, 180))]
-            all_rotated_imgs = torch.stack(all_rotated_imgs, dim=0)
-            rot_lbl = torch.LongTensor([0, 1, 2, 3])
-            return all_rotated_imgs, rot_lbl
             
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])

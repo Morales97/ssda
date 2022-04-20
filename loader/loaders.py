@@ -19,7 +19,7 @@ def get_loaders(args, num_t_samples=2975):
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
     label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
-    
+
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
         idxs = np.arange(num_t_samples)
@@ -84,12 +84,12 @@ def get_loaders(args, num_t_samples=2975):
 
 
     # Get validation loader
-    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val')
+    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', hflip=False)
     val_loader = DataLoader(
         val_dataset,
         batch_size=args.batch_size_tl,
         num_workers=args.num_workers,
-        shuffle=True,
+        shuffle=False,
     )    
     
 

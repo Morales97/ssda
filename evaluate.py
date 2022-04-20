@@ -48,7 +48,9 @@ def evaluate(args):
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
     label_path_cs = 'data/cityscapes/gtFine'
 
-    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', downsample_gt=True)
+    # NOTE downsampling or not the ground truth is found to make very little difference on the accuracy reported
+    # However, it is x4 slower if downsample_gt = False
+    val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', downsample_gt=False, hflip=False)
     val_loader = DataLoader(
         val_dataset,
         batch_size=8,

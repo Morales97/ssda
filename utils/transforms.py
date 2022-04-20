@@ -124,7 +124,7 @@ class WeakStrongAug2:
 
 def get_transforms(crop_size=256, split='train', aug_level=0):
 
-    # normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
     if split == 'test':
         transform_list = [
@@ -179,10 +179,30 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 
 
     transform_list.append(transforms.ToTensor())
-    # transform_list.append(normalize)    # NOTE does normalization occur after transforms? or before? (color jitter and such might change )
+    transform_list.append(normalize)    
     transform = transforms.Compose(transform_list)
 
     return transform
+
+
+# NOTE when implementing CutMix, check out code from Alonso et al at utils/transformsgpu (below). Is this CutMix?
+'''
+def mix(mask, data=None, target=None):
+    if not (data is None):
+        if mask.shape[0] == data.shape[0]:
+            data = torch.cat([(mask[i] * data[i] + (1 - mask[i]) * data[(i + 1) % data.shape[0]]).unsqueeze(0) for i in
+                              range(data.shape[0])])
+        elif mask.shape[0] == data.shape[0] / 2:
+            data = torch.cat((torch.cat([(mask[i] * data[2 * i] + (1 - mask[i]) * data[2 * i + 1]).unsqueeze(0) for i in
+                                         range(int(data.shape[0] / 2))]),
+                              torch.cat([((1 - mask[i]) * data[2 * i] + mask[i] * data[2 * i + 1]).unsqueeze(0) for i in
+                                         range(int(data.shape[0] / 2))])))
+    if not (target is None):
+        target = torch.cat(
+            [(mask[i] * target[i] + (1 - mask[i]) * target[(i + 1) % target.shape[0]]).unsqueeze(0) for i in
+             range(target.shape[0])])
+    return data, target
+'''
 
 
 # TODO what is this? wouldn't it be better to have it random?
