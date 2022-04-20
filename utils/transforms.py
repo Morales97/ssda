@@ -126,7 +126,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 
     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
-    if split == 'test':
+    if split == 'test': # NOTE delete this? we never use split test
         transform_list = [
             transforms.CenterCrop(crop_size),
         ]
@@ -179,7 +179,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 
 
     transform_list.append(transforms.ToTensor())
-    transform_list.append(normalize)    
+    # transform_list.append(normalize)    
     transform = transforms.Compose(transform_list)
 
     return transform
