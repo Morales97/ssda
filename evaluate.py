@@ -123,5 +123,5 @@ if __name__ == '__main__':
     evaluate(args)
     #wandb.finish()
 
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_30k_FS_small.tar --size=small
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_50k_FS_tiny.tar --size=tiny
