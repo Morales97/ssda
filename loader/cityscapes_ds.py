@@ -82,6 +82,7 @@ class cityscapesDataset(data.Dataset):
             raise Exception('size not valid')
         
         self.orig_size = (2048, 1024)
+        self.downsample_gt = downsample_gt
 
         if self.rot:
             self.transforms = get_transforms(crop_size=min(self.img_size), split='train', aug_level=1)
@@ -203,7 +204,7 @@ class cityscapesDataset(data.Dataset):
             
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-        if downsample_gt:
+        if self.downsample_gt:
             lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
         else:
             lbl = pil_loader(lbl_path, self.orig_size[0], self.orig_size[1], is_segmentation=True)
