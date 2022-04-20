@@ -39,7 +39,7 @@ def evaluate(args):
     random.seed(args.seed)
 
     # --- Validation loader ---
-    size = 'small'
+    size = args.size
     assert size in ['tiny', 'small']
 
     if size == 'tiny':
@@ -85,7 +85,6 @@ def evaluate(args):
                 outputs = outputs['out']
 
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
-            pdb.set_trace()
             pred = outputs.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
@@ -122,4 +121,5 @@ if __name__ == '__main__':
     evaluate(args)
     #wandb.finish()
 
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=tiny
