@@ -18,10 +18,10 @@ from utils.ioutils import gen_unique_name
 from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
-from loss.loss import cross_entropy2d
+from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loader.loaders import get_loaders
-from consistency.consistency import consistency_reg
+from loss.consistency import consistency_reg
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 
