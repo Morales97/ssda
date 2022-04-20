@@ -58,7 +58,8 @@ def evaluate(args):
     
     # --- Model ---
     model = get_model(args)
-
+    model.cuda()
+    
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'])
