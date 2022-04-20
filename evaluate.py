@@ -85,7 +85,7 @@ def evaluate(args):
                 outputs = outputs['out']
 
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
-
+            pdb.set_trace()
             pred = outputs.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
