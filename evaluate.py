@@ -68,7 +68,7 @@ def evaluate(args):
         raise Exception('No file found at {}'.format(args.resume))
     
     # --- Evaluate ---
-    running_metrics_val = runningScore(target_loader.dataset.n_classes)
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     model.eval()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
@@ -123,4 +123,4 @@ if __name__ == '__main__':
     evaluate(args)
     #wandb.finish()
 
-# python evaluate --net=deeplabv3_rn50 --resume=ckpt_15k_FS_small.tar
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar
