@@ -37,7 +37,7 @@ def main(args, wandb):
     random.seed(args.seed)
     
     # Load data
-    args.target_samples = 3
+    args.target_samples = 7
     _, target_loader, _, val_loader = get_loaders(args)
     
     # Load model
@@ -76,7 +76,7 @@ def main(args, wandb):
     # Training loop
     while step <= args.steps:
 
-        if step % len(target_loader) == 0:
+        if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
 
         images_t, labels_t = next(data_iter_t)
