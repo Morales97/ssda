@@ -175,7 +175,6 @@ def main(args, wandb):
                 labels = torch.cat([labels_s, labels_t], dim=0)
                 pred = torch.cat([pred_s, pred_t], dim=0)
                 loss_cl_t = pixel_contrast(proj, labels, pred)
-                pdb.set_trace()
 
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         
