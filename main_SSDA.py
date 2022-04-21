@@ -45,6 +45,7 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
+    pdb.set_trace()
     ema = ExponentialMovingAverage(model.parameters(), decay=0.995).to(model.device)
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
@@ -309,11 +310,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.finish()
+    #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
