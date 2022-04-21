@@ -59,7 +59,7 @@ def main(args, wandb):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            start_step = checkpoint['step'] + 1
+            start_step = checkpoint['step']
             print('Resuming from train step {}'.format(start_step))
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -291,7 +291,7 @@ def main(args, wandb):
                 }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                 print('Checkpoint saved.')
             
-            if score['mIoU'] > best_mIoU:
+            if score['mIoU'] >  :
                 if args.save_model:
                     shutil.copyfile(
                         os.path.join(args.save_dir, 'checkpoint.pth.tar'),
