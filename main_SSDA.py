@@ -160,14 +160,16 @@ def main(args, wandb):
         # CL
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
-            #proj_s = outputs_s['proj']
+            proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
 
-            #_, pred_s = torch.max(out_s, 1) 
+            _, pred_s = torch.max(out_s, 1) 
             _, pred_t = torch.max(out_t, 1)
 
             loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-            loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+            #loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+            pdb.set_trace()
+            loss_cl_t = pixel_contrast(proj, labels, pred)
 
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         
@@ -296,11 +298,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.finish()
+    #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
