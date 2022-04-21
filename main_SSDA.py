@@ -282,7 +282,7 @@ def main(args, wandb):
         if step % args.save_interval == 0:
             if args.save_model:
                 model_ema = copy.deepcopy(model)
-                ema.copy_to(model_ema) # copy EMA's parameter to a model
+                ema.copy_to(model_ema.parameters()) # copy EMA's parameter to a model
                 torch.save({
                     'model_state_dict' : model.state_dict(),
                     'ema_state_dict' : model_ema.state_dict(),
