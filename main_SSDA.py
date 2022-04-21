@@ -142,12 +142,12 @@ def main(args, wandb):
                 images_strong = images_t_unl[1].cuda()
 
                 if args.dsbn:
-                    with ema.average_parameters():
-                        outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
+                    #with ema.average_parameters():
+                    outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
                     outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
                 else:
-                    with ema.average_parameters():
-                        outputs_w = model(images_weak)     # (N, C, H, W)
+                    #with ema.average_parameters():
+                    outputs_w = model(images_weak)     # (N, C, H, W)
                     outputs_strong = model(images_strong)
 
                 if type(outputs_w) == OrderedDict:
