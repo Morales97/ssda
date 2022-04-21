@@ -24,6 +24,7 @@ from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
 import wandb
+from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
 from torchvision.utils import save_image
 import pdb
@@ -44,6 +45,7 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
+    ema = ExponentialMovingAverage(model.parameters(), decay=0.995).to(model.device)
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
@@ -138,10 +140,12 @@ def main(args, wandb):
                 images_strong = images_t_unl[1].cuda()
 
                 if args.dsbn:
-                    outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
+                    with ema.average_parameters():
+                        outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
                     outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
                 else:
-                    outputs_w = model(images_weak)     # (N, C, H, W)
+                    with ema.average_parameters():
+                        outputs_w = model(images_weak)     # (N, C, H, W)
                     outputs_strong = model(images_strong)
 
                 if type(outputs_w) == OrderedDict:
@@ -153,7 +157,7 @@ def main(args, wandb):
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
-                cr_multiple_augs(args, images_t_unl, model)
+                cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
 
             time_cr = time.time() - start_ts_cr
             
@@ -181,6 +185,8 @@ def main(args, wandb):
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
+        ema.update()
+        pdb.set_trace()
 
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
