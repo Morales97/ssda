@@ -182,7 +182,7 @@ def cr_KL(out_w, out_s, eps=1e-8):
     p_w = F.softmax(out_w, dim=1).detach()              
     p_s = F.softmax(out_s, dim=1)    
 
-    kl = F.kl_div(p_s.log(), p_w + eps, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
+    kl = F.kl_div((p_s + eps).log(), p_w, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
     loss_cr = kl
     
     percent_pl = 100
