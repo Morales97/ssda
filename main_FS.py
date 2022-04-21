@@ -37,7 +37,7 @@ def main(args, wandb):
     random.seed(args.seed)
     
     # Load data
-    args.target_samples = -1
+    args.target_samples = 3
     _, target_loader, _, val_loader = get_loaders(args)
     
     # Load model
@@ -84,8 +84,9 @@ def main(args, wandb):
         labels_t = labels_t.cuda()
 
         print(images_t.shape)
+        print(step)
         if images_t.shape[0] != 2:
-            break
+            pdb.set_trace
         continue
 
         start_ts = time.time()
