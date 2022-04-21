@@ -45,8 +45,8 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
-    pdb.set_trace()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995).to(model.device)
+    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema = ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
