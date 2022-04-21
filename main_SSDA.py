@@ -291,7 +291,7 @@ def main(args, wandb):
                 }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                 print('Checkpoint saved.')
             
-            if score['mIoU'] >  :
+            if score['mIoU'] > best_mIoU:
                 if args.save_model:
                     shutil.copyfile(
                         os.path.join(args.save_dir, 'checkpoint.pth.tar'),
