@@ -12,6 +12,8 @@ from torch.utils import model_zoo
 import numpy as np
 from torch.nn import functional as F
 import pdb
+from collections import OrderedDict
+
 affine_par = True
 
 
@@ -96,10 +98,11 @@ class _ASPP(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes):
+    def __init__(self, block, layers, num_classes, pixel_contrast=False):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.num_classes= num_classes
+        self.pixel_contrast = pixel_contrast
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -113,6 +116,14 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4)
         self.layer5 = _ASPP(2048, num_classes, [6,12,18,24])
+        if self.pixel_contrast:
+            self.projection = nn.Sequential(
+                            nn.Conv2d(2048, 2048, 1, bias=False),
+                            nn.BatchNorm2d(2048),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(2048, 256, 1, bias=False)
+                        )
+
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -150,13 +161,22 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         features = self.layer4(x)
+
+        result = OrderedDict()
         x = self.layer5(features)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        result['out'] = x
+
+        if self.pixel_contrast:
+            proj = self.projection(features)
+            proj = F.normalize(proj, p=2, dim=1)  
+            proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
+            result["proj"] = proj
 
         if return_features:
-            return x, features
+            return result, features
         else:
-            return x
+            return result
 
 
     def get_1x_lr_params(self):
@@ -189,11 +209,11 @@ class ResNet(nn.Module):
         return [{'params': self.get_1x_lr_params(), 'lr': args.learning_rate}]
 
 
-def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, num_classes=19):
+def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False, num_classes=19):
     if pretrained:
         raise Exception('pretrained DeepLabv2 + ResNet-101 is not available')
 
-    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes)
+    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes, pixel_contrast)
     
     if custom_pretrain_path is not None:
         raise Exception('custom DeepLabv2 + ResNet-101 is not available')
@@ -221,5 +241,5 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
 
 if __name__ == '__main__':
-    model = deeplabv2_rn101()
+    model = deeplabv2_rn101(pixel_contrast=True)
     pdb.set_trace()
