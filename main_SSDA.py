@@ -128,7 +128,7 @@ def main(args, wandb):
         loss_cr, percent_pl, time_cr = 0, 0, 0
         if args.cr is not None:
             start_ts_cr = time.time()
-            if step % len(target_loader_unl) == 0:
+            if step % (len(target_loader_unl)-1) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
             
             images_t_unl = next(data_iter_t_unl)

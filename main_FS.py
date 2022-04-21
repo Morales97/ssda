@@ -37,7 +37,7 @@ def main(args, wandb):
     random.seed(args.seed)
     
     # Load data
-    args.target_samples = 7
+    args.target_samples = -1
     _, target_loader, _, val_loader = get_loaders(args)
     
     # Load model
