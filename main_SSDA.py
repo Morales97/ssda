@@ -46,7 +46,7 @@ def main(args, wandb):
     model.cuda()
     model.train()
     ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema = ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
     pdb.set_trace()
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
@@ -188,7 +188,6 @@ def main(args, wandb):
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
-        pdb.set_trace()
 
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
