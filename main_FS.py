@@ -87,8 +87,7 @@ def main(args, wandb):
         print(step)
         step +=1
         if images_t.shape[0] != 2:
-            pdb.set_trace
-        continue
+            pdb.set_trace()
 
         start_ts = time.time()
         model.train()
