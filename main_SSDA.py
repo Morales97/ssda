@@ -166,10 +166,16 @@ def main(args, wandb):
             _, pred_s = torch.max(out_s, 1) 
             _, pred_t = torch.max(out_t, 1)
 
-            loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-            #loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
-            pdb.set_trace()
-            loss_cl_t = pixel_contrast(proj, labels, pred)
+            if not args.pc_mixed:
+                loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
+                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+            else:
+                loss_cl_s = 0
+                proj = torch.cat([proj_s, proj_t], dim=0)
+                labels = torch.cat([labels_s, labels_t], dim=0)
+                pred = torch.cat([pred_s, pred_t], dim=0)
+                loss_cl_t = pixel_contrast(proj, labels, pred)
+                pdb.set_trace()
 
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         
@@ -307,4 +313,4 @@ if __name__ == '__main__':
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1 --pre_trained=True
-# python main_SSDA.py --net=deeplabv3_rn50 
+# python main_SSDA.py --net=deeplabv3_rn50 --pixel_contrast=True
