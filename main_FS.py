@@ -85,7 +85,6 @@ def main(args, wandb):
 
         print(images_t.shape)
         print(step)
-        step +=1
         if images_t.shape[0] != 2:
             pdb.set_trace()
 
