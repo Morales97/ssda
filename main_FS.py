@@ -84,8 +84,8 @@ def main(args, wandb):
         labels_t = labels_t.cuda()
 
         print(images_t.shape)
-        if images_t.shape[0] != 2:
-            pdb.set_trace()
+        #if images_t.shape[0] != 2:
+        #    pdb.set_trace()
         continue
 
         start_ts = time.time()
