@@ -277,7 +277,7 @@ def main(args, wandb):
 
             log_str = get_log_str(args, log_info, title='Validation Log')
             print(log_str)
-            #wandb.log(rm_format(log_info))
+            wandb.log(rm_format(log_info))
 
             val_loss_meter.reset()
             running_metrics_val.reset()
