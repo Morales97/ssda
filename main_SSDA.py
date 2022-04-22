@@ -310,7 +310,6 @@ def main(args, wandb):
         
 if __name__ == '__main__':
     args = parse_args()
-    WANDB_CACHE_DIR = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
