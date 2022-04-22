@@ -275,7 +275,7 @@ def main(args, wandb):
 
             log_str = get_log_str(args, log_info, title='Validation Log')
             print(log_str)
-            wandb.log(rm_format(log_info))
+            #wandb.log(rm_format(log_info))
 
             val_loss_meter.reset()
             running_metrics_val.reset()
@@ -298,9 +298,9 @@ def main(args, wandb):
                         os.path.join(args.save_dir, 'checkpoint.pth.tar'),
                         os.path.join(args.save_dir, 'model-best.pth.tar'))
                     # DM. save model as wandb artifact
-                    model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
-                    model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-                    wandb.log_artifact(model_artifact)
+                    #model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
+                    #model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                    #wandb.log_artifact(model_artifact)
                 best_mIoU = score['mIoU']
             
             
