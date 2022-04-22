@@ -210,7 +210,7 @@ def main(args, wandb):
                 param_group['lr'] = lr
         elif args.lr_decay == 'det':
             if step == np.floor(args.steps * 0.75):
-                print('*** Learning rate set to %.6f ***' % (lr * 0.1))
+                print('*** Learning rate set to %.6f ***' % (args.lr * 0.1))
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
