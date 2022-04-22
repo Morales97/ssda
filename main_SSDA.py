@@ -60,6 +60,7 @@ def main(args, wandb):
             model.load_state_dict(checkpoint['model_state_dict'])
             if 'ema_state_dict' in checkpoint.keys():
                 ema.load_state_dict(checkpoint['ema_state_dict'])
+                print('Loaded EMA state dict')
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('Resuming from train step {}'.format(start_step))
@@ -316,7 +317,7 @@ if __name__ == '__main__':
     if not args.expt_name:
         args.expt_name = gen_unique_name()
     wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    WANDB_CACHE_DIR = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
+    os.environ['WANDB_CACHE_DIR'] = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
     #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
