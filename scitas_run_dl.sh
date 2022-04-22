@@ -10,7 +10,6 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
-WANDB_CACHE_DIR = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_EMA_PC_mix_pixpro --net=deeplabv3_rn50_pixpro --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --pc_mixed=True #--custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 #python main_SSDA.py --seed=1 --lr=0.01 --lr_decay=poly --steps=30000 --save_interval=15000 --project=GTA_to_CS_small --size=small --expt_name=KL --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl
