@@ -58,6 +58,8 @@ def main(args, wandb):
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
+            if 'ema_state_dict' in checkpoint.keys():
+                ema.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('Resuming from train step {}'.format(start_step))
@@ -282,11 +284,9 @@ def main(args, wandb):
         
         if step % args.save_interval == 0:
             if args.save_model:
-                model_ema = copy.deepcopy(model)
-                ema.copy_to(model_ema.parameters()) # copy EMA's parameter to a model
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : model_ema.state_dict(),
+                    'ema_state_dict' : ema.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
@@ -298,9 +298,9 @@ def main(args, wandb):
                         os.path.join(args.save_dir, 'checkpoint.pth.tar'),
                         os.path.join(args.save_dir, 'model-best.pth.tar'))
                     # DM. save model as wandb artifact
-                    #model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
-                    #model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-                    #wandb.log_artifact(model_artifact)
+                    model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
+                    model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                    wandb.log_artifact(model_artifact)
                 best_mIoU = score['mIoU']
             
             
@@ -316,11 +316,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    wandb=None
+    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    #wandb.finish()
+    wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
