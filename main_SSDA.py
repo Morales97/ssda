@@ -208,6 +208,7 @@ def main(args, wandb):
                 param_group['lr'] = lr
         elif args.lr_decay == 'det':
             if step == np.floor(args.steps * 0.75):
+                print('*** Learning rate set to %.6f ***' % (lr * 0.1))
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
@@ -309,18 +310,19 @@ def main(args, wandb):
         
 if __name__ == '__main__':
     args = parse_args()
+    WANDB_CACHE_DIR = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
     # W&B logging setup
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
     main(args, wandb)
-    wandb.finish()
+    #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1 --pre_trained=True
-# python main_SSDA.py --net=deeplabv3_rn50 --save_interval=1
+# python main_SSDA.py --net=deeplabv3_rn50 --save_interval=1 --val_interval=1
