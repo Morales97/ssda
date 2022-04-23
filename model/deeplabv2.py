@@ -7,6 +7,7 @@ This implementation follows the new implementation of Resnet bottleneck module w
 Code taken from https://github.com/WilhelmT/ClassMix, slightly modified
 """
 
+import torch
 import torch.nn as nn
 from torch.utils import model_zoo
 import numpy as np
@@ -216,7 +217,20 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes, pixel_contrast)
     
     if custom_pretrain_path is not None:
-        raise Exception('custom DeepLabv2 + ResNet-101 is not available')
+        print('Loading model from %s' % custom_pretrain_path)
+        maskContrast_pretrained = torch.load(custom_pretrain_path)
+        sd = maskContrast_pretrained['model']
+
+        # Create a new state_dict
+        new_state_dict = {}
+        for key, param in sd.items():
+            if 'module.model_q.' in key:
+                if 'backbone' in key:
+                    new_state_dict[key[15:]] = param  # remove the 'module.model_q.' part
+                elif 'head' in key:
+                    new_state_dict['layer5' + key[19:]] = param
+
+        model.load_state_dict(new_state_dict, strict=False) 
         return model
 
     if pretrained_backbone:
@@ -241,5 +255,5 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
 
 if __name__ == '__main__':
-    model = deeplabv2_rn101(pixel_contrast=True)
+    model = deeplabv2_rn101(pixel_contrast=False)
     pdb.set_trace()
