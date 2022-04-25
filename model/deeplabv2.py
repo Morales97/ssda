@@ -218,7 +218,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
-        maskContrast_pretrained = torch.load(custom_pretrain_path)
+        maskContrast_pretrained = torch.load(custom_pretrain_path, map_location=torch.device('cpu'))
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict
@@ -227,10 +227,13 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
             if 'module.model_q.' in key:
                 if 'backbone' in key:
                     new_state_dict[key[15:]] = param  # remove the 'module.model_q.' part
+                    print(key)
                 elif 'head' in key:
                     new_state_dict['layer5' + key[19:]] = param
+                    print(key)
 
         model.load_state_dict(new_state_dict, strict=False) 
+        pdb.set_trace()
         return model
 
     if pretrained_backbone:
@@ -255,5 +258,5 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
 
 if __name__ == '__main__':
-    model = deeplabv2_rn101(pixel_contrast=False)
+    model = deeplabv2_rn101(pixel_contrast=False, custom_pretrain_path='model/pretrained/ckpt_mask_v2.tar')
     pdb.set_trace()
