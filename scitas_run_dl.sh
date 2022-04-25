@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --seed=2 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=IN_bb_mask_random --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_random_neg.tar
+python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=IN_bb_mask_random --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_random_neg.tar
 
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=IN_bb_mask_random --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --custom_pretrain_path=model/pretrained/ckpt_mask_dlrn50_CS_random_neg.tar
 #python main_SSDA.py --seed=1 --lr=0.01 --lr_decay=poly --steps=30000 --save_interval=15000 --project=GTA_to_CS_small --size=small --expt_name=KL --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl
