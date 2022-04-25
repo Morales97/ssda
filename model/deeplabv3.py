@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict
 
 import torch
+import numpy as np
 from torch import nn, Tensor
 from torch.nn import functional as F
 import pdb
@@ -12,6 +13,7 @@ from collections import OrderedDict
 from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
 import copy
+import pickle
 
 '''
 torch's deeplab from
@@ -375,14 +377,6 @@ if __name__ == '__main__':
     image = to_tensor(image).unsqueeze(0)
     model(image, 0)
     '''
-    pt_sd = torch.load('model/pretrained/pixpro_base_r50_400ep.pth')['model']
-    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=False, dsbn=False)   
-
-    # Create a new state_dict
-    new_state_dict = copy.deepcopy(model.state_dict())
-    for key, param in pt_sd.items():
-        if 'module.encoder' in key and not 'encoder_k' in key:
-            new_state_dict['backbone' + key[14:]] = param 
-            
-    model.load_state_dict(new_state_dict)
+    sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True)
+    #sd = pickle.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy')
     pdb.set_trace()
