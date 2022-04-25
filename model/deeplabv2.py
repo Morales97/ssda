@@ -14,6 +14,7 @@ import numpy as np
 from torch.nn import functional as F
 import pdb
 from collections import OrderedDict
+import copy 
 
 affine_par = True
 
@@ -222,18 +223,15 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict
-        new_state_dict = {}
+        new_state_dict = copy.deepcopy(model.state_dict())
         for key, param in sd.items():
-            if 'module.model_q.' in key:
+            if 'model_q.' in key:
                 if 'backbone' in key:
-                    new_state_dict[key[15:]] = param  # remove the 'module.model_q.' part
+                    new_state_dict[key[17:]] = param  # remove the 'module.model_q.' part
                     print(key)
-                elif 'head' in key:
-                    new_state_dict['layer5' + key[19:]] = param
-                    print(key)
+                # NOTE do not load classification head: v2 decoder is 2048 -> C, and C changes to num_classes. cannot reuse
 
-        model.load_state_dict(new_state_dict, strict=False) 
-        pdb.set_trace()
+        model.load_state_dict(new_state_dict)
         return model
 
     if pretrained_backbone:
@@ -258,5 +256,6 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
 
 if __name__ == '__main__':
+
     model = deeplabv2_rn101(pixel_contrast=False, custom_pretrain_path='model/pretrained/ckpt_mask_v2.tar')
     pdb.set_trace()
