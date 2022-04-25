@@ -218,7 +218,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
-        maskContrast_pretrained = torch.load(custom_pretrain_path, map_location=torch.device('cpu'))
+        maskContrast_pretrained = torch.load(custom_pretrain_path)
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict

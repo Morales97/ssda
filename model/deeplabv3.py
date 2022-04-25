@@ -254,17 +254,6 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         sd = maskContrast_pretrained['model']
 
         # Create a new state_dict
-        '''
-        new_state_dict = {}
-        for key, param in sd.items():
-            if 'module.model_q.' in key:
-                if 'backbone' in key:
-                    new_state_dict[key[15:]] = param  # remove the 'module.model_q.' part
-                elif 'decoder' in key:
-                    new_state_dict['classifier' + key[22:]] = param
-        '''
-
-        # Create a new state_dict
         new_state_dict = copy.deepcopy(model.state_dict())
         for key, param in sd.items():
             if 'model_q.' in key:
@@ -313,7 +302,12 @@ def deeplabv3_rn50_densecl(pixel_contrast=False, dsbn=False):
     # TODO merge this with deeplabv3_rn50()
     pt_sd = torch.load('model/pretrained/densecl_r50_imagenet_200ep.pth')['state_dict']
     model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, dsbn=dsbn)   
-    model.load_state_dict(pt_sd, strict=False)
+
+    new_state_dict = copy.deepcopy(model.state_dict())
+    for key, param in pt_sd.items():
+        new_state_dict['backbone.' + key] = param
+            
+    model.load_state_dict(new_state_dict)
     print('Loading model pretrained densly on ImageNet with DenseCL')
     return model
 
@@ -356,7 +350,7 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     # for CS + GTA pretrained at epoch 32:  model/pretrained/checkpoint_mask_dlrn50_CS_GTA.pth.tar
 
     print('Loading model from %s' % model_path)
-    maskContrast_pretrained = torch.load(model_path, map_location=torch.device('cpu'))
+    maskContrast_pretrained = torch.load(model_path)
     model = deeplabv3_resnet50(num_classes=num_classes)   
     sd = maskContrast_pretrained['model']
 
@@ -381,19 +375,13 @@ if __name__ == '__main__':
     image = to_tensor(image).unsqueeze(0)
     model(image, 0)
     '''
-    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=False)   
-    maskContrast_pretrained = torch.load('model/pretrained/checkpoint_39_mask_dlrn50.pth.tar', map_location=torch.device('cpu'))
-    sd = maskContrast_pretrained['model']
+    pt_sd = torch.load('model/pretrained/densecl_r50_imagenet_200ep.pth')['state_dict']
+    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=False, dsbn=False)  
 
+    # Create a new state_dict
     new_state_dict = copy.deepcopy(model.state_dict())
-    for key, param in sd.items():
-        if 'model_q.' in key:
-            if 'backbone' in key:
-                new_state_dict[key[8:]] = param  # remove the 'model_q.' part
-                print(key[8:])
-            elif 'decoder' in key:
-                new_state_dict['classifier' + key[15:]] = param
-                print('classifier' + key[15:])
-
-    model.load_state_dict(new_state_dict)#, strict=False) 
+    for key, param in pt_sd.items():
+        new_state_dict['backbone.' + key] = param
+            
+    model.load_state_dict(new_state_dict)
     pdb.set_trace()
