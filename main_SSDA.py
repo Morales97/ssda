@@ -196,7 +196,7 @@ def main(args, wandb):
             
             print(mask.sum())
             if mask.sum() > 1:
-                feature_memory.add_features(None, proj_t_selected, proj_t_selected, args.batch_size_tl)
+                feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
                 pdb.set_trace()
 
 
