@@ -177,12 +177,11 @@ def main(args, wandb):
             prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
 
             # save the projected features if the prediction is correct and more confident than 0.95
-            # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds
-            pdb.set_trace()
+            # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
             proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
-            labels_s_down = F.interpolate(labels_s, size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest')
-            labels_t_down = F.interpolate(labels_t, size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest')
+            labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+            labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
             pdb.set_trace()
 
         # Total Loss
