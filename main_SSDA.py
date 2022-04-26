@@ -330,8 +330,9 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
     else:
         if step >= args.warmup_steps:
             with ema.average_parameters():
-                outputs_w = model(images_weak)     # (N, C, H, W)
                 pdb.set_trace()
+                outputs_w = model(images_weak)     # (N, C, H, W)
+                
         else:
             outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
