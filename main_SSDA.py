@@ -168,7 +168,7 @@ def main(args, wandb):
         ramp_up_steps = 500
         
         # Build feature memory bank, start 'ramp_up_steps' before
-        if step >= args.warmup_steps - ramp_up_steps:
+        #if step >= args.warmup_steps - ramp_up_steps:
             
 
         # Total Loss
