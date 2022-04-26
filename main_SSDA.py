@@ -188,12 +188,13 @@ def main(args, wandb):
             pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
             prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
             
-            mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
+            mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.1).float()).bool() # (B, 32, 64)
             labels_t_down_selected = labels_t_down[mask]
 
             mask = mask.unsqueeze(1).expand([-1, 256, -1, -1])  # (B, 256, 32, 64)
             proj_t_selected = proj_t[mask]
-
+            
+            pdb.set_trace()
             feature_memory.add_features(None, proj_t_selected, proj_t_selected, args.batch_size_tl)
 
             pdb.set_trace()
