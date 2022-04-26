@@ -161,6 +161,8 @@ class DeepLabV3Alonso(nn.Module):
                         )
         self.decoder2 = nn.Conv2d(256, num_classes, 1)
         
+        print('Alonso Contrast Model')
+
         dim_in = 256
         feat_dim = 256
         self.projection_head = nn.Sequential(
