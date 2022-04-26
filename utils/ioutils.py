@@ -88,7 +88,9 @@ def get_parser():
     parser.add_argument('--size', type=str, default='tiny',
                         help='size of the dataset (tiny/small)')     
     parser.add_argument('--dsbn', type=boolfromstr, default=False,
-                        help='Use or not Adaptive Batch Norm')     
+                        help='Use or not Adaptive Batch Norm')    
+    parser.add_argument('--lab_color', type=boolfromstr, default=False,
+                        help='Transform source images into targets LAB color space')     
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
