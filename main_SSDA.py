@@ -116,6 +116,7 @@ def main(args, wandb):
 
 
         optimizer.zero_grad()
+        '''
         if args.dsbn:
             outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
             outputs_t = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))
@@ -129,6 +130,8 @@ def main(args, wandb):
         else:
             out_s = outputs_s
             out_t = outputs_t
+        '''
+        out_s, out_t = _forward(args, model, images_s, images_t)
 
         # CE
         loss_s = loss_fn(out_s, labels_s)
@@ -147,6 +150,7 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
+                '''
                 if args.dsbn:
                     with ema.average_parameters():
                         outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
@@ -162,6 +166,9 @@ def main(args, wandb):
                 else:
                     out_w = outputs_w
                     out_strong = outputs_strong
+                '''
+                out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
+
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
@@ -311,20 +318,65 @@ def main(args, wandb):
         if step >= args.steps:
             break
 
-        
+
+def _forward(args, model, images_s, images_t):
+    if args.dsbn:
+        outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
+        outputs_t = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))
+    else:
+        outputs_s = model(images_s)
+        outputs_t = model(images_t)
+
+    if type(outputs_t) == OrderedDict:
+        out_s = outputs_s['out'] 
+        out_t = outputs_t['out']  
+    else:
+        out_s = outputs_s
+        out_t = outputs_t
+
+    return out_s, out_t
+
+
+def _forward_cr(args, model, ema, images_weak, images_strong, step):
+    if args.dsbn:
+        if step >= args.warmup_steps:
+            with ema.average_parameters():
+                outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
+        else:
+            outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))
+        outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
+    else:
+        if step >= args.warmup_steps:
+            with ema.average_parameters():
+                outputs_w = model(images_weak)     # (N, C, H, W)
+        else:
+            outputs_w = model(images_weak)
+        outputs_strong = model(images_strong)
+
+    if type(outputs_w) == OrderedDict:
+        out_w = outputs_w['out']
+        out_strong = outputs_strong['out']
+    else:
+        out_w = outputs_w
+        out_strong = outputs_strong
+
+    return out_w, out_strong
+
+
 if __name__ == '__main__':
     args = parse_args()
     os.environ['WANDB_CACHE_DIR'] = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
-    # W&B logging setup
-    #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
-    main(args, wandb)
-    wandb.finish()
+
+    if args.wandb:
+        wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+        main(args, wandb)     
+        wandb.finish()
+    else:
+        main(args, None)
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True

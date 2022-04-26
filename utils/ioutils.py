@@ -90,7 +90,9 @@ def get_parser():
     parser.add_argument('--dsbn', type=boolfromstr, default=False,
                         help='Use or not Adaptive Batch Norm')    
     parser.add_argument('--lab_color', type=boolfromstr, default=False,
-                        help='Transform source images into targets LAB color space')     
+                        help='Transform source images into targets LAB color space') 
+    parser.add_argument('--wandb', type=boolfromstr, default=True,
+                        help='whether or not to use wandb')     
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
