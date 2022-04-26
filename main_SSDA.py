@@ -126,7 +126,7 @@ def main(args, wandb):
 
         # Forward pass
         optimizer.zero_grad()
-        out_s, out_t = _forward(args, model, images_s, images_t)
+        out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s)
@@ -357,7 +357,7 @@ def _forward(args, model, images_s, images_t):
         out_s = outputs_s
         out_t = outputs_t
 
-    return out_s, out_t
+    return out_s, out_t, outputs_s, outputs_t
 
 
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
