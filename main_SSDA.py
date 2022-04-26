@@ -342,6 +342,7 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         if step >= args.warmup_steps:
             with ema.average_parameters():
                 outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
+                print('heyo')
         else:
             outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))
         outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
@@ -381,4 +382,4 @@ if __name__ == '__main__':
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1 --pre_trained=True
-# python main_SSDA.py --net=deeplabv3_rn50 --save_interval=1 --val_interval=1
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=kl
