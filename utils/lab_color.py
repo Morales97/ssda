@@ -102,7 +102,7 @@ def lab_transform(source_batch, target_batch):
         mean_s = source_batch[i].mean(axis=[1,2]).view(-1, 1, 1)
         std_s = source_batch[i].std(axis=[1,2]).view(-1, 1, 1)
 
-        source_batch[i] = (source_batch[i] - mean_s) / std_s * std_t + mean_t
+        source_batch[i] = (source_batch[i] - mean_s) / (std_s + 1e-4) * std_t + mean_t
     
     source_batch = lab_to_rgb(source_batch)
     return source_batch

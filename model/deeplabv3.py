@@ -161,6 +161,29 @@ class DeepLabV3Alonso(nn.Module):
                         )
         self.decoder2 = nn.Conv2d(256, num_classes, 1)
         
+        dim_in = 256
+        feat_dim = 256
+        self.projection_head = nn.Sequential(
+            nn.Linear(dim_in, feat_dim),
+            nn.BatchNorm1d(feat_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(feat_dim, feat_dim)
+        )
+        self.prediction_head = nn.Sequential(
+            nn.Linear(feat_dim, feat_dim),
+            nn.BatchNorm1d(feat_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(feat_dim, feat_dim)
+        )
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, 0.01)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+
     def forward(self, x: Tensor) -> Dict[str, Tensor]:
         input_shape = x.shape[-2:]
         # contract: features is a dict of tensors
@@ -170,10 +193,17 @@ class DeepLabV3Alonso(nn.Module):
         x = features["out"]
         x = self.aspp(x)
         x_f = self.decoder1(x)  # x_f will be used as projection head
+
         x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+
+        proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+        pred = self.prediction_head(x_f)
+
         result["out"] = x
         result["feat"] = x_f
+        result["proj"] = proj
+        result["pred"] = pred
 
         return result
 
