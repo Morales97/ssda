@@ -380,6 +380,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
 
     if alonso_contrast:
         model = deeplabv3_resnet50(num_classes=19, alonso_contrast=True)
+        return model
 
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=False, 
