@@ -71,6 +71,23 @@ def test_on_local():
 
     save_image(image_gta, '/Users/dani/Desktop/image_gta_lab.jpg')
 
+def lab_transform_batch(source_batch, target_image):
+    """
+    Transform a batch of images into the LAB color space of a target image
+    """
+    assert target_image.shape[0] == 3 and source_batch.shape[1] == 3
+    target_image = rgb_to_lab(target_image)
+    source_batch = rgb_to_lab(source_batch)
+
+    mean_t = target_image.mean(axis=[1,2]).view(1, -1, 1, 1)
+    std_t = target_image.std(axis=[1,2]).view(1, -1, 1, 1)
+    mean_s = source_batch.mean(axis=[0,2,3]).view(1, -1, 1, 1)
+    std_s = source_batch.std(axis=[0,2,3]).view(1, -1, 1, 1)
+
+    source_batch = (source_batch - mean_s) / std_s * std_t + mean_t
+    source_batch = lab_to_rgb(source_batch)
+    return source_batch
+
 if __name__ == '__main__':
     test_on_local()
 

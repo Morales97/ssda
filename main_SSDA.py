@@ -23,6 +23,7 @@ from loss.pixel_contrast import PixelContrastLoss
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
+from utils.lab_color import lab_transform_batch
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
@@ -106,6 +107,10 @@ def main(args, wandb):
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
+
+        images_s = lab_transform_batch(images_s, images_t[0])
+        pdb.set_trace()
+
 
         start_ts = time.time()
         model.train()
@@ -316,11 +321,11 @@ if __name__ == '__main__':
     #wandb = WandbWrapper(debug=~args.use_wandb)
     if not args.expt_name:
         args.expt_name = gen_unique_name()
-    wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
+    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
+    wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
-    main(args, wandb)
-    wandb.finish()
+    #main(args, wandb)
+    #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
 # python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
