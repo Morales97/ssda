@@ -114,30 +114,15 @@ def main(args, wandb):
         start_ts = time.time()
         model.train()
 
-
+        # Forward pass
         optimizer.zero_grad()
-        '''
-        if args.dsbn:
-            outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
-            outputs_t = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))
-        else:
-            outputs_s = model(images_s)
-            outputs_t = model(images_t)
-
-        if type(outputs_t) == OrderedDict:
-            out_s = outputs_s['out'] 
-            out_t = outputs_t['out']  
-        else:
-            out_s = outputs_s
-            out_t = outputs_t
-        '''
         out_s, out_t = _forward(args, model, images_s, images_t)
 
-        # CE
+        # ** Cross Entropy **
         loss_s = loss_fn(out_s, labels_s)
         loss_t = loss_fn(out_t, labels_t)
 
-        # CR
+        # ** Consistency Regularization **
         loss_cr, percent_pl, time_cr = 0, 0, 0
         if args.cr is not None:
             start_ts_cr = time.time()
@@ -150,25 +135,8 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
-                '''
-                if args.dsbn:
-                    with ema.average_parameters():
-                        outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
-                    outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
-                else:
-                    with ema.average_parameters():
-                        outputs_w = model(images_weak)     # (N, C, H, W)
-                    outputs_strong = model(images_strong)
-
-                if type(outputs_w) == OrderedDict:
-                    out_w = outputs_w['out']
-                    out_strong = outputs_strong['out']
-                else:
-                    out_w = outputs_w
-                    out_strong = outputs_strong
-                '''
+                # Forward pass for CR
                 out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
-
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
@@ -176,7 +144,7 @@ def main(args, wandb):
 
             time_cr = time.time() - start_ts_cr
             
-        # CL
+        # ** Pixel Contrastive Learning **
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
             proj_s = outputs_s['proj']
@@ -195,13 +163,16 @@ def main(args, wandb):
                 pred = torch.cat([pred_s, pred_t], dim=0)
                 loss_cl_t = pixel_contrast(proj, labels, pred)
 
+        # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
         
+        # Update
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
 
+        # Meters
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
         train_loss_meter.update(loss)
@@ -212,7 +183,7 @@ def main(args, wandb):
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
 
-        # decrease lr
+        # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
             lr_min = args.lr/50
             lr = (args.lr - lr_min) * pow(1 - step/args.steps, 0.9) + lr_min
@@ -226,6 +197,7 @@ def main(args, wandb):
                     param_group['lr'] = param_group['lr'] * 0.1
 
         step += 1
+        # Log Training
         if step % args.log_interval == 0:
             log_info = OrderedDict({
                 'Train Step': step,
@@ -252,6 +224,7 @@ def main(args, wandb):
             constrast_t_loss_meter.reset()
             train_loss_meter.reset()
             
+        # Log Validation
         if step % args.val_interval == 0:
             model.eval()
             with torch.no_grad():
@@ -293,6 +266,7 @@ def main(args, wandb):
             val_loss_meter.reset()
             running_metrics_val.reset()
         
+        # Save checkpoint
         if step % args.save_interval == 0:
             if args.save_model:
                 torch.save({
@@ -349,7 +323,6 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         if step >= args.warmup_steps:
             with ema.average_parameters():
                 outputs_w = model(images_weak)     # (N, C, H, W)
-                print('heyo')
         else:
             outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
