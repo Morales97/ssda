@@ -322,14 +322,14 @@ def _forward(args, model, images_s, images_t):
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
     if args.dsbn:
         if step >= args.warmup_steps:
-            with ema.average_parameters():
+            with ema.average_parameters() and torch.no_grad():
                 outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
         else:
             outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))
         outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
     else:
         if step >= args.warmup_steps:
-            with ema.average_parameters():
+            with ema.average_parameters() and torch.no_grad():
                 pdb.set_trace()
                 outputs_w = model(images_weak)     # (N, C, H, W)
                 
