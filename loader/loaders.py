@@ -12,8 +12,9 @@ def get_loaders(args, num_t_samples=2975):
     assert size in ['tiny', 'small']
 
     if size == 'tiny':
-        image_path_gta = 'data/gta5/images_tiny'
+        image_path_gta = 'data/gta5/gta5cycada/images_tiny'
         image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
+        print('*** GTA5 stylized as CS with CyCada ***')
     elif size == 'small':
         image_path_gta = 'data/gta5/images_small'
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
