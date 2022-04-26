@@ -370,14 +370,27 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
         sd = maskContrast_pretrained['model']
 
-        # Create a new state_dict
-        new_state_dict = copy.deepcopy(model.state_dict())
-        for key, param in sd.items():
-            if 'model_q.' in key:
-                if 'backbone' in key:
-                    new_state_dict[key[8:]] = param  # remove the 'model_q.' part
-                elif 'decoder' in key:
-                    new_state_dict['classifier' + key[15:]] = param
+        if pixel_contrast:
+            # For DeepLabContrast2, the state dict is different
+            # Create a new state_dict
+            new_state_dict = copy.deepcopy(model.state_dict())
+            for key, param in sd.items():
+                if 'model_q.' in key:
+                    if 'backbone' in key:
+                        new_state_dict[key[8:]] = param  # remove the 'model_q.' part
+                    elif 'decoder.0' in key:
+                        new_state_dict['aspp' + key[17:]] = param
+                    # TODO could also upload last decoder layer (very few params)
+
+        else:
+            # Create a new state_dict
+            new_state_dict = copy.deepcopy(model.state_dict())
+            for key, param in sd.items():
+                if 'model_q.' in key:
+                    if 'backbone' in key:
+                        new_state_dict[key[8:]] = param  # remove the 'model_q.' part
+                    elif 'decoder' in key:
+                        new_state_dict['classifier' + key[15:]] = param
 
         model.load_state_dict(new_state_dict)
         return model
