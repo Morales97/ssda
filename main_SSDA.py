@@ -191,9 +191,8 @@ def main(args, wandb):
             mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.1).float()).bool() # (B, 32, 64)
             labels_t_down_selected = labels_t_down[mask]
 
-            mask = mask.unsqueeze(1).expand([-1, 256, -1, -1])  # (B, 256, 32, 64)
-            proj_t_selected = proj_t[mask]
-            
+            proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
+            proj_t_selected = proj_t[mask, :]
             
             print(mask.sum())
             if mask.sum() > 1:
