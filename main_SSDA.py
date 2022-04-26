@@ -324,7 +324,7 @@ if __name__ == '__main__':
     #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
     wandb=None
     os.makedirs(args.save_dir, exist_ok=True)
-    #main(args, wandb)
+    main(args, wandb)
     #wandb.finish()
     
 # python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
