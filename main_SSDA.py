@@ -170,18 +170,22 @@ def main(args, wandb):
         # Build feature memory bank, start 'ramp_up_steps' before
         if args.alonso_contrast and (True or step >= args.warmup_steps - ramp_up_steps):
             with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                outputs_s = model(images_s)
+                #outputs_s = model(images_s) # TODO extend to use also S
                 outputs_t = model(images_t)   
 
-            prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
+            #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
             prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
 
             # save the projected features if the prediction is correct and more confident than 0.95
             # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
-            proj_s = outputs_s['proj']
+            #proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
-            labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+            #labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
             labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+            pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+            prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+            
+            mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool()
             pdb.set_trace()
 
         # Total Loss
