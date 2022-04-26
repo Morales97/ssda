@@ -342,7 +342,6 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         if step >= args.warmup_steps:
             with ema.average_parameters():
                 outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))                   # (N, C, H, W)
-                print('heyo')
         else:
             outputs_w = model(images_weak, 1*torch.ones(images_s.shape[0], dtype=torch.long))
         outputs_strong = model(images_strong, 2*torch.ones(images_s.shape[0], dtype=torch.long))
@@ -350,6 +349,7 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         if step >= args.warmup_steps:
             with ema.average_parameters():
                 outputs_w = model(images_weak)     # (N, C, H, W)
+                print('heyo')
         else:
             outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
