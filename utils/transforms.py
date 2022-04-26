@@ -179,7 +179,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
 
 
     transform_list.append(transforms.ToTensor())
-    #transform_list.append(normalize)    
+    transform_list.append(normalize)    
     transform = transforms.Compose(transform_list)
 
     return transform

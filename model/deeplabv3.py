@@ -111,6 +111,35 @@ class DeepLabV3Contrast(nn.Module):
 
         return result
 
+
+class DeepLabV3Alonso(nn.Module):
+    def __init__(self, backbone: nn.Module, in_channels, num_classes) -> None:
+        super().__init__()
+        self.backbone = backbone
+        self.aspp = ASPP(in_channels, [12, 24, 36])
+        self.decoder = nn.Sequential(
+                            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(),
+                            nn.Conv2d(256, num_classes, 1),
+                        )
+        pdb.set_trace()            
+        
+    def forward(self, x: Tensor) -> Dict[str, Tensor]:
+        input_shape = x.shape[-2:]
+        # contract: features is a dict of tensors
+        features = self.backbone(x)
+
+        result = OrderedDict()
+        x = features["out"]
+        x_f = self.aspp(x)
+        x = self.decoder(x_f)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        result["out"] = x
+        result["feat"] = x_f
+
+        return result
+
 class DeepLabV3DSBN(nn.Module):
 
     def __init__(self, backbone: nn.Module, classifier: nn.Module) -> None:
@@ -204,7 +233,8 @@ def _deeplabv3_resnet(
     backbone: resnet.ResNet,
     num_classes: int,
     pixel_contrast: bool,
-    dsbn: bool
+    dsbn: bool,
+    alonso_contrast: bool
 ) -> DeepLabV3:
     return_layers = {"layer4": "out"}
     backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
@@ -215,7 +245,10 @@ def _deeplabv3_resnet(
         assert not pixel_contrast, 'both dsbn and pixel contrast not supported yet'
         return DeepLabV3DSBN(backbone, classifier)
     if pixel_contrast:
+        assert not alonso_contrast, 'both alonso and pixel contrast not supported yet'
         return DeepLabV3Contrast(backbone, classifier, 2048, 256)
+    if alonso_contrast:
+        return DeepLabV3Alonso(backbone, 2048, num_classes)
     else:
         return DeepLabV3(backbone, classifier, None)
 
@@ -224,7 +257,8 @@ def deeplabv3_resnet50(
     num_classes: int = 21,
     pretrained_backbone: bool = True,
     pixel_contrast: bool = False,
-    dsbn: bool = False
+    dsbn: bool = False,
+    alonso_contrast: bool = False
 ) -> DeepLabV3:
     """Constructs a DeepLabV3 model with a ResNet-50 backbone.
     Args:
@@ -236,13 +270,12 @@ def deeplabv3_resnet50(
         pretrained_backbone (bool): If True, the backbone will be pre-trained.
     """
     # DM: modified to remove aux classifier
-
     if dsbn:
         backbone = resnet_dsbn.resnet50dsbn(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
     else:
         backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
-    model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast, dsbn)
-
+    
+    model = _deeplabv3_resnet(backbone, num_classes, pixel_contrast, dsbn, alonso_contrast)
     return model
 
 
@@ -268,13 +301,15 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         return model
     
     if dsbn:
-        model = deeplabv3_resnet50(num_classes=19, dsbn=dsbn)   
+        model = deeplabv3_resnet50(num_classes=19, dsbn=True)   
         return model 
 
     if pixel_contrast:
-        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
+        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=True)   
         return model
 
+    if alonso_contrast:
+        model = deeplabv3_resnet50(num_classes=19, alonso_contrast=True)
 
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', 
         pretrained=False, 
@@ -369,14 +404,6 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     return model
 
 if __name__ == '__main__':
-    #model = deeplabv3_rn50(pretrained=True)
-    '''
-    model = deeplabv3_resnet50(num_classes=19, dsbn=True)
+    model = deeplabv3_resnet50(num_classes=19, alonso_contrast=True)
 
-    image = Image.open('/Users/dani/Desktop/sample_img.jpg')
-    image = to_tensor(image).unsqueeze(0)
-    model(image, 0)
-    '''
-    sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True)
-    #sd = pickle.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy')
     pdb.set_trace()
