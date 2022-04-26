@@ -211,7 +211,6 @@ class DeepLabV3Alonso(nn.Module):
         x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
-        pdb.set_trace()
         proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
         pred = self.prediction_head(x_f)
 
