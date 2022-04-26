@@ -165,18 +165,30 @@ class DeepLabV3Alonso(nn.Module):
 
         dim_in = 256
         feat_dim = 256
+        
+        # NOTE Alonso et al uses Linear layers for projection (commented below). But in this repo, only works with conv layers of kernel 1. 
+        # Is there any conceptual difference?
+        '''
         self.projection_head = nn.Sequential(
             nn.Linear(dim_in, feat_dim),
             nn.BatchNorm1d(feat_dim),
             nn.ReLU(inplace=True),
             nn.Linear(feat_dim, feat_dim)
         )
+        '''
+
+        self.projection_head = nn.Sequential(
+                                    nn.Conv2d(dim_in, feat_dim, 1, bias=False),
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
         self.prediction_head = nn.Sequential(
-            nn.Linear(feat_dim, feat_dim),
-            nn.BatchNorm1d(feat_dim),
-            nn.ReLU(inplace=True),
-            nn.Linear(feat_dim, feat_dim)
-        )
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
