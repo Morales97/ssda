@@ -88,6 +88,25 @@ def lab_transform_batch(source_batch, target_image):
     source_batch = lab_to_rgb(source_batch)
     return source_batch
 
+def lab_transform(source_batch, target_batch):
+    """
+    Transform a batch of images into the LAB color space of target images, each image differently
+    """
+    assert target_batch.shape[1] == 3 and source_batch.shape[1] == 3
+    target_batch = rgb_to_lab(target_image)
+    source_batch = rgb_to_lab(source_batch)
+
+    for i in range(target_batch.shape[0])
+        mean_t = target_batch[i].mean(axis=[1,2]).view(-1, 1, 1)
+        std_t = target_batch[i].std(axis=[1,2]).view(-1, 1, 1)
+        mean_s = source_batch[i].mean(axis=[1,2]).view(-1, 1, 1)
+        std_s = source_batch[i].std(axis=[1,2]).view(-1, 1, 1)
+
+        source_batch[i] = (source_batch[i] - mean_s) / std_s * std_t + mean_t
+    
+    source_batch = lab_to_rgb(source_batch)
+    return source_batch
+
 if __name__ == '__main__':
     test_on_local()
 

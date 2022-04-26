@@ -23,7 +23,7 @@ from loss.pixel_contrast import PixelContrastLoss
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
-from utils.lab_color import lab_transform_batch
+from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
@@ -108,7 +108,11 @@ def main(args, wandb):
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
 
-        images_s = lab_transform_batch(images_s, images_t[0])
+        images_s = lab_transform(images_s, images_t)
+        from torchvision.utils import save_image
+        save_image(images_s, 'gta_lab' + str(step) + '.jpg')
+        save_image(images_t, 'cs_lab' + str(step) + '.jpg')
+        
         pdb.set_trace()
 
 
