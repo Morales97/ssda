@@ -194,10 +194,12 @@ def main(args, wandb):
             mask = mask.unsqueeze(1).expand([-1, 256, -1, -1])  # (B, 256, 32, 64)
             proj_t_selected = proj_t[mask]
             
-            pdb.set_trace()
-            feature_memory.add_features(None, proj_t_selected, proj_t_selected, args.batch_size_tl)
+            
+            print(mask.sum())
+            if mask.sum() > 1:
+                pdb.set_trace()
+                feature_memory.addfeatures(None, proj_t_selected, proj_t_selected, args.batch_size_tl)
 
-            pdb.set_trace()
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
