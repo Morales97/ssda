@@ -178,6 +178,7 @@ def main(args, wandb):
 
             # save the projected features if the prediction is correct and more confident than 0.95
             # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds
+            pdb.set_trace()
             proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
             labels_s_down = F.interpolate(labels_s, size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest')
