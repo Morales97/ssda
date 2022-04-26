@@ -114,6 +114,13 @@ def main(args, wandb):
         if args.lab_color:
             images_s = lab_transform(images_s, images_t)
 
+        if args.cr is not None or args.alonso_contrast:
+            if step % (len(target_loader_unl)-1) == 0:
+                data_iter_t_unl = iter(target_loader_unl)
+            
+            images_t_unl = next(data_iter_t_unl)
+
+
         start_ts = time.time()
         model.train()
 
@@ -125,14 +132,11 @@ def main(args, wandb):
         loss_s = loss_fn(out_s, labels_s)
         loss_t = loss_fn(out_t, labels_t)
 
+
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
         if args.cr is not None:
             start_ts_cr = time.time()
-            if step % (len(target_loader_unl)-1) == 0:
-                data_iter_t_unl = iter(target_loader_unl)
-            
-            images_t_unl = next(data_iter_t_unl)
 
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
@@ -194,10 +198,17 @@ def main(args, wandb):
             proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
             proj_t_selected = proj_t[mask, :]
             
-            print(mask.sum())
-            if mask.sum() > 1:
+            if mask.sum() > 0:
                 feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
-                pdb.set_trace()
+
+        # Contrastive Learning
+        if args.alonso_contrast and (True or step >= args.warmup_steps):
+            # Labeled CL 
+            # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
+
+            # Unlabeled CL
+            images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
+            out_tu = model(images_tu)
 
 
 
