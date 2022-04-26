@@ -168,8 +168,21 @@ def main(args, wandb):
         ramp_up_steps = 500
         
         # Build feature memory bank, start 'ramp_up_steps' before
-        #if step >= args.warmup_steps - ramp_up_steps:
-            
+        if args.alonso_contrast and (True or step >= args.warmup_steps - ramp_up_steps):
+            with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
+                outputs_s = model(images_s)
+                outputs_t = model(images_t)   
+
+            prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
+            prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
+
+            # save the projected features if the prediction is correct and more confident than 0.95
+            # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds
+            proj_s = outputs_s['proj']
+            proj_t = outputs_t['proj']
+            labels_s_down = F.interpolate(labels_s, size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest')
+            labels_t_down = F.interpolate(labels_t, size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest')
+            pdb.set_trace()
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
