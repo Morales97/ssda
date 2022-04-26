@@ -107,10 +107,11 @@ def main(args, wandb):
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
+        from torchvision.utils import save_image
+
         save_image(images_s, 'gta_lab_orig.jpg')
 
         images_s = lab_transform(images_s, images_t)
-        from torchvision.utils import save_image
         save_image(images_s, 'gta_lab.jpg')
         save_image(images_t, 'cs_lab.jpg')
         
