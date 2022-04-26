@@ -20,6 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
+from loss.pixel_contrast_unsup import FeatureMemory
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
@@ -71,6 +72,8 @@ def main(args, wandb):
     loss_fn = cross_entropy2d   
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
+    if args.alonso_contrast:
+        feature_memory = FeatureMemory(num_samples=args.target_samples)
 
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
@@ -186,8 +189,12 @@ def main(args, wandb):
             prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
             
             mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
-            mask = mask.unsqueeze(1).expand([-1, 256, -1, -1])
-            proj_t_correct = proj_t[mask]
+            labels_t_down_selected = labels_t_down[mask]
+
+            mask = mask.unsqueeze(1).expand([-1, 256, -1, -1])  # (B, 256, 32, 64)
+            proj_t_selected = proj_t[mask]
+
+            feature_memory.add_features(None, proj_t_selected, proj_t_selected, args.batch_size_tl)
 
             pdb.set_trace()
 
