@@ -118,11 +118,11 @@ def main(args, wandb):
         optimizer.zero_grad()
         out_s, out_t = _forward(args, model, images_s, images_t)
 
-        # ** Cross Entropy **
+        # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s)
         loss_t = loss_fn(out_t, labels_t)
 
-        # ** Consistency Regularization **
+        # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
         if args.cr is not None:
             start_ts_cr = time.time()
@@ -144,7 +144,7 @@ def main(args, wandb):
 
             time_cr = time.time() - start_ts_cr
             
-        # ** Pixel Contrastive Learning **
+        # *** Pixel Contrastive Learning (supervised) ***
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
             proj_s = outputs_s['proj']
@@ -162,6 +162,14 @@ def main(args, wandb):
                 labels = torch.cat([labels_s, labels_t], dim=0)
                 pred = torch.cat([pred_s, pred_t], dim=0)
                 loss_cl_t = pixel_contrast(proj, labels, pred)
+
+
+        # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
+        ramp_up_steps = 500
+        
+        # Build feature memory bank, start 'ramp_up_steps' before
+        if step >= args.warmup_steps - ramp_up_steps:
+            
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
@@ -323,6 +331,7 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         if step >= args.warmup_steps:
             with ema.average_parameters():
                 outputs_w = model(images_weak)     # (N, C, H, W)
+                pdb.set_trace()
         else:
             outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
