@@ -39,7 +39,6 @@ class FeatureMemory:
         for c in range(self.n_classes):
             mask_c = class_labels == c  # get mask for class c
             #selector = model.__getattr__('contrastive_class_selector_' + str(c))  # get the self attention moduel for class c
-            pdb.set_trace()
             features_c = features[mask_c, :] # get features from class c
             if features_c.shape[0] > 0:
                 if features_c.shape[0] > elements_per_class:
