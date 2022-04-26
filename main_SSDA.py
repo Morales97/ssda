@@ -336,7 +336,7 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         else:
             outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
-
+    pdb.set_trace()
     if type(outputs_w) == OrderedDict:
         out_w = outputs_w['out']
         out_strong = outputs_strong['out']
