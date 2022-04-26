@@ -111,9 +111,8 @@ class DeepLabV3Contrast(nn.Module):
 
         return result
 
-
-class DeepLabV3Alonso(nn.Module):
-    def __init__(self, backbone: nn.Module, in_channels, num_classes) -> None:
+class DeepLabV3Contrast2(nn.Module):
+    def __init__(self, backbone: nn.Module, in_channels, num_classes, dim_embed) -> None:
         super().__init__()
         self.backbone = backbone
         self.aspp = ASPP(in_channels, [12, 24, 36])
@@ -123,7 +122,12 @@ class DeepLabV3Alonso(nn.Module):
                             nn.ReLU(),
                             nn.Conv2d(256, num_classes, 1),
                         )
-        pdb.set_trace()            
+        self.projection = nn.Sequential(
+                            nn.Conv2d(256, 256, 1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(256, dim_embed, 1, bias=False)
+                        )
         
     def forward(self, x: Tensor) -> Dict[str, Tensor]:
         input_shape = x.shape[-2:]
@@ -132,8 +136,41 @@ class DeepLabV3Alonso(nn.Module):
 
         result = OrderedDict()
         x = features["out"]
-        x_f = self.aspp(x)
-        x = self.decoder(x_f)
+        aspp_features = self.aspp(x)
+
+        x = self.decoder(aspp_features)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        result["out"] = x
+
+        proj = self.projection(aspp_features)
+        proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
+        proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
+        result["proj"] = proj
+
+        return result
+
+class DeepLabV3Alonso(nn.Module):
+    def __init__(self, backbone: nn.Module, in_channels, num_classes) -> None:
+        super().__init__()
+        self.backbone = backbone
+        self.aspp = ASPP(in_channels, [12, 24, 36])
+        self.decoder1 = nn.Sequential(
+                            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(),
+                        )
+        self.decoder2 = nn.Conv2d(256, num_classes, 1)
+        
+    def forward(self, x: Tensor) -> Dict[str, Tensor]:
+        input_shape = x.shape[-2:]
+        # contract: features is a dict of tensors
+        features = self.backbone(x)
+
+        result = OrderedDict()
+        x = features["out"]
+        x = self.aspp(x)
+        x_f = self.decoder1(x)  # x_f will be used as projection head
+        x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
         result["out"] = x
         result["feat"] = x_f
@@ -246,7 +283,8 @@ def _deeplabv3_resnet(
         return DeepLabV3DSBN(backbone, classifier)
     if pixel_contrast:
         assert not alonso_contrast, 'both alonso and pixel contrast not supported yet'
-        return DeepLabV3Contrast(backbone, classifier, 2048, 256)
+        #return DeepLabV3Contrast(backbone, classifier, 2048, 256)
+        return DeepLabV3Contrast2(backbone, 2048, num_classes, 256)
     if alonso_contrast:
         return DeepLabV3Alonso(backbone, 2048, num_classes)
     else:
@@ -280,7 +318,7 @@ def deeplabv3_resnet50(
 
 
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False, dsbn=False):
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False, dsbn=False, alonso_contrast=False):
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
