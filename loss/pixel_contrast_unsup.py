@@ -6,6 +6,7 @@ from https://github.com/Shathe/SemiSeg-Contrastive
 import torch
 import numpy as np
 import random
+import pdb
 
 class FeatureMemory:
     def __init__(self, num_samples, memory_per_class=256, feature_size=256, n_classes=19):
@@ -38,6 +39,7 @@ class FeatureMemory:
         for c in range(self.n_classes):
             mask_c = class_labels == c  # get mask for class c
             #selector = model.__getattr__('contrastive_class_selector_' + str(c))  # get the self attention moduel for class c
+            pdb.set_trace()
             features_c = features[mask_c, :] # get features from class c
             if features_c.shape[0] > 0:
                 if features_c.shape[0] > elements_per_class:
