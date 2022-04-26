@@ -93,7 +93,7 @@ def lab_transform(source_batch, target_batch):
     Transform a batch of images into the LAB color space of target images, each image differently
     """
     assert target_batch.shape[1] == 3 and source_batch.shape[1] == 3
-    target_batch = rgb_to_lab(target_image)
+    target_batch = rgb_to_lab(target_batch)
     source_batch = rgb_to_lab(source_batch)
 
     for i in range(target_batch.shape[0]):
