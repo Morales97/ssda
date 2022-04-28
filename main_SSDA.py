@@ -402,7 +402,5 @@ if __name__ == '__main__':
     else:
         main(args, None)
     
-# python main_SSDA.py --net=lraspp_mobilenet --target_samples=100 --batch_size=8 --cr=one_hot 
-# python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True
-# python main_SSDA.py --net=lraspp_mobilenet_contrast --pixel_contrast=True --gamma=0.1 --pre_trained=True
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=kl
+
+# python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
