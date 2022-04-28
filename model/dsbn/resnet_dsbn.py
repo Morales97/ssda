@@ -342,7 +342,7 @@ class DSBNResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x, domain)
-        x = self.layer2(x, 0*domain)
+        x = self.layer2(x, domain)
         x = self.layer3(x, 0*domain)
         x = self.layer4(x, 0*domain)
 
