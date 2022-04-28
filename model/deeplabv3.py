@@ -8,7 +8,7 @@ import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
 #from dsbn import resnet_dsbn
-#from model.dsbn import resnet_dsbn
+from model.dsbn import resnet_dsbn
 from collections import OrderedDict
 from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
