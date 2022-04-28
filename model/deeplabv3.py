@@ -8,7 +8,7 @@ import pdb
 from torchvision.models import resnet
 from torchvision.models._utils import IntermediateLayerGetter
 #from dsbn import resnet_dsbn
-from model.dsbn import resnet_dsbn
+#from model.dsbn import resnet_dsbn
 from collections import OrderedDict
 from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
@@ -500,6 +500,14 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     return model
 
 if __name__ == '__main__':
-    model = deeplabv3_resnet50(num_classes=19, alonso_contrast=True)
+    pt_sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True)
+    pdb.set_trace()
+    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, dsbn=dsbn)   
 
+    new_state_dict = copy.deepcopy(model.state_dict())
+    for key, param in pt_sd.items():
+        new_state_dict['backbone.' + key] = param
+            
+    model.load_state_dict(new_state_dict)
+    print('Loading model pretrained densly on ImageNet with DenseCL')
     pdb.set_trace()
