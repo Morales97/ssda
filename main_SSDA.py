@@ -325,16 +325,17 @@ def main(args, wandb):
                     'step' : step,
                 }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
                 print('Checkpoint saved.')
-            
+                
+                # DM. save model as wandb artifact
+                model_artifact = wandb.Artifact('model_{}'.format(step), type='model')
+                model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                wandb.log_artifact(model_artifact)
+
             if score['mIoU'] > best_mIoU:
                 if args.save_model:
                     shutil.copyfile(
                         os.path.join(args.save_dir, 'checkpoint.pth.tar'),
                         os.path.join(args.save_dir, 'model-best.pth.tar'))
-                    # DM. save model as wandb artifact
-                    model_artifact = wandb.Artifact('best_model_{}'.format(step), type='model')
-                    model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
-                    wandb.log_artifact(model_artifact)
                 best_mIoU = score['mIoU']
             
             
