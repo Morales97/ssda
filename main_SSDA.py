@@ -225,7 +225,7 @@ def main(args, wandb):
                 pred_tu = pred_tu[mask, ...]
                 pseudo_lbl_down = pseudo_lbl_down[mask]
 
-                loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory)
+                loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
                 pdb.set_trace()
 
 
