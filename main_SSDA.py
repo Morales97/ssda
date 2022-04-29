@@ -204,7 +204,7 @@ def main(args, wandb):
                 if proj_t_selected.shape[0] > 0:
                     feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
 
-                store_S_pixels = True
+                store_S_pixels = False  # Results are better when only storing features from T, not S+T. This is also what Alonso et al does
                 if store_S_pixels:
                     with ema.average_parameters() and torch.no_grad():  
                         outputs_s = model(images_s) 
@@ -236,12 +236,15 @@ def main(args, wandb):
                 pred_tu = outputs_tu['pred']
 
                 # compute pseudolabel
-                _, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1).detach(), dim=1)
+                prob, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1).detach(), dim=1)
                 pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
+                prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
 
                 # take out the features from black pixels from zooms out and augmetnations 
                 ignore_label = 250
-                mask = (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
+                threshold = 0.9
+                mask = prob_down > threshold
+                mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
 
                 pred_tu = pred_tu.permute(0, 2, 3, 1)
                 pred_tu = pred_tu[mask, ...]
