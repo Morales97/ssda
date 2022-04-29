@@ -241,9 +241,10 @@ def main(args, wandb):
                 mask = prob_down > threshold
                 mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
                 '''
-                use_tl = False
-                if use _tl:
+                use_tl = True
+                if use_tl:
                     labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                    ignore_label = 250
                     mask = mask * (labels_t_down != ignore_label)
                     
                     pred_tl = pred_tl.permute(0, 2, 3, 1)
