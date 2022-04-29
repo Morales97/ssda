@@ -181,16 +181,13 @@ def main(args, wandb):
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                    outputs_t = model(images_t)   
+                    outputs_t_ema = model(images_t)   
 
-                #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
-                prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
+                prob_t, pred_t = torch.max(torch.softmax(outputs_t_ema['out'], dim=1), dim=1)  
 
                 # save the projected features if the prediction is correct and more confident than 0.95
                 # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
-                #proj_s = outputs_s['proj']
-                proj_t = outputs_t['proj']
-                #labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+                proj_t = outputs_t_ema['proj']
                 labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
                 pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
                 prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
@@ -227,10 +224,36 @@ def main(args, wandb):
 
             # Contrastive Learning
             if step >= args.warmup_steps:
-                # Labeled CL 
+                # ** Labeled CL **
                 # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
+                pred_tl = outputs_t['pred']
 
-                # Unlabeled CL
+                # compute pseudolabel
+                # NOTE we could try adding a threshold for labeled samples too
+                '''
+                prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
+                pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+
+                # take out the features from black pixels from zooms out and augmetnations 
+                ignore_label = 250
+                threshold = 0.9
+                mask = prob_down > threshold
+                mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
+                '''
+                '''
+                labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                mask = mask * (labels_t_down != ignore_label)
+                
+                pred_tl = pred_tl.permute(0, 2, 3, 1)
+                pred_tl = pred_tl[mask, ...]
+                labels_t_down = labels_t_down[mask]
+
+                loss_labeled = contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
+                '''
+                loss_labeled = 0
+
+                # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
                 outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 pred_tu = outputs_tu['pred']
@@ -250,8 +273,8 @@ def main(args, wandb):
                 pred_tu = pred_tu[mask, ...]
                 pseudo_lbl_down = pseudo_lbl_down[mask]
 
-                loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
-
+                loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
+                loss_cl_alonso = loss_labeled + loss_unlabeled
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso

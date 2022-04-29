@@ -149,8 +149,8 @@ class DeepLabV3Contrast2(nn.Module):
 
         return result
 
-class DeepLabV3Alonso(nn.Module):
-    def __init__(self, backbone: nn.Module, in_channels, num_classes) -> None:
+class DeepLabV3PixelContrast(nn.Module):
+    def __init__(self, backbone: nn.Module, in_channels, num_classes, dim_embed) -> None:
         super().__init__()
         self.backbone = backbone
         self.aspp = ASPP(in_channels, [12, 24, 36])
@@ -339,11 +339,13 @@ def _deeplabv3_resnet(
         assert not pixel_contrast, 'both dsbn and pixel contrast not supported yet'
         assert not alonso_contrast, 'both alonso and dsbn not supported yet'
         return DeepLabV3DSBN(backbone, classifier)
-    if alonso_contrast:
-        return DeepLabV3Alonso(backbone, 2048, num_classes) # NOTE pixel contrast implemented in this model as well
+    if pixel_contrast or alonso_contrast:
+        return DeepLabV3PixelContrast(backbone, 2048, num_classes, 256) # NOTE pixel contrast implemented in this model as well
+    '''
     if pixel_contrast:
         #return DeepLabV3Contrast(backbone, classifier, 2048, 256)
         return DeepLabV3Contrast2(backbone, 2048, num_classes, 256)
+    '''
     
     else:
         return DeepLabV3(backbone, classifier, None)
