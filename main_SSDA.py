@@ -20,7 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import FeatureMemory
+from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
@@ -173,47 +173,64 @@ def main(args, wandb):
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
         ramp_up_steps = 500
-        
+        loss_cl_alonso = 0
+
         # Build feature memory bank, start 'ramp_up_steps' before
-        if args.alonso_contrast and (True or step >= args.warmup_steps - ramp_up_steps):
-            with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                #outputs_s = model(images_s) # TODO extend to use also S
-                outputs_t = model(images_t)   
+        if args.alonso_contrast:
+            if (True or step >= args.warmup_steps - ramp_up_steps):
+                with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
+                    #outputs_s = model(images_s) # TODO extend to use also S
+                    outputs_t = model(images_t)   
 
-            #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
-            prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
+                #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
+                prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
 
-            # save the projected features if the prediction is correct and more confident than 0.95
-            # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
-            #proj_s = outputs_s['proj']
-            proj_t = outputs_t['proj']
-            #labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
-            labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-            pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-            prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-            
-            mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.1).float()).bool() # (B, 32, 64)
-            labels_t_down_selected = labels_t_down[mask]
+                # save the projected features if the prediction is correct and more confident than 0.95
+                # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
+                #proj_s = outputs_s['proj']
+                proj_t = outputs_t['proj']
+                #labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+                labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+                pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+                prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+                
+                mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.2).float()).bool() # (B, 32, 64) NOTE change th to 0.95
+                labels_t_down_selected = labels_t_down[mask]
 
-            proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
-            proj_t_selected = proj_t[mask, :]
-            
-            if mask.sum() > 0:
-                feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
+                proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
+                proj_t_selected = proj_t[mask, :]
+                
+                if proj_t_selected is not None:
+                    feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
 
-        # Contrastive Learning
-        if args.alonso_contrast and (True or step >= args.warmup_steps):
-            # Labeled CL 
-            # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
+                pdb.set_trace()
+            # Contrastive Learning
+            if (True or step >= args.warmup_steps):
+                # Labeled CL 
+                # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
 
-            # Unlabeled CL
-            images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-            out_tu = model(images_tu)
+                # Unlabeled CL
+                images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
+                outputs_tu = model(images_tu)
+                pred_tu = outputs_tu['pred']
 
+                # compute pseudolabel
+                _, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1), dim=1).detach()
+                pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
+
+                # take out the features from black pixels from zooms out and augmetnations 
+                ignore_label = 250
+                mask = (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
+
+                pred_tu = pred_tu.permute(0, 2, 3, 1)
+                pred_tu = pred_tu[mask, ...]
+                pseudo_lbl_down = pseudo_lbl_down[mask]
+
+                loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory)
 
 
         # Total Loss
-        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t)
+        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso
         
         # Update
         loss.backward()
@@ -404,3 +421,4 @@ if __name__ == '__main__':
     
 
 # python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True

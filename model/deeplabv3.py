@@ -212,7 +212,7 @@ class DeepLabV3Alonso(nn.Module):
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
         proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
-        pred = self.prediction_head(x_f)
+        pred = self.prediction_head(proj)
 
         result["out"] = x
         result["feat"] = x_f
