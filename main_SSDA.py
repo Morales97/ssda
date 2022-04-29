@@ -181,7 +181,6 @@ def main(args, wandb):
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                    #outputs_s = model(images_s) # TODO extend to use also S
                     outputs_t = model(images_t)   
 
                 #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
@@ -204,6 +203,27 @@ def main(args, wandb):
                 
                 if proj_t_selected.shape[0] > 0:
                     feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
+
+                store_S_pixels = True
+                if store_S_pixels:
+                    with ema.average_parameters() and torch.no_grad():  
+                        outputs_s = model(images_s) 
+
+                    prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
+                    proj_s = outputs_s['proj']
+                    labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+                    pred_s_down = F.interpolate(pred_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze() 
+                    prob_s_down = F.interpolate(prob_s.unsqueeze(0), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+
+                    mask = ((pred_s_down == labels_s_down).float() * (prob_s_down > 0.95).float()).bool() # (B, 32, 64)
+                    labels_s_down_selected = labels_s_down[mask]
+
+                    proj_s = proj_s.permute(0,2,3,1)    # (B, 32, 64, C)
+                    proj_s_selected = proj_s[mask, :]
+                    
+                    if proj_s_selected.shape[0] > 0:
+                        feature_memory.add_features(None, proj_s_selected, labels_s_down_selected, args.batch_size_s)
+
 
             # Contrastive Learning
             if step >= args.warmup_steps:
