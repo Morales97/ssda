@@ -160,7 +160,14 @@ class DeepLabV3Alonso(nn.Module):
                             nn.ReLU(),
                         )
         self.decoder2 = nn.Conv2d(256, num_classes, 1)
-        
+        self.decoder = nn.Sequential(
+                            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(),
+                            nn.Conv2d(256, num_classes, 1),
+                        )
+
+
         print('Alonso Contrast Model')
 
         dim_in = 256
@@ -206,17 +213,18 @@ class DeepLabV3Alonso(nn.Module):
         result = OrderedDict()
         x = features["out"]
         x = self.aspp(x)
-        x_f = self.decoder1(x)  # x_f will be used as projection head
-        x = self.decoder2(x_f)
+        x = self.decoder(x)
+        #x_f = self.decoder1(x)  # x_f will be used as projection head
+        #x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
-        proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
-        pred = self.prediction_head(proj)
+        #proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+        #pred = self.prediction_head(proj)
 
         result["out"] = x
-        result["feat"] = x_f
-        result["proj"] = proj
-        result["pred"] = pred
+        #result["feat"] = x_f
+        #result["proj"] = proj
+        #result["pred"] = pred
 
         return result
 
