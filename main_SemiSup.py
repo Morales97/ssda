@@ -120,6 +120,7 @@ def main(args, wandb):
         out_t, outputs_t = _forward(args, model, images_t)
 
         # *** Cross Entropy ***
+        loss_s = 0
         loss_t = loss_fn(out_t, labels_t)
 
         # *** Consistency Regularization ***
