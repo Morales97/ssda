@@ -341,11 +341,9 @@ def _deeplabv3_resnet(
         return DeepLabV3DSBN(backbone, classifier)
     if pixel_contrast or alonso_contrast:
         return DeepLabV3PixelContrast(backbone, 2048, num_classes, 256) # NOTE pixel contrast implemented in this model as well
-    '''
     if pixel_contrast:
         #return DeepLabV3Contrast(backbone, classifier, 2048, 256)
         return DeepLabV3Contrast2(backbone, 2048, num_classes, 256)
-    '''
     
     else:
         return DeepLabV3(backbone, classifier, None)
