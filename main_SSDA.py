@@ -89,6 +89,7 @@ def main(args, wandb):
     constrast_s_loss_meter = averageMeter()
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
+    alonso_contrast_meter = averageMeter()
 
     data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
@@ -175,9 +176,10 @@ def main(args, wandb):
         ramp_up_steps = 500
         loss_cl_alonso = 0
 
-        # Build feature memory bank, start 'ramp_up_steps' before
         if args.alonso_contrast:
-            if (True or step >= args.warmup_steps - ramp_up_steps):
+
+            # Build feature memory bank, start 'ramp_up_steps' before
+            if step >= args.warmup_steps - ramp_up_steps:
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
                     #outputs_s = model(images_s) # TODO extend to use also S
                     outputs_t = model(images_t)   
@@ -204,7 +206,7 @@ def main(args, wandb):
                     feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
 
             # Contrastive Learning
-            if (True or step >= args.warmup_steps):
+            if step >= args.warmup_steps:
                 # Labeled CL 
                 # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
 
@@ -226,9 +228,6 @@ def main(args, wandb):
                 pseudo_lbl_down = pseudo_lbl_down[mask]
 
                 loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
-                print(loss_cl_alonso)
-                if loss_cl_alonso > 0:
-                    pdb.set_trace()
 
 
         # Total Loss
@@ -250,6 +249,7 @@ def main(args, wandb):
         constrast_s_loss_meter.update(args.gamma * loss_cl_s)
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
+        alonso_contrast_meter(loss_cl_alonso)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
@@ -279,6 +279,7 @@ def main(args, wandb):
                 'Train Loss': FormattedLogItem(train_loss_meter.avg, '{:.3f}'),
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
                 'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
+                'Alonso CL Loss': FormattedLogItem(alonso_contrast_meter.avg, '{:.3f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
@@ -290,6 +291,7 @@ def main(args, wandb):
             cr_loss_meter.reset()
             constrast_s_loss_meter.reset()
             constrast_t_loss_meter.reset()
+            alonso_contrast_meter.reset()
             train_loss_meter.reset()
             
         # Log Validation
