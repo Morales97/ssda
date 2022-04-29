@@ -101,7 +101,14 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
 
             # L2 normalize vectors
             memory_c = F.normalize(memory_c, dim=1) # N, 256
-            features_c_norm = F.normalize(features_c, dim=1) # M, 256
+
+            use_prototypes = True
+            if use_prototypes:
+                prototype = features_c.mean(dim=0)  # M=1, 256
+                features_c_norm = F.normalize(prototype, dim=1) # M=1, 256
+            else:
+                features_c_norm = F.normalize(features_c, dim=1) # M, 256
+            
 
             # compute similarity. All elements with all elements
             similarities = torch.mm(features_c_norm, memory_c.transpose(1, 0))  # MxN

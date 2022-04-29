@@ -242,7 +242,7 @@ def main(args, wandb):
 
                 # take out the features from black pixels from zooms out and augmetnations 
                 ignore_label = 250
-                threshold = 0.9
+                threshold = 0
                 mask = prob_down > threshold
                 mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
 
