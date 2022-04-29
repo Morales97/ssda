@@ -107,7 +107,7 @@ class DeepLabV3Contrast(nn.Module):
         proj = self.projection(features["out"])
         proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
         proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
-        result["proj"] = proj
+        result["proj_pc"] = proj
 
         return result
 
@@ -145,7 +145,7 @@ class DeepLabV3Contrast2(nn.Module):
         proj = self.projection(aspp_features)
         proj = F.normalize(proj, p=2, dim=1)  #need to normalize the projection
         proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
-        result["proj"] = proj
+        result["proj_pc"] = proj
 
         return result
 
@@ -160,7 +160,14 @@ class DeepLabV3Alonso(nn.Module):
                             nn.ReLU(),
                         )
         self.decoder2 = nn.Conv2d(256, num_classes, 1)
-
+        
+        # for pixel contrast
+        self.projection_pc = nn.Sequential(
+                            nn.Conv2d(256, 256, 1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(256, dim_embed, 1, bias=False)
+                        )
 
         print('Alonso Contrast Model')
 
@@ -209,18 +216,21 @@ class DeepLabV3Alonso(nn.Module):
 
         result = OrderedDict()
         x = features["out"]
-        x = self.aspp(x)
-        x_f = self.decoder1(x)  # x_f will be used as projection head
+        aspp_f = self.aspp(x)
+        x_f = self.decoder1(aspp_f)  # x_f will be used as projection head
         x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
         proj = self.projection_head(x_f)    # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
         pred = self.prediction_head(proj)
 
+        proj_pc = self.projection_pc(aspp_f)
+
         result["out"] = x
         result["feat"] = x_f
         result["proj"] = proj
         result["pred"] = pred
+        result["proj_pc"] = proj_pc
 
         return result
 
@@ -329,12 +339,12 @@ def _deeplabv3_resnet(
         assert not pixel_contrast, 'both dsbn and pixel contrast not supported yet'
         assert not alonso_contrast, 'both alonso and dsbn not supported yet'
         return DeepLabV3DSBN(backbone, classifier)
+    if alonso_contrast:
+        return DeepLabV3Alonso(backbone, 2048, num_classes) # NOTE pixel contrast implemented in this model as well
     if pixel_contrast:
-        assert not alonso_contrast, 'both alonso and pixel contrast not supported yet'
         #return DeepLabV3Contrast(backbone, classifier, 2048, 256)
         return DeepLabV3Contrast2(backbone, 2048, num_classes, 256)
-    if alonso_contrast:
-        return DeepLabV3Alonso(backbone, 2048, num_classes)
+    
     else:
         return DeepLabV3(backbone, classifier, None)
 
