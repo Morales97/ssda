@@ -91,7 +91,6 @@ def main(args, wandb):
     pseudo_lbl_meter = averageMeter()
     alonso_contrast_meter = averageMeter()
 
-    data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
     data_iter_t_unl = iter(target_loader_unl)
 
