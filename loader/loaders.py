@@ -17,10 +17,10 @@ def get_loaders(args, num_t_samples=2975):
         image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
         #print('*** GTA5 stylized as CS with CyCada ***')
     elif size == 'small':
-        #image_path_gta = 'data/gta5/images_small'
-        image_path_gta = 'data/gta5/gta5cycada/images_small'
+        image_path_gta = 'data/gta5/images_small'
+        #image_path_gta = 'data/gta5/gta5cycada/images_small'
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
-        print('*** GTA5 stylized as CS with CyCada ***')
+        #print('*** GTA5 stylized as CS with CyCada ***')
     label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
 
