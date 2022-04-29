@@ -200,10 +200,9 @@ def main(args, wandb):
                 proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
                 proj_t_selected = proj_t[mask, :]
                 
-                if proj_t_selected is not None:
+                if proj_t_selected.shape[0] > 0:
                     feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
 
-                pdb.set_trace()
             # Contrastive Learning
             if (True or step >= args.warmup_steps):
                 # Labeled CL 
@@ -215,7 +214,7 @@ def main(args, wandb):
                 pred_tu = outputs_tu['pred']
 
                 # compute pseudolabel
-                _, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1), dim=1).detach()
+                _, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1).detach(), dim=1)
                 pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
 
                 # take out the features from black pixels from zooms out and augmetnations 
@@ -227,6 +226,7 @@ def main(args, wandb):
                 pseudo_lbl_down = pseudo_lbl_down[mask]
 
                 loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory)
+                pdb.set_trace()
 
 
         # Total Loss
