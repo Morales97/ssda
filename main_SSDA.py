@@ -212,7 +212,7 @@ def main(args, wandb):
 
                 # Unlabeled CL
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-                outputs_tu = model(images_tu)
+                outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 pred_tu = outputs_tu['pred']
 
                 # compute pseudolabel
