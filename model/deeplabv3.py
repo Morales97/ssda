@@ -225,6 +225,8 @@ class DeepLabV3PixelContrast(nn.Module):
         pred = self.prediction_head(proj)
 
         proj_pc = self.projection_pc(aspp_f)
+        proj_pc = F.normalize(proj_pc, p=2, dim=1)  #need to normalize the projection
+        proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
 
         result["out"] = x
         result["feat"] = x_f

@@ -241,15 +241,18 @@ def main(args, wandb):
                 mask = prob_down > threshold
                 mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
                 '''
-                
-                labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
-                mask = mask * (labels_t_down != ignore_label)
-                
-                pred_tl = pred_tl.permute(0, 2, 3, 1)
-                pred_tl = pred_tl[mask, ...]
-                labels_t_down = labels_t_down[mask]
+                use_tl = False
+                if use _tl:
+                    labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                    mask = mask * (labels_t_down != ignore_label)
+                    
+                    pred_tl = pred_tl.permute(0, 2, 3, 1)
+                    pred_tl = pred_tl[mask, ...]
+                    labels_t_down = labels_t_down[mask]
 
-                loss_labeled = contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
+                    loss_labeled = contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
+                else:
+                    loss_labeled = 0
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
