@@ -207,7 +207,6 @@ class DeepLabV3Alonso(nn.Module):
         x = features["out"]
         x = self.aspp(x)
         x_f = self.decoder1(x)  # x_f will be used as projection head
-
         x = self.decoder2(x_f)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
@@ -324,6 +323,7 @@ def _deeplabv3_resnet(
     if dsbn:
         backbone = resnet_dsbn.IntermediateLayerGetterDSBN(backbone, return_layers=return_layers)
         assert not pixel_contrast, 'both dsbn and pixel contrast not supported yet'
+        assert not alonso_contrast, 'both alonso and dsbn not supported yet'
         return DeepLabV3DSBN(backbone, classifier)
     if pixel_contrast:
         assert not alonso_contrast, 'both alonso and pixel contrast not supported yet'

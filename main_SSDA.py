@@ -196,7 +196,7 @@ def main(args, wandb):
                 pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
                 prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
                 
-                mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.2).float()).bool() # (B, 32, 64) NOTE change th to 0.95
+                mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
                 labels_t_down_selected = labels_t_down[mask]
 
                 proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
