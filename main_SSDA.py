@@ -249,7 +249,7 @@ def main(args, wandb):
         constrast_s_loss_meter.update(args.gamma * loss_cl_s)
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
-        alonso_contrast_meter(loss_cl_alonso)
+        alonso_contrast_meter.update(loss_cl_alonso)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
