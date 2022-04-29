@@ -102,7 +102,7 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
             # L2 normalize vectors
             memory_c = F.normalize(memory_c, dim=1) # N, 256
 
-            use_prototypes = True
+            use_prototypes = False
             if use_prototypes:
                 prototype = features_c.mean(dim=0)  # M=1, 256
                 features_c_norm = F.normalize(prototype, dim=1) # M=1, 256
