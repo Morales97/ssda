@@ -42,7 +42,7 @@ def main(args, wandb):
     print('Seed: ', args.seed)
     
     # Load data
-    source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+    _, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
     # Load model
     model = get_model(args)
@@ -99,21 +99,12 @@ def main(args, wandb):
     while step <= args.steps:
 
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
-        if step % (len(source_loader)-1) == 0:
-            data_iter_s = iter(source_loader)
         if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
 
-        images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
-
-        images_s = images_s.cuda()
-        labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
-
-        if args.lab_color:
-            images_s = lab_transform(images_s, images_t)
 
         if args.cr is not None or args.alonso_contrast:
             if step % (len(target_loader_unl)-1) == 0:
@@ -127,12 +118,10 @@ def main(args, wandb):
 
         # Forward pass
         optimizer.zero_grad()
-        out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
+        out_t, outputs_t = _forward(args, model, images_t)
 
         # *** Cross Entropy ***
-        loss_s = loss_fn(out_s, labels_s)
         loss_t = loss_fn(out_t, labels_t)
-
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
@@ -155,21 +144,12 @@ def main(args, wandb):
         # *** Pixel Contrastive Learning (supervised) ***
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
-            proj_s = outputs_s['proj']
             proj_t = outputs_t['proj']
-
-            _, pred_s = torch.max(out_s, 1) 
             _, pred_t = torch.max(out_t, 1)
 
-            if not args.pc_mixed:
-                loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
-            else:
-                loss_cl_s = 0
-                proj = torch.cat([proj_s, proj_t], dim=0)
-                labels = torch.cat([labels_s, labels_t], dim=0)
-                pred = torch.cat([pred_s, pred_t], dim=0)
-                loss_cl_t = pixel_contrast(proj, labels, pred)
+
+            loss_cl_s = 0 
+            loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
@@ -364,39 +344,25 @@ def main(args, wandb):
             break
 
 
-def _forward(args, model, images_s, images_t):
-    if args.dsbn:
-        outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
-        outputs_t = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))
-    else:
-        outputs_s = model(images_s)
-        outputs_t = model(images_t)
+def _forward(args, model, images_t):
+    outputs_t = model(images_t)
 
     if type(outputs_t) == OrderedDict:
-        out_s = outputs_s['out'] 
         out_t = outputs_t['out']  
     else:
-        out_s = outputs_s
         out_t = outputs_t
 
-    return out_s, out_t, outputs_s, outputs_t
+    return out_t, outputs_t
 
 
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
-    if args.dsbn:
-        if step >= args.warmup_steps:
-            with ema.average_parameters() and torch.no_grad():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))
-        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
+
+    if step >= args.warmup_steps:
+        with ema.average_parameters() and torch.no_grad():
+            outputs_w = model(images_weak)     # (N, C, H, W)
     else:
-        if step >= args.warmup_steps:
-            with ema.average_parameters() and torch.no_grad():
-                outputs_w = model(images_weak)     # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak)
-        outputs_strong = model(images_strong)
+        outputs_w = model(images_weak)
+    outputs_strong = model(images_strong)
 
     if type(outputs_w) == OrderedDict:
         out_w = outputs_w['out']
@@ -412,7 +378,7 @@ if __name__ == '__main__':
     args = parse_args()
     os.environ['WANDB_CACHE_DIR'] = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
-    print('\nSSDA for semantic segmentation. Source: GTA, Target: Cityscapes\n')
+    print('\nSemi-Supervised semantic segmentation on Cityscapes\n')
 
     if not args.expt_name:
         args.expt_name = gen_unique_name()
