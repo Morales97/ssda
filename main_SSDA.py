@@ -90,6 +90,7 @@ def main(args, wandb):
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
     alonso_contrast_meter = averageMeter()
+    entropy_meter = averageMeter()
 
     data_iter_s = iter(source_loader)
     data_iter_t = iter(target_loader)
@@ -300,6 +301,7 @@ def main(args, wandb):
 
 
         # *** Entropy minimization ***
+        entropy = 0
         if args.ent_min:
             images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
             outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
@@ -333,6 +335,7 @@ def main(args, wandb):
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
         alonso_contrast_meter.update(loss_cl_alonso)
+        entropy_meter.update(0.1 * entropy)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
@@ -363,6 +366,7 @@ def main(args, wandb):
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
                 'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
                 'Alonso CL Loss': FormattedLogItem(alonso_contrast_meter.avg, '{:.3f}'),
+                'Entropy Loss': FormattedLogItem(entropy_meter.avg, '{:.3f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
@@ -375,6 +379,7 @@ def main(args, wandb):
             constrast_s_loss_meter.reset()
             constrast_t_loss_meter.reset()
             alonso_contrast_meter.reset()
+            entropy_meter.reset()
             train_loss_meter.reset()
             
         # Log Validation
