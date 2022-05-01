@@ -94,7 +94,9 @@ def get_parser():
     parser.add_argument('--lab_color', type=boolfromstr, default=False,
                         help='Transform source images into targets LAB color space') 
     parser.add_argument('--wandb', type=boolfromstr, default=True,
-                        help='whether or not to use wandb')     
+                        help='whether or not to use wandb')    
+    parser.add_argument('--ent_min', type=boolfromstr, default=False,
+                        help='Use entropy minimization')     
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

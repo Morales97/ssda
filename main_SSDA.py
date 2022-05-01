@@ -115,7 +115,7 @@ def main(args, wandb):
         if args.lab_color:
             images_s = lab_transform(images_s, images_t)
 
-        if args.cr is not None or args.alonso_contrast:
+        if args.cr is not None or args.alonso_contrast or args.ent_min:
             if step % (len(target_loader_unl)-1) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
             
@@ -504,4 +504,4 @@ if __name__ == '__main__':
     
 
 # python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
