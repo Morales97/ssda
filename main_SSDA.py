@@ -226,21 +226,32 @@ def main(args, wandb):
             if step >= args.warmup_steps:
                 # ** Labeled CL **
                 # NOTE beware that it can compete with our PC!
+                loss_labeled = 0
+                pred_s = outputs_s['pred']
                 pred_tl = outputs_t['pred']
 
-                # compute pseudolabel
-                # NOTE we could try adding a threshold for labeled samples too
-                '''
-                prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
-                pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
-                prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                use_s = True
+                if use_s:
 
-                # take out the features from black pixels from zooms out and augmetnations 
-                ignore_label = 250
-                threshold = 0.9
-                mask = prob_down > threshold
-                mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
-                '''
+                    labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
+                    ignore_label = 250
+                    mask = (labels_s_down != ignore_label)
+                    
+                    use_threhsold_s = False
+                    if use_threhsold_s:
+                        prob, pseudo_lbl = torch.max(F.softmax(outputs_s['out'], dim=1).detach(), dim=1)
+                        pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
+                        prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()     
+                        threshold = 0.9
+                        mask = prob_down > threshold      
+                        mask = mask * (labels_s_down == pseudo_lbl_down)     
+                    
+                    pred_s = pred_s.permute(0, 2, 3, 1)
+                    pred_s = pred_s[mask, ...]
+                    labels_s_down = labels_s_down[mask]
+
+                    loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, feature_memory.memory)
+
                 use_tl = True
                 if use_tl:
 
@@ -248,7 +259,7 @@ def main(args, wandb):
                     ignore_label = 250
                     mask = (labels_t_down != ignore_label)
                     
-                    use_threhsold_tl = True
+                    use_threhsold_tl = False
                     if use_threhsold_tl:
                         prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
                         pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
@@ -261,9 +272,8 @@ def main(args, wandb):
                     pred_tl = pred_tl[mask, ...]
                     labels_t_down = labels_t_down[mask]
 
-                    loss_labeled = contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
-                else:
-                    loss_labeled = 0
+                    loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
+
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
