@@ -316,7 +316,6 @@ def main(args, wandb):
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
-        pdb.set_trace()
 
         # Update
         loss.backward()
