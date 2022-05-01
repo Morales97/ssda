@@ -231,14 +231,14 @@ def main(args, wandb):
                 pred_s = outputs_s['pred']
                 pred_tl = outputs_t['pred']
 
-                use_s = True
+                use_s = False
                 if use_s:
 
                     labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
                     ignore_label = 250
                     mask = (labels_s_down != ignore_label)
                     
-                    use_threhsold_s = False
+                    use_threhsold_s = True
                     if use_threhsold_s:
                         prob, pseudo_lbl = torch.max(F.softmax(outputs_s['out'], dim=1).detach(), dim=1)
                         pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
@@ -260,7 +260,7 @@ def main(args, wandb):
                     ignore_label = 250
                     mask = (labels_t_down != ignore_label)
                     
-                    use_threhsold_tl = False
+                    use_threhsold_tl = True
                     if use_threhsold_tl:
                         prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
                         pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
