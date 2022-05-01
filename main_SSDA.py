@@ -315,7 +315,7 @@ def main(args, wandb):
             entropy = torch.sum(entropy.view(-1)) / (n*h*w)
 
         # Total Loss
-        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
+        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + entropy 
 
         # Update
         loss.backward()
@@ -334,7 +334,7 @@ def main(args, wandb):
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
         alonso_contrast_meter.update(loss_cl_alonso)
-        entropy_meter.update(0.1 * entropy)
+        entropy_meter.update(entropy)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
