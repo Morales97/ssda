@@ -248,11 +248,14 @@ def main(args, wandb):
                     ignore_label = 250
                     mask = (labels_t_down != ignore_label)
                     
-                    use_threhsold_tl = False
+                    use_threhsold_tl = True
                     if use_threhsold_tl:
                         prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
                         pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
-                        prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()                
+                        prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()     
+                        threshold = 0.9
+                        mask = prob_down > threshold      
+                        mask = mask * (labels_t_down == pseudo_lbl_down)     
                     
                     pred_tl = pred_tl.permute(0, 2, 3, 1)
                     pred_tl = pred_tl[mask, ...]
