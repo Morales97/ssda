@@ -225,7 +225,7 @@ def main(args, wandb):
             # Contrastive Learning
             if step >= args.warmup_steps:
                 # ** Labeled CL **
-                # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
+                # NOTE beware that it can compete with our PC!
                 pred_tl = outputs_t['pred']
 
                 # compute pseudolabel
@@ -241,11 +241,18 @@ def main(args, wandb):
                 mask = prob_down > threshold
                 mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
                 '''
-                use_tl = False
+                use_tl = True
                 if use_tl:
+
                     labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
                     ignore_label = 250
-                    mask = mask * (labels_t_down != ignore_label)
+                    mask = (labels_t_down != ignore_label)
+                    
+                    use_threhsold_tl = False
+                    if use_threhsold_tl:
+                        prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
+                        pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+                        prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()                
                     
                     pred_tl = pred_tl.permute(0, 2, 3, 1)
                     pred_tl = pred_tl[mask, ...]
