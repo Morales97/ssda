@@ -298,6 +298,15 @@ def main(args, wandb):
                 loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
                 loss_cl_alonso = loss_labeled + loss_unlabeled
 
+
+        # *** Entropy minimization ***
+        images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
+        outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+        out_cat = torch.cat((outputs_s['out'], outputs_t['out'], outputs_tu['out']), dim=0)
+        prob_cat = F.softmax(out_cat, dim=1)
+        pdb.set_trace()
+
+
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso
         
