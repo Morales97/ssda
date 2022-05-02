@@ -253,7 +253,7 @@ def main(args, wandb):
 
                     loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, feature_memory.memory)
 
-                use_tl = True
+                use_tl = False
                 if use_tl:
 
                     labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
