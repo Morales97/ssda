@@ -106,7 +106,7 @@ def cr_prob_distr(out_w, out_s, tau):
     return loss_cr, percent_pl
 
 
-def cr_JS(out_w, out_s, tau):
+def cr_JS(out_w, out_s, tau, eps=1e-8):
     '''
     TODO generalize to n augmentations
     '''
@@ -136,8 +136,8 @@ def cr_JS(out_w, out_s, tau):
 
     out_s = F.softmax(out_s, dim=1)    # convert to probabilities
     m = (out_s + p_w)/2
-    kl1 = F.kl_div(out_s.log(), m, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
-    kl2 = F.kl_div(p_w.log(), m, reduction='batchmean')
+    kl1 = F.kl_div((out_s + eps).log(), m, reduction='batchmean')   
+    kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
     
     percent_pl = len(idxs) / len(max_prob) * 100
@@ -145,7 +145,7 @@ def cr_JS(out_w, out_s, tau):
 
 
 
-def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
+def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
     # NOTE only implented for tau = 0
     assert tau == 0
 
@@ -161,9 +161,9 @@ def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0):
     p_s2 = F.softmax(out_s2, dim=1)   
 
     m = (p_w + p_s1 + p_s2)/3
-    kl1 = F.kl_div(p_w.log(), m, reduction='batchmean')   
-    kl2 = F.kl_div(p_s1.log(), m, reduction='batchmean')
-    kl3 = F.kl_div(p_s2.log(), m, reduction='batchmean')
+    kl1 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')   
+    kl2 = F.kl_div((p_s1 + eps).log(), m, reduction='batchmean')
+    kl3 = F.kl_div((p_s2 + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2 + kl3)/3
     
     percent_pl = 100
@@ -182,7 +182,7 @@ def cr_KL(out_w, out_s, eps=1e-8):
     p_w = F.softmax(out_w, dim=1).detach()              
     p_s = F.softmax(out_s, dim=1)    
 
-    kl = F.kl_div((p_s + eps).log(), p_w, reduction='batchmean')   # reduction batchmean is the mathematically correct, but idk if with the deafult 'mean' results would be better?
+    kl = F.kl_div((p_s + eps).log(), p_w, reduction='batchmean')   
     loss_cr = kl
     
     percent_pl = 100
