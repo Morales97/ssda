@@ -102,7 +102,7 @@ class DeepLabV3_custom(nn.Module):
     def forward(self, x: Tensor, domain=None) -> Dict[str, Tensor]:
         input_shape = x.shape[-2:]
         # contract: features is a dict of tensors
-        if is_dsbn:
+        if self.is_dsbn:
             features = self.backbone(x, domain)
         else:
             features = self.backbone(x)
