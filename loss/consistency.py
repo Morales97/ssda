@@ -197,13 +197,13 @@ def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
 
     # Generate one-hot pseudo-labels
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero() # indexes 
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
     if idxs.nelement() == 0:  
         return 0, 0
 
     pseudo_lbl = pseudo_lbl[idxs]
-    p_w = torch.zeros((len(idxs), p_w.shape[1]))
-    p_w[:, pseudo_lbl] = 1
+    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1]))
+    pseudo_lbl_oh[:, pseudo_lbl] = 1
 
     out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
@@ -212,7 +212,8 @@ def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
 
     pdb.set_trace()
 
-    loss_cr = custom_kl_div(p_s.log(), pseudo_lbl)
+    loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
+    pdb.set_trace()
     return loss_cr
 
 def custom_kl_div(prediction, target):
