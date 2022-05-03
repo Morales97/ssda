@@ -191,7 +191,7 @@ def main(args, wandb):
                     outputs_t_ema = model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
-                print(alonso_pc_learner.feature_memory)
+                pdb.set_trace()
 
             # Contrastive Learning
             if step >= args.warmup_steps:
