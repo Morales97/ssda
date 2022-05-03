@@ -89,7 +89,7 @@ def get_parser():
                         help='size of the dataset (tiny/small)')     
     parser.add_argument('--dsbn', type=boolfromstr, default=False,
                         help='Use or not Adaptive Batch Norm')    
-    parser.add_argument('--alonso_contrast', type=boolfromstr, default=False,
+    parser.add_argument('--alonso_contrast', type=str, default=None,
                         help='Use or not Alonso et al pixel contrastive learning')    
     parser.add_argument('--lab_color', type=boolfromstr, default=False,
                         help='Transform source images into targets LAB color space') 

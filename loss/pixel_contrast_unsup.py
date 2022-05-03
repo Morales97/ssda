@@ -19,7 +19,7 @@ class FeatureMemory:
         self.per_class_samples_per_image = max(1, int(round(memory_per_class / num_samples)))
  
 
-    def add_features(self, model, features, class_labels, batch_size):
+    def add_features(self, model, features, class_labels, batch_size, use_selector):
         """
         Updates the memory bank with some quality feature vectors per class
         Args:
@@ -40,7 +40,6 @@ class FeatureMemory:
         for c in range(self.n_classes):
             mask_c = class_labels == c  # get mask for class c
 
-            use_selector=True
             if use_selector:
                 selector = model.__getattr__('contrastive_class_selector_' + str(c))  # get the self attention moduel for class c
                 features_c = features[mask_c, :] # get features from class c
@@ -156,7 +155,8 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
 
 
 class AlonsoContrastiveLearner:
-    def __init__(self, num_samples):
+    def __init__(self, mode, num_samples):
+        self.mode = mode
         self.feature_memory = FeatureMemory(num_samples)
 
 
@@ -175,9 +175,15 @@ class AlonsoContrastiveLearner:
 
         proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
         proj_t_selected = proj_t[mask, :]
-        print(proj_t_selected.shape[0])
+        
         if proj_t_selected.shape[0] > 0:
-            self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0])
+            if self.mode == 'feat_quality':
+                print(mode)
+                self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0], use_selector=True)
+            elif self.mode == 'base':
+                self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0], use_selector=False)
+            else:
+                raise Exception('Mode not available')
 
         store_S_pixels = False  # Results are better when only storing features from T, not S+T. This is also what Alonso et al does
         if store_S_pixels:

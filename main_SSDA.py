@@ -73,8 +73,8 @@ def main(args, wandb):
     loss_fn = cross_entropy2d   
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
-    if args.alonso_contrast:
-        alonso_pc_learner = AlonsoContrastiveLearner(num_samples=args.target_samples)
+    if args.alonso_contrast is not None:
+        alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
@@ -175,7 +175,7 @@ def main(args, wandb):
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
-        ramp_up_steps = 0 #500
+        ramp_up_steps = 500
         loss_cl_alonso = 0
 
         if args.alonso_contrast is not None:
@@ -191,7 +191,6 @@ def main(args, wandb):
                     outputs_t_ema = model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
-                print(alonso_pc_learner.feature_memory.memory)
 
             # Contrastive Learning
             if step >= args.warmup_steps:
