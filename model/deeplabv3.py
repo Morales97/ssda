@@ -387,7 +387,7 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
         sd = maskContrast_pretrained['model']
 
         if pixel_contrast:
-            # For DeepLabContrast2, the state dict is different
+            # For DeepLabContrast2, the state dict is different. TODO change this when merging models
             # Create a new state_dict
             new_state_dict = copy.deepcopy(model.state_dict())
             for key, param in sd.items():
