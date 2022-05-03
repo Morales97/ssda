@@ -154,3 +154,43 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
 
     return loss / num_classes
 
+
+def add_features_to_memory(outputs_t_ema, model, feature_memory):
+    prob_t, pred_t = torch.max(torch.softmax(outputs_t_ema['out'], dim=1), dim=1)  
+
+    # save the projected features if the prediction is correct and more confident than 0.95
+    # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
+    proj_t = outputs_t_ema['proj']
+    labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+    pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+    prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
+    
+    mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
+    labels_t_down_selected = labels_t_down[mask]
+
+    proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
+    proj_t_selected = proj_t[mask, :]
+    
+    if proj_t_selected.shape[0] > 0:
+        feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
+
+    store_S_pixels = False  # Results are better when only storing features from T, not S+T. This is also what Alonso et al does
+    if store_S_pixels:
+        with ema.average_parameters() and torch.no_grad():  
+            outputs_s = model(images_s) 
+
+        prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
+        proj_s = outputs_s['proj']
+        labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+        pred_s_down = F.interpolate(pred_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze() 
+        prob_s_down = F.interpolate(prob_s.unsqueeze(0), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
+
+        mask = ((pred_s_down == labels_s_down).float() * (prob_s_down > 0.95).float()).bool() # (B, 32, 64)
+        labels_s_down_selected = labels_s_down[mask]
+
+        proj_s = proj_s.permute(0,2,3,1)    # (B, 32, 64, C)
+        proj_s_selected = proj_s[mask, :]
+        
+        if proj_s_selected.shape[0] > 0:
+            feature_memory.add_features(None, proj_s_selected, labels_s_down_selected, args.batch_size_s)
+

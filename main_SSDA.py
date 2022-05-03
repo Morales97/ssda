@@ -322,12 +322,17 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
 
         # Update
-        print(model.backbone.layer4[0].conv1.weight[0,:10])
+        if step % 10 == 0:
+            print(model.backbone.layer4[0].conv1.weight[0,:10])
+            selector = model.__getattr__('contrastive_class_selector_0')
+            print(selector[3].weight[0][:10])
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
-        print(model.backbone.layer4[0].conv1.weight[0,:10])
+        if step % 10 == 0:
+            print(model.backbone.layer4[0].conv1.weight[0,:10])
+            print(selector[3].weight[0][:10])
 
         # Meters
         time_meter.update(time.time() - start_ts)
