@@ -191,6 +191,8 @@ def cr_KL(out_w, out_s, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
+    loss_kl, _ = cr_KL(out_w, out_s)
+
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
