@@ -36,6 +36,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_JS(out_w, out_s, tau=0)
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
+    elif cr_type == 'kl_oh':
+        return cr_kl_one_hot(out_w, out_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
