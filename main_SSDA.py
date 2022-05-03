@@ -190,8 +190,8 @@ def main(args, wandb):
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
                     outputs_t_ema = model(images_t)   
 
-                add_features_to_memory(outputs_t_ema, model, feature_memory)
-
+                add_features_to_memory(outputs_t_ema, labels_t, model, feature_memory)
+                print(feature_memory)
             # Contrastive Learning
             if step >= args.warmup_steps:
                 # ** Labeled CL **
@@ -220,17 +220,17 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
 
         # Update
+        ''' 
         if step % 10 == 0:
             print(model.backbone.layer4[0].conv1.weight[0,:10])
             selector = model.__getattr__('contrastive_class_selector_0')
             print(selector[3].weight[0][:10])
+        '''
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
-        if step % 10 == 0:
-            print(model.backbone.layer4[0].conv1.weight[0,:10])
-            print(selector[3].weight[0][:10])
+
 
         # Meters
         time_meter.update(time.time() - start_ts)

@@ -155,7 +155,7 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
     return loss / num_classes
 
 
-def add_features_to_memory(outputs_t_ema, model, feature_memory):
+def add_features_to_memory(outputs_t_ema, labels_t, model, feature_memory):
     prob_t, pred_t = torch.max(torch.softmax(outputs_t_ema['out'], dim=1), dim=1)  
 
     # save the projected features if the prediction is correct and more confident than 0.95
