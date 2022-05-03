@@ -177,7 +177,7 @@ class AlonsoContrastiveLearner:
         proj_t_selected = proj_t[mask, :]
         print(proj_t_selected.shape[0])
         if proj_t_selected.shape[0] > 0:
-            self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
+            self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0])
 
         store_S_pixels = False  # Results are better when only storing features from T, not S+T. This is also what Alonso et al does
         if store_S_pixels:
