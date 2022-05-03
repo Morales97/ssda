@@ -22,6 +22,7 @@ from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class
 from loss.consistency import consistency_reg, cr_multiple_augs
+from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
@@ -177,7 +178,12 @@ def main(args, wandb):
         ramp_up_steps = 0 #500
         loss_cl_alonso = 0
 
-        if args.alonso_contrast:
+        if args.alonso_contrast is not None:
+            '''
+            options:
+                - "base": without any selector
+                - "feat_quality": use selectors in memory bank to save the highest quality
+            '''
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
@@ -307,12 +313,8 @@ def main(args, wandb):
             outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
             #out_cat = torch.cat((outputs_s['out'], outputs_t['out'], outputs_tu['out']), dim=0) # NOTE try if ent min on labeled data helps (uncomment this and comment line below)
             out_cat = outputs_tu['out'] 
-            n, c, h, w = out_cat.size()
 
-            prob = F.softmax(out_cat, dim=1)
-            log_prob = torch.log(prob + 1e-10)
-            entropy = - prob * log_prob
-            entropy = torch.sum(entropy.view(-1)) / (n*h*w)
+            entropy = entropy_loss(out_cat)
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
