@@ -77,7 +77,7 @@ class DeepLabV3_custom(nn.Module):
                                     nn.ReLU(inplace=True),
                                     nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
                                 )
-
+        
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
@@ -95,7 +95,7 @@ class DeepLabV3_custom(nn.Module):
                 nn.Linear(feat_dim, 1)
             )
             self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
-
+        
         print('Using custom DeepLabV3 model')
 
 
@@ -265,4 +265,6 @@ if __name__ == '__main__':
     #pt_sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True).item() # NOTE need .item() to get dat from np.object
     # the keys are saved in a completely different format, not suitable to load model...
     model = deeplabv3_rn50(dsbn=False)
+    for i, elem in enumerate(model.parameters()):
+        print(i)    
     pdb.set_trace()

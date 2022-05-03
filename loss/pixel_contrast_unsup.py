@@ -192,5 +192,77 @@ def add_features_to_memory(outputs_t_ema, model, feature_memory):
         proj_s_selected = proj_s[mask, :]
         
         if proj_s_selected.shape[0] > 0:
-            feature_memory.add_features(None, proj_s_selected, labels_s_down_selected, args.batch_size_s)
+            feature_memory.add_features(model, proj_s_selected, labels_s_down_selected, args.batch_size_s)
 
+
+def labeled_pc(outputs_s, outputs_t, labels_s, labels_t):
+    loss_labeled = 0
+    pred_s = outputs_s['pred']
+    pred_tl = outputs_t['pred']
+
+    use_s = False
+    if use_s:
+
+        labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
+        ignore_label = 250
+        mask = (labels_s_down != ignore_label)
+        
+        use_threhsold_s = True
+        if use_threhsold_s:
+            prob, pseudo_lbl = torch.max(F.softmax(outputs_s['out'], dim=1).detach(), dim=1)
+            pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
+            prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()     
+            threshold = 0.9
+            mask = prob_down > threshold      
+            mask = mask * (labels_s_down == pseudo_lbl_down)     
+        
+        pred_s = pred_s.permute(0, 2, 3, 1)
+        pred_s = pred_s[mask, ...]
+        labels_s_down = labels_s_down[mask]
+
+        loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, feature_memory.memory)
+
+    use_tl = False
+    if use_tl:
+
+        labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+        ignore_label = 250
+        mask = (labels_t_down != ignore_label)
+        
+        use_threhsold_tl = True
+        if use_threhsold_tl:
+            prob, pseudo_lbl = torch.max(F.softmax(outputs_t['out'], dim=1).detach(), dim=1)
+            pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
+            prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()     
+            threshold = 0.9
+            mask = prob_down > threshold      
+            mask = mask * (labels_t_down == pseudo_lbl_down)     
+        
+        pred_tl = pred_tl.permute(0, 2, 3, 1)
+        pred_tl = pred_tl[mask, ...]
+        labels_t_down = labels_t_down[mask]
+
+        loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, feature_memory.memory)
+
+    return loss_labeled
+
+def unlabeled_pc(outputs_tu):
+    pred_tu = outputs_tu['pred']
+
+    # compute pseudolabel
+    prob, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1).detach(), dim=1)
+    pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
+    prob_down = F.interpolate(prob.unsqueeze(0), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
+
+    # take out the features from black pixels from zooms out and augmetnations 
+    ignore_label = 250
+    threshold = 0.9
+    mask = prob_down > threshold
+    mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
+
+    pred_tu = pred_tu.permute(0, 2, 3, 1)
+    pred_tu = pred_tu[mask, ...]
+    pseudo_lbl_down = pseudo_lbl_down[mask]
+
+    loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
+    return loss_unlabeled
