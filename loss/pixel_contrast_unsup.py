@@ -160,7 +160,7 @@ class AlonsoContrastiveLearner:
         self.feature_memory = FeatureMemory(num_samples)
 
 
-    def add_features_to_memory(outputs_t_ema, labels_t, model):
+    def add_features_to_memory(self, outputs_t_ema, labels_t, model):
         prob_t, pred_t = torch.max(torch.softmax(outputs_t_ema['out'], dim=1), dim=1)  
 
         # save the projected features if the prediction is correct and more confident than 0.95
@@ -200,7 +200,7 @@ class AlonsoContrastiveLearner:
                 self.feature_memory.add_features(model, proj_s_selected, labels_s_down_selected, args.batch_size_s)
 
 
-    def labeled_pc(outputs_s, outputs_t, labels_s, labels_t):
+    def labeled_pc(self, outputs_s, outputs_t, labels_s, labels_t):
         loss_labeled = 0
         pred_s = outputs_s['pred']
         pred_tl = outputs_t['pred']
@@ -251,7 +251,7 @@ class AlonsoContrastiveLearner:
 
         return loss_labeled
 
-    def unlabeled_pc(outputs_tu):
+    def unlabeled_pc(self, outputs_tu):
         pred_tu = outputs_tu['pred']
 
         # compute pseudolabel
