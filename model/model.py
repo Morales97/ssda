@@ -14,7 +14,7 @@ from model.lraspp_contrast import lraspp_mobilenet_v3_large_contrast
 
 def get_model(args):
     if args.net == 'deeplabv3_rn50':
-        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain, args.pixel_contrast, args.dsbn, args.alonso_contrast)
+        model = deeplabv3_rn50(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain, args.dsbn)
     elif args.net == 'deeplabv2_rn101':
         model = deeplabv2_rn101(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain, args.pixel_contrast)
     #elif args.net == 'dl_mobilenet':
