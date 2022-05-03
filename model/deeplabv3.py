@@ -383,10 +383,10 @@ def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain_p
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
         maskContrast_pretrained = torch.load(custom_pretrain_path)
-        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast)   
+        model = deeplabv3_resnet50(num_classes=19, pixel_contrast=pixel_contrast, alonso_contrast=alonso_contrast)   
         sd = maskContrast_pretrained['model']
 
-        if pixel_contrast:
+        if pixel_contrast or alonso_contrast:
             # For DeepLabContrast2, the state dict is different. TODO change this when merging models
             # Create a new state_dict
             new_state_dict = copy.deepcopy(model.state_dict())
@@ -512,6 +512,23 @@ def deeplabv3_resnet50_maskContrast(num_classes=19, model_path=None):
     return model
 
 if __name__ == '__main__':
-    pt_sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True).item()
+    #pt_sd = np.load('model/pretrained/resnet50_detcon_b_imagenet_1k.npy', allow_pickle=True).item() # NOTE need .item() to get dat from np.object
     # the keys are saved in a completely different format, not suitable to load model...
+
+    maskContrast_pretrained = torch.load('model/pretrained/checkpoint_39_mask_dlrn50.pth.tar', map_location=torch.device('cpu'))
+    model = deeplabv3_resnet50(num_classes=19, pixel_contrast=False, alonso_contrast=True)   
+    sd = maskContrast_pretrained['model']
+
+    if True: #pixel_contrast or alonso_contrast:
+        # For DeepLabContrast2, the state dict is different. TODO change this when merging models
+        # Create a new state_dict
+        new_state_dict = copy.deepcopy(model.state_dict())
+        for key, param in sd.items():
+            if 'model_q.' in key:
+                if 'backbone' in key:
+                    new_state_dict[key[8:]] = param  # remove the 'model_q.' part
+                elif 'decoder.0' in key:
+                    new_state_dict['aspp' + key[17:]] = param
+                # TODO could also upload last decoder layer (very few params)
+
     pdb.set_trace()
