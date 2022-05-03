@@ -187,3 +187,70 @@ def cr_KL(out_w, out_s, eps=1e-8):
     
     percent_pl = 100
     return loss_cr, percent_pl
+
+def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
+
+    # Generate one-hot pseudo-labels
+    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
+    pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
+    #if pseudo_lbl 
+
+    out_s = out_s.permute(0, 2, 3, 1)
+    out_s = torch.flatten(out_s, end_dim=2)
+    loss_cr = custom_kl_div(out_s.log(), pseudo_lbl)
+    return loss_cr
+
+def custom_kl_div(prediction, target):
+    '''
+    From https://github.com/ErikEnglesson/GJS/blob/main/losses.py
+    
+    Applies 'batchnorm' KL divergence. Can be used with one-hot encoded target
+    prediction: log-probabilities
+    target: probabilities
+
+    '''
+    output_pos = target * (target.clamp(min=1e-7).log() - prediction)
+    zeros = torch.zeros_like(output_pos)
+    output = torch.where(target > 0, output_pos, zeros)
+    output = torch.sum(output, axis=1)
+    return output.mean()
+
+
+if __name__ == '__main__':
+    
+    batch_size = 3
+    vector_dim = 5
+
+    # Generate random input and target distributions
+    p_input = torch.rand(size=(batch_size, vector_dim))
+    p_target = torch.rand(size=(batch_size, vector_dim))
+
+    p_input = F.softmax(p_input, dim=1)
+    p_target = F.softmax(p_target, dim=1)
+    print('\np_input:')
+    print(p_input)
+    print('\np_target:')
+    print(p_target)
+
+    kl_all = F.kl_div(p_input.log(), p_target, reduction='batchmean')
+    print('\nkl_all:')
+    print(kl_all)
+
+    print('\nkl_batch:')
+    total_kl = 0
+    for i in range(batch_size):
+        kl_batch = F.kl_div(p_input[i].log(), p_target[i], reduction='sum') / batch_size    # this is equivalent to reduction='batchmean' with the entire batch
+        print(kl_batch)
+        total_kl += kl_batch
+    print('total_kl:')
+    print(total_kl)
+
+    custom_kl = custom_kl_div(p_input.log(), p_target)
+    print('custom_kl:')
+    print(custom_kl)
+
+    #kl_one_hot = cr_kl_one_hot()
+    pdb.set_trace()
