@@ -20,7 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, add_features_to_memory, labeled_pc, unlabeled_pc, AlonsoContrastiveLearner
+from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
