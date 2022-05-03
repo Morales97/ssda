@@ -178,7 +178,7 @@ class AlonsoContrastiveLearner:
         
         if proj_t_selected.shape[0] > 0:
             self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
-
+        
         store_S_pixels = False  # Results are better when only storing features from T, not S+T. This is also what Alonso et al does
         if store_S_pixels:
             with ema.average_parameters() and torch.no_grad():  
