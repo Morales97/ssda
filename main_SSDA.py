@@ -174,7 +174,7 @@ def main(args, wandb):
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
-        ramp_up_steps = 500
+        ramp_up_steps = 0 #500
         loss_cl_alonso = 0
 
         if args.alonso_contrast:
@@ -515,5 +515,5 @@ if __name__ == '__main__':
 
 # python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=prob_distr
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_steps=0
 

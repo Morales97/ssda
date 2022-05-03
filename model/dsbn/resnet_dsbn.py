@@ -2,6 +2,7 @@
 Followed torch's implementation https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py
 Replaced norm_layers with DSBN from https://github.com/wgchang/DSBN/blob/master/model/resnetdsbn.py 
 '''
+from __future__ import absolute_import
 
 from functools import partial
 from typing import Any, Dict, Optional, TypeVar, Callable, Tuple, Union, Type, List

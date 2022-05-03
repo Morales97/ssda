@@ -39,33 +39,51 @@ class FeatureMemory:
         # for each class, save [elements_per_class]
         for c in range(self.n_classes):
             mask_c = class_labels == c  # get mask for class c
-            #selector = model.__getattr__('contrastive_class_selector_' + str(c))  # get the self attention moduel for class c
-            features_c = features[mask_c, :] # get features from class c
-            if features_c.shape[0] > 0:
-                if features_c.shape[0] > elements_per_class:
-                    with torch.no_grad():
-                        # get ranking scores
-                        '''
-                        rank = selector(features_c)
-                        rank = torch.sigmoid(rank)
-                        # sort them
-                        _, indices = torch.sort(rank[:, 0], dim=0)
-                        indices = indices.cpu().numpy()
-                        features_c = features_c.cpu().numpy()
-                        # get features with highest rankings
-                        features_c = features_c[indices, :]
-                        new_features = features_c[:elements_per_class, :]
-                        ''' # NOTE no ranking implemented for the moment -- not using class attention module. Simply select first elements
-                        new_features = features_c[:elements_per_class, :].cpu().numpy()
-                else:
-                    new_features = features_c.cpu().numpy()
 
-                if self.memory[c] is None: # was empy, first elements
-                    self.memory[c] = new_features
+            use_selector=True
+            if use_selector:
+                selector = model.__getattr__('contrastive_class_selector_' + str(c))  # get the self attention moduel for class c
+                features_c = features[mask_c, :] # get features from class c
+                if features_c.shape[0] > 0:
+                    if features_c.shape[0] > elements_per_class:
+                        with torch.no_grad():
+                            # get ranking scores
+                            rank = selector(features_c)
+                            rank = torch.sigmoid(rank)
+                            # sort them
+                            _, indices = torch.sort(rank[:, 0], dim=0)
+                            indices = indices.cpu().numpy()
+                            features_c = features_c.cpu().numpy()
+                            # get features with highest rankings
+                            features_c = features_c[indices, :]
+                            new_features = features_c[:elements_per_class, :]
+                    else:
+                        new_features = features_c.cpu().numpy()
 
-                else: # add elements to already existing list
-                    # keep only most recent memory_per_class samples
-                    self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
+                    pdb.set_trace()
+                    if self.memory[c] is None: # was empy, first elements
+                        self.memory[c] = new_features
+
+                    else: # add elements to already existing list
+                        # keep only most recent memory_per_class samples
+                        self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
+
+            else:
+                features_c = features[mask_c, :] # get features from class c
+                if features_c.shape[0] > 0:
+                    if features_c.shape[0] > elements_per_class:
+                        with torch.no_grad():
+                            # NOTE no ranking implemented for the moment -- not using class attention module. Simply select first elements
+                            new_features = features_c[:elements_per_class, :].cpu().numpy()
+                    else:
+                        new_features = features_c.cpu().numpy()
+
+                    if self.memory[c] is None: # was empy, first elements
+                        self.memory[c] = new_features
+
+                    else: # add elements to already existing list
+                        # keep only most recent memory_per_class samples
+                        self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
 
 
 def contrastive_class_to_class(model, features, class_labels, memory, num_classes=19):
