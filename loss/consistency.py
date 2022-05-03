@@ -201,8 +201,10 @@ def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
     if idxs.nelement() == 0:  
         return 0, 0
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     pseudo_lbl = pseudo_lbl[idxs]
-    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1]))
+    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
     pseudo_lbl_oh[:, pseudo_lbl] = 1
 
     out_s = out_s.permute(0, 2, 3, 1)
