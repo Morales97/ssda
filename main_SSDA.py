@@ -515,3 +515,4 @@ if __name__ == '__main__':
 
 # python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
+
