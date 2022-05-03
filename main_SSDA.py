@@ -20,7 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, add_features_to_memory, labeled_pc, unlabeled_pc
+from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, add_features_to_memory, labeled_pc, unlabeled_pc, AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
@@ -74,7 +74,7 @@ def main(args, wandb):
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast:
-        feature_memory = FeatureMemory(num_samples=args.target_samples)
+        alonso_pc_learner = AlonsoContrastiveLearner(num_samples=args.target_samples)
 
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
@@ -190,19 +190,19 @@ def main(args, wandb):
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
                     outputs_t_ema = model(images_t)   
 
-                add_features_to_memory(outputs_t_ema, labels_t, model, feature_memory)
-                #print(feature_memory)
+                alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
+                print(alonso_pc_learner.feature_memory)
 
             # Contrastive Learning
             if step >= args.warmup_steps:
                 # ** Labeled CL **
                 # NOTE beware that it can compete with our PC!
-                loss_labeled = labeled_pc(outputs_s, outputs_t, labels_s, labels_t)
+                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t)
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
                 outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
-                loss_unlabeled = unlabeled_pc(outputs_tu)
+                loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu)
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
 
