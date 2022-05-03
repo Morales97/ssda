@@ -37,7 +37,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
-        return cr_kl_one_hot(out_w, out_s)
+        return cr_KL_one_hot(out_w, out_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
@@ -190,35 +190,36 @@ def cr_KL(out_w, out_s, eps=1e-8):
     percent_pl = 100
     return loss_cr, percent_pl
 
-def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
+def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
     loss_kl, _ = cr_KL(out_w, out_s)
 
+    # Output weak augmentation
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
 
-    # Generate one-hot pseudo-labels
+    # Apply confidence threshold
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
     if idxs.nelement() == 0:  
         return 0, 0
 
+    # Generate one-hot pseudo-labels
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     pseudo_lbl = pseudo_lbl[idxs]
     pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
     pseudo_lbl_oh[:, pseudo_lbl] = 1
 
+    # Output strong augmentation
     out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     out_s = out_s[idxs]
     p_s = F.softmax(out_s, dim=1)    
 
-    pdb.set_trace()
-
     loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
-    pdb.set_trace()
-    return loss_cr
+    percent_pl = len(idxs) / len(max_prob) * 100
+
+    return loss_cr, percent_pl
 
 def custom_kl_div(prediction, target):
     '''
