@@ -190,6 +190,8 @@ def main(args, wandb):
                 with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
                     outputs_t_ema = model(images_t)   
 
+                #add_features_to_memory(outputs_t_ema, model, feature_memory)
+
                 prob_t, pred_t = torch.max(torch.softmax(outputs_t_ema['out'], dim=1), dim=1)  
 
                 # save the projected features if the prediction is correct and more confident than 0.95
@@ -320,10 +322,12 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
 
         # Update
+        print(model.backbone.layer4[0].conv1.weight[0,:10])
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
+        print(model.backbone.layer4[0].conv1.weight[0,:10])
 
         # Meters
         time_meter.update(time.time() - start_ts)

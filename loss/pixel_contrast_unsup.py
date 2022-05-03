@@ -84,7 +84,6 @@ class FeatureMemory:
                         # keep only most recent memory_per_class samples
                         self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
 
-        pdb.set_trace()
 
 def contrastive_class_to_class(model, features, class_labels, memory, num_classes=19):
     """
