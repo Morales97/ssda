@@ -37,7 +37,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
-        return cr_KL_one_hot(out_w, out_s)
+        #return cr_KL_one_hot(out_w, out_s)
+        return cr_KL_one_hot_more_efficient(out_w, out_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
@@ -220,6 +221,36 @@ def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
     percent_pl = len(idxs) / len(max_prob) * 100
 
     return loss_cr, percent_pl
+
+def cr_KL_one_hot_more_efficient(out_w, out_s, tau=0.9, eps=1e-8):
+    loss_kl, _ = cr_KL(out_w, out_s)
+
+    # Output weak augmentation
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
+
+    # Apply confidence threshold
+    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
+    if idxs.nelement() == 0:  
+        return 0, 0
+
+    # Generate one-hot pseudo-labels
+    pseudo_lbl = pseudo_lbl[idxs]
+
+    # Output strong augmentation
+    out_s = out_s.permute(0, 2, 3, 1)
+    out_s = torch.flatten(out_s, end_dim=2)
+    out_s = out_s[idxs]
+    p_s = F.softmax(out_s, dim=1)    
+
+    loss_cr = - p_s[pseudo_lbl].log() # this is the KL formula when target is one-hot
+    loss_cr = loss_cr.mean()
+    percent_pl = len(idxs) / len(max_prob) * 100
+
+    return loss_cr, percent_pl
+
 
 def custom_kl_div(prediction, target):
     '''
