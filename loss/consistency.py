@@ -80,7 +80,7 @@ def cr_prob_distr(out_w, out_s, tau):
     p_w = F.softmax(out_w, dim=1).detach()        
 
     max_prob, _ = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
     if idxs.nelement() == 0:  
         return 0, 0
 
@@ -96,8 +96,8 @@ def cr_prob_distr(out_w, out_s, tau):
         p_w = p_w.unsqueeze(0)
     assert out_s.size() == p_w.size()
 
-    if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-        pdb.set_trace()
+    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
+    #    pdb.set_trace()
 
 
     loss_cr = F.cross_entropy(out_s, p_w)
@@ -195,14 +195,22 @@ def cr_kl_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
 
     # Generate one-hot pseudo-labels
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl+1, 0).nonzero() # +1 to remove 0s without affecting labels 0
-    if pseudo_lbl.nelement() == 0:  
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero() # indexes 
+    if idxs.nelement() == 0:  
         return 0, 0
-    pseudo_lbl = pseudo_lbl - 1     # compensate for the +1
+
+    pseudo_lbl = pseudo_lbl[idxs]
+    p_w = torch.zeros((len(idxs), p_w.shape[1]))
+    p_w[:, pseudo_lbl] = 1
 
     out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
-    loss_cr = custom_kl_div(out_s.log(), pseudo_lbl)
+    out_s = out_s[idxs]
+    p_s = F.softmax(out_s, dim=1)    
+
+    pdb.set_trace()
+
+    loss_cr = custom_kl_div(p_s.log(), pseudo_lbl)
     return loss_cr
 
 def custom_kl_div(prediction, target):
