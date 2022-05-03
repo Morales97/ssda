@@ -20,7 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, add_features_to_memory
+from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, add_features_to_memory, labeled_pc, unlabeled_pc
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
@@ -191,7 +191,8 @@ def main(args, wandb):
                     outputs_t_ema = model(images_t)   
 
                 add_features_to_memory(outputs_t_ema, labels_t, model, feature_memory)
-                print(feature_memory)
+                #print(feature_memory)
+
             # Contrastive Learning
             if step >= args.warmup_steps:
                 # ** Labeled CL **
