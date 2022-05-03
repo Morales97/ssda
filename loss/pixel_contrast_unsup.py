@@ -178,7 +178,7 @@ class AlonsoContrastiveLearner:
         
         if proj_t_selected.shape[0] > 0:
             if self.mode == 'feat_quality':
-                print(mode)
+                print(self.mode)
                 self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0], use_selector=True)
             elif self.mode == 'base':
                 self.feature_memory.add_features(model, proj_t_selected, labels_t_down_selected, pred_t.shape[0], use_selector=False)
