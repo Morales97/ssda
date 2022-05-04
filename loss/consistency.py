@@ -64,8 +64,8 @@ def cr_one_hot(p_w, out_s, tau):
     assert len(pseudo_lbl) == out_s.size()[0]
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
-    percent_pl = sum(pseudo_lbl != 250) / len(pseudo_lbl) * 100
-    pdb.set_trace()
+    percent_pl = len(torch.where(pseudo_lbl != 250, 1, 0).nonzero()) / len(pseudo_lbl) * 100    # much faster than sum(pseudo_lbl != 250)
+
     return loss_cr, percent_pl
     
 def cr_prob_distr(p_w, out_s, tau):
@@ -126,6 +126,7 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     loss_cr = (kl1 + kl2)/2
     
     percent_pl = len(idxs) / n * 100
+    pdb.set_trace()
     return loss_cr, percent_pl
 
 

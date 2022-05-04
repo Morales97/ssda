@@ -149,7 +149,7 @@ def main(args, wandb):
                 # Forward pass for CR
                 out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
-                
+
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
                 cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
@@ -430,7 +430,7 @@ if __name__ == '__main__':
         main(args, None)
     
 
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=prob_distr --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=one_hot --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_steps=0
 
