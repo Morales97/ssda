@@ -260,6 +260,9 @@ def cr_KL_one_hot_old(out_w, out_s, tau=0.9, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
+    '''
+    NOTE it does not work!!
+    '''
     # Output weak augmentation
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
@@ -280,10 +283,10 @@ def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
     out_s = out_s[idxs]
     p_s = F.softmax(out_s, dim=1)    
 
-    loss_cr = - p_s[pseudo_lbl].log() # this is the KL formula when target is one-hot
+    loss_cr = - p_s[pseudo_lbl].log() # NOTE this breaks!! p_s[pseudo_lbl] does not work as I thought
     loss_cr = loss_cr.mean()
     percent_pl = len(idxs) / len(max_prob) * 100
-    pdb.set_trace()
+
     return loss_cr, percent_pl
 
 
