@@ -28,7 +28,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_JS_one_hot(p_w, p_s, tau)
     elif cr_type == 'kl':
         return cr_KL(p_w, p_s)
-    elif cr_type == 'klç_th':
+    elif cr_type == 'kl_th':
         return cr_JS_th(p_w, p_s, tau)
     elif cr_type == 'kl_oh':
         return cr_KL_one_hot(p_w, p_s, tau)
