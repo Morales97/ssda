@@ -28,8 +28,10 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
         return cr_JS_one_hot(p_w, p_s, tau)
     elif cr_type == 'kl':
         return cr_KL(p_w, p_s)
+    elif cr_type == 'js_th':
+        return cr_JS_th(p_w, p_s, tau)
     elif cr_type == 'kl_oh':
-        pass#return cr_KL_one_hot(out_w, out_s)
+        return cr_KL_one_hot(p_w, p_s, tau)
     else:
         raise Exception('Consistency regularization type not supported')
 
@@ -105,10 +107,7 @@ def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
     percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
-def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''          
+def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):    
     n = p_s.shape[0]
     idxs, pseudo_lbl = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
@@ -138,64 +137,48 @@ def cr_KL(p_w, p_s, eps=1e-8):
     
     return loss_cr, 100
 
+def cr_KL_th(p_s, p_w, idxs, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, _ = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
+    p_s = p_s[idxs]
+    p_w = p_w[idxs]
+    assert p_s.size() == p_w.size()
 
-def cr_KL_one_hot_old(out_w, out_s, tau=0.9, eps=1e-8):
-    '''
-    NOTE this is a more intuitive implementation, but it has a bug! (I think when idxs len is 1)
-    '''
-    # Output weak augmentation
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
+    loss_cr, _ = cr_KL(p_s, p_w)
+    percent_pl = len(idxs) / n * 100
+    return loss_cr, percent_pl
 
-    # Apply confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
+def cr_KL_one_hot_old(p_w, p_s, tau=0.9, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, pseudo_lbl = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
+
+    # filter by confidence > tau
+    pseudo_lbl = pseudo_lbl[idxs]
+    p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pseudo_lbl = pseudo_lbl[idxs]
-    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
-    pseudo_lbl_oh[:, pseudo_lbl] = 1
-
-    # Output strong augmentation
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    
+    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, n_classes=p_w.shape[1]) 
 
     loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
 
     return loss_cr, percent_pl
 
-def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
-    # Output weak augmentation
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
-
-    # Apply confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
+def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, pseudo_lbl = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
     # Generate one-hot pseudo-labels
     pseudo_lbl = pseudo_lbl[idxs]
-
-    # Output strong augmentation
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    
+    p_s = p_s[idxs]   
 
     loss_cr = - p_s[pseudo_lbl].log() # this is the KL formula when target is one-hot
     loss_cr = loss_cr.mean()
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
 
     return loss_cr, percent_pl
 
