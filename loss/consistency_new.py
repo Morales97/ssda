@@ -43,9 +43,9 @@ def _apply_threshold(p_w, tau):
         idxs = idxs.unsqueeze(0)
     return idxs, pseudo_lbl
 
-def _to_one_hot(pseudo_lbl, dim):
+def _to_one_hot(pseudo_lbl, n_classes):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pseudo_lbl_oh = torch.zeros((len(idxs), dim)).to(device)
+    pseudo_lbl_oh = torch.zeros((len(pseudo_lbl), n_classes)).to(device)
     pseudo_lbl_oh[:, pseudo_lbl] = 1
     return pseudo_lbl_oh
 
@@ -118,7 +118,7 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, dim=p_w.shape[1])
+    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, n_classes=p_w.shape[1])
 
     # compute Jensen-Shannon div
     m = (p_s + pseudo_lbl_oh)/2
