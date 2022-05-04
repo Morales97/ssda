@@ -5,28 +5,6 @@ from collections import OrderedDict
 from torchvision.utils import save_image
 
 
-def cr_multiple_augs(args, images, model):
-    # NOTE for the moment only support 2 augmentations
-    assert args.n_augmentations == 2 and args.cr == 'js'
-    images_weak = images[0].cuda()
-    images_strong1 = images[1].cuda()
-    images_strong2 = images[2].cuda()
-
-    outputs_w = model(images_weak)                   # (N, C, H, W)
-    outputs_strong1 = model(images_strong1)
-    outputs_strong2 = model(images_strong2)
-    if type(outputs_w) == OrderedDict:
-        out_w = outputs_w['out']
-        out_strong1 = outputs_strong1['out']
-        out_strong2 = outputs_strong2['out']
-    else:
-        out_w = outputs_w
-        out_strong1 = outputs_strong1
-        out_strong2 = outputs_strong2
-
-    return cr_JS_2_augs(out_w, out_strong1, out_strong2)
-
-
 def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     # Weak augmentations
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
@@ -38,22 +16,14 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
-    # Select idxs with confidence > tau
-    idxs = None
-    if tau > 0:
-        max_prob, _ = torch.max(p_w, dim=1)
-        idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
-        if idxs.nelement() == 0:  
-            return 0, 0
-        if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-            idxs = idxs.unsqueeze(0)
-
     if cr_type == 'one_hot':
         return cr_one_hot(p_w, out_s, tau)
     elif cr_type == 'prob_distr':
-        return cr_prob_distr(p_w, out_s, idxs)
+        return cr_prob_distr(p_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(p_w, p_s)
+    elif cr_type == 'js_th':
+        return cr_JS_th(p_w, p_s, tau)
     elif cr_type == 'js_oh':
         pass#return cr_JS_one_hot(out_w, out_s, tau)
     elif cr_type == 'kl':
@@ -64,6 +34,17 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
         raise Exception('Consistency regularization type not supported')
 
 
+def _apply_threshold(p_w, tau):
+    max_prob, _ = torch.max(p_w, dim=1)
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
+    if idxs.nelement() == 0:  
+        return 0, 0
+    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+        idxs = idxs.unsqueeze(0)
+    return idxs
+
+
+# *** Cross-Entropy ***
 def cr_one_hot(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
@@ -86,7 +67,7 @@ def cr_one_hot(p_w, out_s, tau):
     return loss_cr, percent_pl
     
 
-def cr_prob_distr(p_w, out_s, idxs):
+def cr_prob_distr(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
@@ -95,6 +76,7 @@ def cr_prob_distr(p_w, out_s, idxs):
     :tau: Threshold of confidence to use prediction as pseudolabel
     '''
     n = out_s.shape[0]
+    idxs = _apply_threshold(p_w, tau)
 
     out_s = out_s[idxs]
     p_w = p_w[idxs]
@@ -104,6 +86,7 @@ def cr_prob_distr(p_w, out_s, idxs):
     percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
+# *** Jensen-Shannon ***
 def cr_JS(p_s, p_w, eps=1e-8):            
 
     m = (p_s + p_w)/2
@@ -115,7 +98,7 @@ def cr_JS(p_s, p_w, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
-
+    idxs = _apply_threshold(p_w, tau)
     p_s = p_s[idxs]
     p_w = p_w[idxs]
     assert p_s.size() == p_w.size()
@@ -159,31 +142,8 @@ def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
-def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
-    # NOTE only implented for tau = 0
-    assert tau == 0
 
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    out_s1 = out_s1.permute(0, 2, 3, 1)
-    out_s1 = torch.flatten(out_s1, end_dim=2)
-    out_s2 = out_s2.permute(0, 2, 3, 1)
-    out_s2 = torch.flatten(out_s2, end_dim=2)
-
-    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
-    p_s1 = F.softmax(out_s1, dim=1)    
-    p_s2 = F.softmax(out_s2, dim=1)   
-
-    m = (p_w + p_s1 + p_s2)/3
-    kl1 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')   
-    kl2 = F.kl_div((p_s1 + eps).log(), m, reduction='batchmean')
-    kl3 = F.kl_div((p_s2 + eps).log(), m, reduction='batchmean')
-    loss_cr = (kl1 + kl2 + kl3)/3
-    
-    percent_pl = 100
-    return loss_cr, percent_pl
-
-
+# *** KL Divergence ***
 def cr_KL(out_w, out_s, eps=1e-8):
     '''
     TODO generalize to n augmentations
