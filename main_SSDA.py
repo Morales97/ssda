@@ -83,6 +83,7 @@ def main(args, wandb):
     step = start_step
     time_meter = averageMeter()
     time_meter_cr = averageMeter()
+    time_meter_update = averageMeter()
     val_loss_meter = averageMeter()
     train_loss_meter = averageMeter()
     source_ce_loss_meter = averageMeter()
@@ -234,15 +235,17 @@ def main(args, wandb):
             selector = model.__getattr__('contrastive_class_selector_0')
             print(selector[3].weight[0][:10])
         '''
+        start_ts_update = time.time()
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
-
+        time_update = time.time() - start_ts_update
 
         # Meters
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
+        time_meter_update.update(time_update)
         train_loss_meter.update(loss)
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
@@ -273,6 +276,7 @@ def main(args, wandb):
                 'Train Step': step,
                 'Time/Image [s]': round(time_meter.avg / args.batch_size_s, 3),
                 'Time CR/Image [s]': round(time_meter_cr.avg / args.batch_size_tu, 3),
+                'Time update/Image [s]': round(time_meter_update.avg / args.batch_size_tu, 3),
                 'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}'),
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
@@ -289,6 +293,9 @@ def main(args, wandb):
             print(log_str)
             wandb.log(rm_format(log_info))
 
+            time_meter.reset()
+            time_meter_cr.reset()
+            time_meter_update.reset()
             source_ce_loss_meter.reset()
             target_ce_loss_meter.reset()
             cr_loss_meter.reset()
