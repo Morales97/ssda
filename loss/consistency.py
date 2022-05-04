@@ -34,6 +34,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_prob_distr(out_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(out_w, out_s, tau=0)
+    elif cr_type == 'js_oh':
+        return cr_JS_one_hot(out_w, out_s, tau)
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
@@ -153,32 +155,33 @@ def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     p_w = F.softmax(out_w, dim=1).detach()              
 
+    # Filter by confidence threshold
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, )
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
     if idxs.nelement() == 0:  
         return 0, 0
 
-    # Apply only CE (between distributions!) where confidence > threshold    
+    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+        idxs = idxs.unsqueeze(0)
+
+    # Generate one-hot pseudo-labels
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    pseudo_lbl = pseudo_lbl[idxs]
+    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
+    pseudo_lbl_oh[:, pseudo_lbl] = 1
+
     out_s = out_s.permute(0, 2, 3, 1)
     out_s = torch.flatten(out_s, end_dim=2)
     out_s = out_s[idxs]
-    p_w = p_w[idxs]
-    
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
-        out_s = out_s.unsqueeze(0)
-        p_w = p_w.unsqueeze(0)
-    assert out_s.size() == p_w.size()
+    p_s = F.softmax(out_s, dim=1)    # convert to probabilities
 
-    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-    #    pdb.set_trace()
-
-    out_s = F.softmax(out_s, dim=1)    # convert to probabilities
-    m = (out_s + p_w)/2
-    kl1 = F.kl_div((out_s + eps).log(), m, reduction='batchmean')   
-    kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
+    # compute Jensen-Shannon div
+    m = (p_s + pseudo_lbl_oh)/2
+    kl1 = F.kl_div((p_s + eps).log(), m, reduction='batchmean')   
+    kl2 = F.kl_div((pseudo_lbl_oh + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
     
+    pdb.set_trace()
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
