@@ -117,7 +117,7 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    pseudo_lbl_oh = F.one_hot(pseudo_lbl, n_classes=p_w.shape[1])
+    pseudo_lbl_oh = F.one_hot(pseudo_lbl, num_classes=p_w.shape[1])
 
     # compute Jensen-Shannon div
     m = (p_s + pseudo_lbl_oh)/2
@@ -160,7 +160,7 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
     p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    pseudo_lbl_oh = F.one_hot(pseudo_lbl, n_classes=p_w.shape[1]) 
+    pseudo_lbl_oh = F.one_hot(pseudo_lbl, num_classes=p_w.shape[1]) 
 
     loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
     percent_pl = len(idxs) / n * 100
