@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=04:00:00
 
-python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=CR_tau0 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=prob_distr --tau=0
+python main_SSDA.py --seed=2 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=CR_tau0 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=prob_distr --tau=0
 #python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=JS_no_ema --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=js --warmup_steps=5000
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=CR_oh --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=one_hot
 #python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=JS_0.9 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=js_th 
