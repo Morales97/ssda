@@ -27,7 +27,7 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'js_oh':
         return cr_JS_one_hot(p_w, p_s, tau)
     elif cr_type == 'kl':
-        pass#return cr_KL(out_w, out_s)
+        return cr_KL(p_w, p_s)
     elif cr_type == 'kl_oh':
         pass#return cr_KL_one_hot(out_w, out_s)
     else:
@@ -38,7 +38,7 @@ def _apply_threshold(p_w, tau):
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
     if idxs.nelement() == 0:  
-        return None
+        return None, None
     if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
         idxs = idxs.unsqueeze(0)
     return idxs, pseudo_lbl
@@ -66,7 +66,6 @@ def cr_one_hot(p_w, out_s, tau):
 
     return loss_cr, percent_pl
     
-
 def cr_prob_distr(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels as a probability distribution
@@ -132,23 +131,14 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
 
 
 # *** KL Divergence ***
-def cr_KL(out_w, out_s, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-
-    p_w = F.softmax(out_w, dim=1).detach()              
-    p_s = F.softmax(out_s, dim=1)    
+def cr_KL(p_w, p_s, eps=1e-8):
 
     kl = F.kl_div((p_s + eps).log(), p_w, reduction='batchmean')   
     loss_cr = kl
     
-    percent_pl = 100
-    return loss_cr, percent_pl
+    return loss_cr, 100
+
+
 
 def cr_KL_one_hot_old(out_w, out_s, tau=0.9, eps=1e-8):
     '''
