@@ -22,6 +22,7 @@ from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
+from loss.consistency_new import consistency_reg2
 from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
@@ -148,6 +149,9 @@ def main(args, wandb):
                 # Forward pass for CR
                 out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
+                print(loss_cr)
+                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
+                print(loss_cr)
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
                 cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
