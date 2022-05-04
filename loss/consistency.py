@@ -29,7 +29,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'kl':
         return cr_KL(p_w, p_s)
     elif cr_type == 'kl_th':
-        return cr_JS_th(p_w, p_s, tau)
+        return cr_KL_th(p_w, p_s, tau)
     elif cr_type == 'kl_oh':
         return cr_KL_one_hot(p_w, p_s, tau)
     else:
@@ -94,7 +94,7 @@ def cr_JS(p_s, p_w, eps=1e-8):
 
     return loss_cr, 100
 
-def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
+def cr_JS_th(p_s, p_w, tau, eps=1e-8):
     n = p_s.shape[0]
     idxs, _ = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
