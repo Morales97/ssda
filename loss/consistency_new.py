@@ -38,12 +38,22 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
+    # Select idxs with confidence > tau
+    idxs = None
+    if tau > 0:
+        max_prob, _ = torch.max(p_w, dim=1)
+        idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
+        if idxs.nelement() == 0:  
+            return 0, 0
+        if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+            idxs = idxs.unsqueeze(0)
+
     if cr_type == 'one_hot':
         return cr_one_hot(p_w, out_s, tau)
     elif cr_type == 'prob_distr':
-        return cr_prob_distr(out_w, out_s, tau)
+        return cr_prob_distr(p_w, out_s, idxs)
     elif cr_type == 'js':
-        pass#return cr_JS(out_w, out_s, tau=0)
+        return cr_JS(p_w, p_s)
     elif cr_type == 'js_oh':
         pass#return cr_JS_one_hot(out_w, out_s, tau)
     elif cr_type == 'kl':
@@ -76,7 +86,7 @@ def cr_one_hot(p_w, out_s, tau):
     return loss_cr, percent_pl
     
 
-def cr_prob_distr(p_w, out_s, tau):
+def cr_prob_distr(p_w, out_s, idxs):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
 
@@ -84,53 +94,18 @@ def cr_prob_distr(p_w, out_s, tau):
     :out_s: Outputs for the batch of strong image augmentations
     :tau: Threshold of confidence to use prediction as pseudolabel
     '''
-    
-    max_prob, _ = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
-    if idxs.nelement() == 0:  
-        return 0, 0
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
+    n = out_s.shape[0]
 
     out_s = out_s[idxs]
     p_w = p_w[idxs]
     assert out_s.size() == p_w.size()
 
     loss_cr = F.cross_entropy(out_s, p_w)
-    
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
+def cr_JS(p_s, p_w, eps=1e-8):            
 
-def cr_JS(out_w, out_s, tau, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()              
-
-    max_prob, _ = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    # Apply only CE (between distributions!) where confidence > threshold    
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_w = p_w[idxs]
-    
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
-        out_s = out_s.unsqueeze(0)
-        p_w = p_w.unsqueeze(0)
-    assert out_s.size() == p_w.size()
-
-    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-    #    pdb.set_trace()
-
-    p_s = F.softmax(out_s, dim=1)    # convert to probabilities
     m = (p_s + p_w)/2
     kl1 = F.kl_div((p_s + eps).log(), m, reduction='batchmean')   
     kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
@@ -138,6 +113,14 @@ def cr_JS(out_w, out_s, tau, eps=1e-8):
     
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
+
+def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
+
+    p_s = p_s[idxs]
+    p_w = p_w[idxs]
+    assert p_s.size() == p_w.size()
+
+    return cr_JS(p_s, p_w)
 
 def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
     '''
