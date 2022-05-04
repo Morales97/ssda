@@ -43,13 +43,13 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'prob_distr':
         return cr_prob_distr(out_w, out_s, tau)
     elif cr_type == 'js':
-        #return cr_JS(out_w, out_s, tau=0)
+        pass#return cr_JS(out_w, out_s, tau=0)
     elif cr_type == 'js_oh':
-        #return cr_JS_one_hot(out_w, out_s, tau)
+        pass#return cr_JS_one_hot(out_w, out_s, tau)
     elif cr_type == 'kl':
-        #return cr_KL(out_w, out_s)
+        pass#return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
-        #return cr_KL_one_hot(out_w, out_s)
+        pass#return cr_KL_one_hot(out_w, out_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
