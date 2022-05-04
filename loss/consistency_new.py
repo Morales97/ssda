@@ -31,7 +31,7 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'js_th':
         return cr_JS_th(p_w, p_s, tau)
     elif cr_type == 'kl_oh':
-        return cr_KL_one_hot(p_w, p_s, tau)
+        return cr_KL_one_hot_old(p_w, p_s, tau)
     else:
         raise Exception('Consistency regularization type not supported')
 
