@@ -187,8 +187,11 @@ def main(args, wandb):
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
-                with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                    outputs_t_ema = model(images_t)   
+                with ema.average_parameters() and torch.no_grad():  
+                    if args.dsbn:
+                        outputs_t_ema = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))  
+                    else:
+                        outputs_t_ema = model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
@@ -200,7 +203,10 @@ def main(args, wandb):
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-                outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+                if args.dsbn:
+                    outputs_tu = model(outputs_tu, 1*torch.ones(outputs_tu.shape[0], dtype=torch.long)) 
+                else:
+                    outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu)
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
