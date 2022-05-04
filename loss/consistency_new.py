@@ -38,7 +38,7 @@ def _apply_threshold(p_w, tau):
     max_prob, _ = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
     if idxs.nelement() == 0:  
-        return 0, 0
+        return None
     if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
         idxs = idxs.unsqueeze(0)
     return idxs
@@ -77,6 +77,7 @@ def cr_prob_distr(p_w, out_s, tau):
     '''
     n = out_s.shape[0]
     idxs = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
     out_s = out_s[idxs]
     p_w = p_w[idxs]
@@ -99,6 +100,8 @@ def cr_JS(p_s, p_w, eps=1e-8):
 
 def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
     idxs = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
+    
     p_s = p_s[idxs]
     p_w = p_w[idxs]
     assert p_s.size() == p_w.size()
