@@ -5,64 +5,62 @@ from collections import OrderedDict
 from torchvision.utils import save_image
 
 
-def cr_multiple_augs(args, images, model):
-    # NOTE for the moment only support 2 augmentations
-    assert args.n_augmentations == 2 and args.cr == 'js'
-    images_weak = images[0].cuda()
-    images_strong1 = images[1].cuda()
-    images_strong2 = images[2].cuda()
-
-    outputs_w = model(images_weak)                   # (N, C, H, W)
-    outputs_strong1 = model(images_strong1)
-    outputs_strong2 = model(images_strong2)
-    if type(outputs_w) == OrderedDict:
-        out_w = outputs_w['out']
-        out_strong1 = outputs_strong1['out']
-        out_strong2 = outputs_strong2['out']
-    else:
-        out_w = outputs_w
-        out_strong1 = outputs_strong1
-        out_strong2 = outputs_strong2
-
-    return cr_JS_2_augs(out_w, out_strong1, out_strong2)
-
-
 def consistency_reg(cr_type, out_w, out_s, tau=0.9):
-    if cr_type == 'one_hot':
-        return cr_one_hot(out_w, out_s, tau)
-    elif cr_type == 'prob_distr':
-        return cr_prob_distr(out_w, out_s, tau)
-    elif cr_type == 'js':
-        return cr_JS(out_w, out_s, tau=0)
-    elif cr_type == 'js_oh':
-        return cr_JS_one_hot(out_w, out_s, tau)
-    elif cr_type == 'kl':
-        return cr_KL(out_w, out_s)
-    elif cr_type == 'kl_oh':
-        return cr_KL_one_hot(out_w, out_s)
-    else:
-        raise Exception('Consistency regularization type not supported')
-
-
-def cr_one_hot(out_w, out_s, tau):
-    '''
-    Consistency regularization with pseudo-labels encoded as One-hot.
-
-    :out_w: Outputs for the batch of weak image augmentations
-    :out_s: Outputs for the batch of strong image augmentations
-    :tau: Threshold of confidence to use prediction as pseudolabel
-    '''
+    # Weak augmentations
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
     p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
 
+    # Strong augmentations
+    out_s = out_s.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
+    p_s = F.softmax(out_s, dim=1)  
+
+    if cr_type == 'one_hot':
+        return cr_one_hot(p_w, out_s, tau)
+    elif cr_type == 'prob_distr':
+        return cr_prob_distr(p_w, out_s, tau)
+    elif cr_type == 'js':
+        return cr_JS(p_w, p_s)
+    elif cr_type == 'js_th':
+        return cr_JS_th(p_w, p_s, tau)
+    elif cr_type == 'js_oh':
+        return cr_JS_one_hot(p_w, p_s, tau)
+    elif cr_type == 'kl':
+        return cr_KL(p_w, p_s)
+    elif cr_type == 'klç_th':
+        return cr_JS_th(p_w, p_s, tau)
+    elif cr_type == 'kl_oh':
+        return cr_KL_one_hot(p_w, p_s, tau)
+    else:
+        raise Exception('Consistency regularization type not supported')
+
+
+def _apply_threshold(p_w, tau):
+    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
+    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
+    if idxs.nelement() == 0:  
+        return None, None
+    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+        idxs = idxs.unsqueeze(0)
+    return idxs, pseudo_lbl
+
+def _to_one_hot(pseudo_lbl, n_classes):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    pseudo_lbl_oh = torch.zeros((len(pseudo_lbl), n_classes)).to(device)
+    pseudo_lbl_oh[:, pseudo_lbl] = 1
+    return pseudo_lbl_oh
+
+# *** Cross-Entropy ***
+def cr_one_hot(p_w, out_s, tau):
+    '''
+    Consistency regularization with pseudo-labels encoded as One-hot.
+    '''
     # Generate one-hot pseudo-labels
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
     pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
     # pseudo_lbl.unique(return_counts=True)
 
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
     assert len(pseudo_lbl) == out_s.size()[0]
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
@@ -70,110 +68,56 @@ def cr_one_hot(out_w, out_s, tau):
 
     return loss_cr, percent_pl
     
-
-def cr_prob_distr(out_w, out_s, tau):
+def cr_prob_distr(p_w, out_s, tau):
     '''
-    Consistency regularization with pseudo-labels encoded as One-hot.
-
-    :out_w: Outputs for the batch of weak image augmentations
-    :out_s: Outputs for the batch of strong image augmentations
-    :tau: Threshold of confidence to use prediction as pseudolabel
+    Consistency regularization with pseudo-labels as a probability distribution
     '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()        
+    n = out_s.shape[0]
+    idxs, _ = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
-    max_prob, _ = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    # Apply only CE (between distributions!) where confidence > threshold    
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
     out_s = out_s[idxs]
     p_w = p_w[idxs]
-    
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
-        out_s = out_s.unsqueeze(0)
-        p_w = p_w.unsqueeze(0)
     assert out_s.size() == p_w.size()
-
-    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-    #    pdb.set_trace()
-
 
     loss_cr = F.cross_entropy(out_s, p_w)
-    
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
+# *** Jensen-Shannon ***
+def cr_JS(p_s, p_w, eps=1e-8):            
 
-def cr_JS(out_w, out_s, tau, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()              
-
-    max_prob, _ = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    # Apply only CE (between distributions!) where confidence > threshold    
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_w = p_w[idxs]
-    
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
-        out_s = out_s.unsqueeze(0)
-        p_w = p_w.unsqueeze(0)
-    assert out_s.size() == p_w.size()
-
-    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
-    #    pdb.set_trace()
-
-    out_s = F.softmax(out_s, dim=1)    # convert to probabilities
-    m = (out_s + p_w)/2
-    kl1 = F.kl_div((out_s + eps).log(), m, reduction='batchmean')   
+    m = (p_s + p_w)/2
+    kl1 = F.kl_div((p_s + eps).log(), m, reduction='batchmean')   
     kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
-    
-    percent_pl = len(idxs) / len(max_prob) * 100
+
+    return loss_cr, 100
+
+def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, _ = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
+
+    p_s = p_s[idxs]
+    p_w = p_w[idxs]
+    assert p_s.size() == p_w.size()
+
+    loss_cr, _ = cr_JS(p_s, p_w)
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
-def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()              
+def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):    
+    n = p_s.shape[0]
+    idxs, pseudo_lbl = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
-    # Filter by confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
+    # filter by confidence > tau
+    pseudo_lbl = pseudo_lbl[idxs]
+    p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pseudo_lbl = pseudo_lbl[idxs]
-    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
-    pseudo_lbl_oh[:, pseudo_lbl] = 1
-
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    # convert to probabilities
+    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, n_classes=p_w.shape[1])
 
     # compute Jensen-Shannon div
     m = (p_s + pseudo_lbl_oh)/2
@@ -181,111 +125,45 @@ def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
     kl2 = F.kl_div((pseudo_lbl_oh + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
     
-    percent_pl = len(idxs) / len(max_prob) * 100
-    return loss_cr, percent_pl
-
-def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
-    # NOTE only implented for tau = 0
-    assert tau == 0
-
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    out_s1 = out_s1.permute(0, 2, 3, 1)
-    out_s1 = torch.flatten(out_s1, end_dim=2)
-    out_s2 = out_s2.permute(0, 2, 3, 1)
-    out_s2 = torch.flatten(out_s2, end_dim=2)
-
-    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
-    p_s1 = F.softmax(out_s1, dim=1)    
-    p_s2 = F.softmax(out_s2, dim=1)   
-
-    m = (p_w + p_s1 + p_s2)/3
-    kl1 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')   
-    kl2 = F.kl_div((p_s1 + eps).log(), m, reduction='batchmean')
-    kl3 = F.kl_div((p_s2 + eps).log(), m, reduction='batchmean')
-    loss_cr = (kl1 + kl2 + kl3)/3
-    
-    percent_pl = 100
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
 
-def cr_KL(out_w, out_s, eps=1e-8):
-    '''
-    TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-
-    p_w = F.softmax(out_w, dim=1).detach()              
-    p_s = F.softmax(out_s, dim=1)    
+# *** KL Divergence ***
+def cr_KL(p_w, p_s, eps=1e-8):
 
     kl = F.kl_div((p_s + eps).log(), p_w, reduction='batchmean')   
     loss_cr = kl
     
-    percent_pl = 100
+    return loss_cr, 100
+
+def cr_KL_th(p_s, p_w, idxs, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, _ = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
+
+    p_s = p_s[idxs]
+    p_w = p_w[idxs]
+    assert p_s.size() == p_w.size()
+
+    loss_cr, _ = cr_KL(p_s, p_w)
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
-def cr_KL_one_hot_old(out_w, out_s, tau=0.9, eps=1e-8):
-    '''
-    NOTE this is a more intuitive implementation, but it has a bug! (I think when idxs len is 1)
-    '''
-    # Output weak augmentation
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
+def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
+    n = p_s.shape[0]
+    idxs, pseudo_lbl = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
-    # Apply confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
+    # filter by confidence > tau
+    pseudo_lbl = pseudo_lbl[idxs]
+    p_s = p_s[idxs]
 
     # Generate one-hot pseudo-labels
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pseudo_lbl = pseudo_lbl[idxs]
-    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
-    pseudo_lbl_oh[:, pseudo_lbl] = 1
-
-    # Output strong augmentation
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    
+    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, n_classes=p_w.shape[1]) 
 
     loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
-    percent_pl = len(idxs) / len(max_prob) * 100
-
-    return loss_cr, percent_pl
-
-def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
-    '''
-    NOTE it does not work!!
-    '''
-    # Output weak augmentation
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
-
-    # Apply confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    # Generate one-hot pseudo-labels
-    pseudo_lbl = pseudo_lbl[idxs]
-
-    # Output strong augmentation
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    
-
-    loss_cr = - p_s[pseudo_lbl].log() # NOTE this breaks!! p_s[pseudo_lbl] does not work as I thought
-    loss_cr = loss_cr.mean()
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
 
     return loss_cr, percent_pl
 
