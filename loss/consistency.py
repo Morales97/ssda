@@ -137,7 +137,7 @@ def cr_KL(p_w, p_s, eps=1e-8):
     
     return loss_cr, 100
 
-def cr_KL_th(p_s, p_w, idxs, eps=1e-8):
+def cr_KL_th(p_s, p_w, tau, eps=1e-8):
     n = p_s.shape[0]
     idxs, _ = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
