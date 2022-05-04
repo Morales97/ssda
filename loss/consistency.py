@@ -64,7 +64,7 @@ def cr_one_hot(out_w, out_s, tau):
     assert len(pseudo_lbl) == out_s.size()[0]
 
     loss_cr = F.cross_entropy(out_s, pseudo_lbl, ignore_index=250)
-    percent_pl = sum(pseudo_lbl.unique(return_counts=True)[1][:-1]) / len(pseudo_lbl) * 100
+    percent_pl = sum(pseudo_lbl != 250) / len(pseudo_lbl) * 100
 
     return loss_cr, percent_pl
     
