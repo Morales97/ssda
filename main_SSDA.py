@@ -406,7 +406,8 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
             with ema.average_parameters() and torch.no_grad():
                 outputs_w = model(images_weak)     # (N, C, H, W)
         else:
-            outputs_w = model(images_weak)
+            with torch.no_grad():
+                outputs_w = model(images_weak)
         outputs_strong = model(images_strong)
 
     if type(outputs_w) == OrderedDict:
