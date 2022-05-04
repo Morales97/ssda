@@ -164,7 +164,7 @@ def cr_KL_one_hot_old(p_w, p_s, tau=0.9, eps=1e-8):
 
     loss_cr = custom_kl_div(p_s.log(), pseudo_lbl_oh)
     percent_pl = len(idxs) / n * 100
-
+    pdb.set_trace()
     return loss_cr, percent_pl
 
 def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
@@ -179,7 +179,7 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
     loss_cr = - p_s[pseudo_lbl].log() # this is the KL formula when target is one-hot
     loss_cr = loss_cr.mean()
     percent_pl = len(idxs) / n * 100
-
+    
     return loss_cr, percent_pl
 
 
