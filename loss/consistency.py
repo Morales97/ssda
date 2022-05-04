@@ -37,8 +37,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'kl':
         return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
-        #return cr_KL_one_hot(out_w, out_s)
-        return cr_KL_one_hot_more_efficient(out_w, out_s)
+        return cr_KL_one_hot(out_w, out_s)
+        #return cr_KL_one_hot_more_efficient(out_w, out_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
@@ -192,8 +192,6 @@ def cr_KL(out_w, out_s, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
-    loss_kl, _ = cr_KL(out_w, out_s)
-
     # Output weak augmentation
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
@@ -223,8 +221,6 @@ def cr_KL_one_hot(out_w, out_s, tau=0.9, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_KL_one_hot_more_efficient(out_w, out_s, tau=0.9, eps=1e-8):
-    loss_kl, _ = cr_KL(out_w, out_s)
-
     # Output weak augmentation
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
