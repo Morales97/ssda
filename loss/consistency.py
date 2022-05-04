@@ -145,7 +145,42 @@ def cr_JS(out_w, out_s, tau, eps=1e-8):
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
+def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
+    '''
+    TODO generalize to n augmentations
+    '''
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    p_w = F.softmax(out_w, dim=1).detach()              
 
+    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
+    pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, )
+    if idxs.nelement() == 0:  
+        return 0, 0
+
+    # Apply only CE (between distributions!) where confidence > threshold    
+    out_s = out_s.permute(0, 2, 3, 1)
+    out_s = torch.flatten(out_s, end_dim=2)
+    out_s = out_s[idxs]
+    p_w = p_w[idxs]
+    
+    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
+        idxs = idxs.unsqueeze(0)
+        out_s = out_s.unsqueeze(0)
+        p_w = p_w.unsqueeze(0)
+    assert out_s.size() == p_w.size()
+
+    #if idxs.nelement() > 1: # when a single pixel is above the threshold, need to add a dimension
+    #    pdb.set_trace()
+
+    out_s = F.softmax(out_s, dim=1)    # convert to probabilities
+    m = (out_s + p_w)/2
+    kl1 = F.kl_div((out_s + eps).log(), m, reduction='batchmean')   
+    kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
+    loss_cr = (kl1 + kl2)/2
+    
+    percent_pl = len(idxs) / len(max_prob) * 100
+    return loss_cr, percent_pl
 
 def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
     # NOTE only implented for tau = 0

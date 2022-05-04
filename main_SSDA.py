@@ -204,7 +204,7 @@ def main(args, wandb):
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
                 if args.dsbn:
-                    outputs_tu = model(outputs_tu, 1*torch.ones(outputs_tu.shape[0], dtype=torch.long)) 
+                    outputs_tu = model(images_tu, 1*torch.ones(images_tu.shape[0], dtype=torch.long)) 
                 else:
                     outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu)
