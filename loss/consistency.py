@@ -181,7 +181,6 @@ def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
     kl2 = F.kl_div((pseudo_lbl_oh + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
     
-    pdb.set_trace()
     percent_pl = len(idxs) / len(max_prob) * 100
     return loss_cr, percent_pl
 
