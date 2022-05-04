@@ -25,7 +25,7 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'js_th':
         return cr_JS_th(p_w, p_s, tau)
     elif cr_type == 'js_oh':
-        pass#return cr_JS_one_hot(out_w, out_s, tau)
+        return cr_JS_one_hot(p_w, p_s, tau)
     elif cr_type == 'kl':
         pass#return cr_KL(out_w, out_s)
     elif cr_type == 'kl_oh':
@@ -43,17 +43,17 @@ def _apply_threshold(p_w, tau):
         idxs = idxs.unsqueeze(0)
     return idxs, pseudo_lbl
 
+def _to_one_hot(pseudo_lbl, dim):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    pseudo_lbl_oh = torch.zeros((len(idxs), dim)).to(device)
+    pseudo_lbl_oh[:, pseudo_lbl] = 1
+    return pseudo_lbl_oh
 
 # *** Cross-Entropy ***
 def cr_one_hot(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
-
-    :out_w: Outputs for the batch of weak image augmentations
-    :out_s: Outputs for the batch of strong image augmentations
-    :tau: Threshold of confidence to use prediction as pseudolabel
     '''
-
     # Generate one-hot pseudo-labels
     max_prob, pseudo_lbl = torch.max(p_w, dim=1)
     pseudo_lbl = torch.where(max_prob > tau, pseudo_lbl, 250)   # 250 is the ignore_index
@@ -69,11 +69,7 @@ def cr_one_hot(p_w, out_s, tau):
 
 def cr_prob_distr(p_w, out_s, tau):
     '''
-    Consistency regularization with pseudo-labels encoded as One-hot.
-
-    :out_w: Outputs for the batch of weak image augmentations
-    :out_s: Outputs for the batch of strong image augmentations
-    :tau: Threshold of confidence to use prediction as pseudolabel
+    Consistency regularization with pseudo-labels as a probability distribution
     '''
     n = out_s.shape[0]
     idxs, _ = _apply_threshold(p_w, tau)
@@ -110,24 +106,20 @@ def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
     percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
-def cr_JS_one_hot(p_w, out_s, tau, eps=1e-8):
+def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     '''
     TODO generalize to n augmentations
     '''          
-
+    n = p_s.shape[0]
     idxs, pseudo_lbl = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
 
-    # Generate one-hot pseudo-labels
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # filter by confidence > tau
     pseudo_lbl = pseudo_lbl[idxs]
-    pseudo_lbl_oh = torch.zeros((len(idxs), p_w.shape[1])).to(device)
-    pseudo_lbl_oh[:, pseudo_lbl] = 1
+    p_s = p_s[idxs]
 
-    out_s = out_s.permute(0, 2, 3, 1)
-    out_s = torch.flatten(out_s, end_dim=2)
-    out_s = out_s[idxs]
-    p_s = F.softmax(out_s, dim=1)    # convert to probabilities
+    # Generate one-hot pseudo-labels
+    pseudo_lbl_oh = _to_one_hot(pseudo_lbl, dim=p_w.shape[1])
 
     # compute Jensen-Shannon div
     m = (p_s + pseudo_lbl_oh)/2
@@ -135,7 +127,7 @@ def cr_JS_one_hot(p_w, out_s, tau, eps=1e-8):
     kl2 = F.kl_div((pseudo_lbl_oh + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
     
-    percent_pl = len(idxs) / len(max_prob) * 100
+    percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
 
