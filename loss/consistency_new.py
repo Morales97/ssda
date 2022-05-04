@@ -35,13 +35,13 @@ def consistency_reg2(cr_type, out_w, out_s, tau=0.9):
 
 
 def _apply_threshold(p_w, tau):
-    max_prob, _ = torch.max(p_w, dim=1)
+    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
     idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze()    # nonzero() returns the indxs where the array is not zero
     if idxs.nelement() == 0:  
         return None
     if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
         idxs = idxs.unsqueeze(0)
-    return idxs
+    return idxs, pseudo_lbl
 
 
 # *** Cross-Entropy ***
@@ -76,7 +76,7 @@ def cr_prob_distr(p_w, out_s, tau):
     :tau: Threshold of confidence to use prediction as pseudolabel
     '''
     n = out_s.shape[0]
-    idxs = _apply_threshold(p_w, tau)
+    idxs, _ = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
 
     out_s = out_s[idxs]
@@ -94,36 +94,29 @@ def cr_JS(p_s, p_w, eps=1e-8):
     kl1 = F.kl_div((p_s + eps).log(), m, reduction='batchmean')   
     kl2 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')
     loss_cr = (kl1 + kl2)/2
-    
-    percent_pl = len(idxs) / len(max_prob) * 100
-    return loss_cr, percent_pl
+
+    return loss_cr, 100
 
 def cr_JS_th(p_s, p_w, idxs, eps=1e-8):
-    idxs = _apply_threshold(p_w, tau)
+    n = p_s.shape[0]
+    idxs, _ = _apply_threshold(p_w, tau)
     if idxs is None: return 0, 0
-    
+
     p_s = p_s[idxs]
     p_w = p_w[idxs]
     assert p_s.size() == p_w.size()
 
-    return cr_JS(p_s, p_w)
+    loss_cr, _ = cr_JS(p_s, p_w)
+    percent_pl = len(idxs) / n * 100
+    return loss_cr, percent_pl
 
-def cr_JS_one_hot(out_w, out_s, tau, eps=1e-8):
+def cr_JS_one_hot(p_w, out_s, tau, eps=1e-8):
     '''
     TODO generalize to n augmentations
-    '''
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()              
+    '''          
 
-    # Filter by confidence threshold
-    max_prob, pseudo_lbl = torch.max(p_w, dim=1)
-    idxs = torch.where(max_prob > tau, 1, 0).nonzero().squeeze() # indexes 
-    if idxs.nelement() == 0:  
-        return 0, 0
-
-    if idxs.nelement() == 1: # when a single pixel is above the threshold, need to add a dimension
-        idxs = idxs.unsqueeze(0)
+    idxs, pseudo_lbl = _apply_threshold(p_w, tau)
+    if idxs is None: return 0, 0
 
     # Generate one-hot pseudo-labels
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
