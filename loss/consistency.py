@@ -48,12 +48,12 @@ def cr_multiple_augs(args, images, model):
     outputs_strong2 = model(images_strong2)
     if type(outputs_w) == OrderedDict:
         out_w = outputs_w['out']
-        out_strong1 = outputs_strong1['out']
-        out_strong2 = outputs_strong2['out']
+        out_s1 = outputs_strong1['out']
+        out_s2 = outputs_strong2['out']
     else:
         out_w = outputs_w
-        out_strong1 = outputs_strong1
-        out_strong2 = outputs_strong2
+        out_s1 = outputs_strong1
+        out_s2 = outputs_strong2
 
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
