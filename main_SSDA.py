@@ -152,7 +152,7 @@ def main(args, wandb):
 
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
-                cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
+                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
 
             time_cr = time.time() - start_ts_cr
             

@@ -84,7 +84,7 @@ class FeatureMemory:
                         self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
 
 
-def contrastive_class_to_class(model, features, class_labels, memory, num_classes=19):
+def contrastive_class_to_class(model, features, class_labels, memory, use_selector, num_classes=19):
     """
     originally, 'contrastive_class_to_class_learned_memory()' from https://github.com/Shathe/SemiSeg-Contrastive 
     Args:
@@ -108,7 +108,7 @@ def contrastive_class_to_class(model, features, class_labels, memory, num_classe
         memory_c = memory[c] # N, 256
 
         # get the self-attention MLPs both for memory features vectors (projected vectors) and network feature vectors (predicted vectors)
-        #selector = model.__getattr__('contrastive_class_selector_' + str(c))
+        selector = model.__getattr__('contrastive_class_selector_' + str(c))
         #selector_memory = model.__getattr__('contrastive_class_selector_memory' + str(c))
 
         if memory_c is not None and features_c.shape[0] > 1 and memory_c.shape[0] > 1:
@@ -229,9 +229,14 @@ class AlonsoContrastiveLearner:
             pred_s = pred_s.permute(0, 2, 3, 1)
             pred_s = pred_s[mask, ...]
             labels_s_down = labels_s_down[mask]
-
-            loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, self.feature_memory.memory)
-
+            
+            if self.mode == 'full':
+                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, self.feature_memory.memory, use_selector=True)
+            elif self.mode == 'base':
+                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, self.feature_memory.memory, use_selector=False)
+            else:
+                raise Exception('Mode not available')
+                
         use_tl = False
         if use_tl:
 
@@ -252,8 +257,13 @@ class AlonsoContrastiveLearner:
             pred_tl = pred_tl[mask, ...]
             labels_t_down = labels_t_down[mask]
 
-            loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, self.feature_memory.memory)
-
+            
+            if self.mode == 'full':
+                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, self.feature_memory.memory, use_selector=True)
+            elif self.mode == 'base':
+                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, self.feature_memory.memory, use_selector=False)
+            else:
+                raise Exception('Mode not available')
         return loss_labeled
 
     def unlabeled_pc(self, outputs_tu):
@@ -274,5 +284,10 @@ class AlonsoContrastiveLearner:
         pred_tu = pred_tu[mask, ...]
         pseudo_lbl_down = pseudo_lbl_down[mask]
 
-        loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, self.feature_memory.memory)
+        if self.mode == 'full':
+            loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, self.feature_memory.memory, use_selector=True)
+        elif self.mode == 'base':
+            loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, self.feature_memory.memory, use_selector=False)
+        else:
+            raise Exception('Mode not available')
         return loss_unlabeled
