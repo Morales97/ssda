@@ -118,13 +118,50 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4)
         self.layer5 = _ASPP(2048, num_classes, [6,12,18,24])
-        if self.pixel_contrast:
-            self.projection = nn.Sequential(
-                            nn.Conv2d(2048, 2048, 1, bias=False),
-                            nn.BatchNorm2d(2048),
-                            nn.ReLU(inplace=True),
-                            nn.Conv2d(2048, 256, 1, bias=False)
-                        )
+        
+        # for Pixel Contrast
+        self.projection_pc = nn.Sequential(
+                        nn.Conv2d(2048, 2048, 1, bias=False),
+                        nn.BatchNorm2d(2048),
+                        nn.ReLU(inplace=True),
+                        nn.Conv2d(2048, 256, 1, bias=False)
+                    )
+
+        # for Alonso's PC
+        dim_in = 2048
+        feat_dim = 256
+        self.projection_head = nn.Sequential(
+                                    nn.Conv2d(dim_in, feat_dim, 1, bias=False), # difference to original Alonso: nn.Linear(dim_in, feat_dim)
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
+        self.prediction_head = nn.Sequential(
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
+        
+        for class_c in range(num_classes):
+            selector = nn.Sequential(
+                nn.Linear(feat_dim, feat_dim),
+                nn.BatchNorm1d(feat_dim),
+                nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                nn.Linear(feat_dim, 1)
+            )
+            self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
+
+        for class_c in range(num_classes):
+            selector = nn.Sequential(
+                nn.Linear(feat_dim, feat_dim),
+                nn.BatchNorm1d(feat_dim),
+                nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                nn.Linear(feat_dim, 1)
+            )
+            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
+        
+        print('Using custom DeepLabV2 model')
 
 
         for m in self.modules():
@@ -153,7 +190,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
 
-    def forward(self, x, return_features=False):
+    def forward(self, x):
         input_shape = x.shape[-2:]
         x = self.conv1(x)
         x = self.bn1(x)
@@ -167,18 +204,21 @@ class ResNet(nn.Module):
         result = OrderedDict()
         x = self.layer5(features)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
-        result['out'] = x
 
-        if self.pixel_contrast:
-            proj = self.projection(features)
-            proj = F.normalize(proj, p=2, dim=1)  
-            proj = F.interpolate(proj, size=input_shape, mode="bilinear", align_corners=False)
-            result["proj"] = proj
+        proj = self.projection_head(x_f)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+        pred = self.prediction_head(proj)
 
-        if return_features:
-            return result, features
-        else:
-            return result
+        proj_pc = self.projection_pc(features)
+        proj_pc = F.normalize(prproj_pcoj, p=2, dim=1)  
+        proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
+
+        result["out"] = x
+        result["feat"] = features
+        result["proj"] = proj
+        result["pred"] = pred
+        result["proj_pc"] = proj_pc
+
+        return result
 
 
     def get_1x_lr_params(self):
@@ -211,7 +251,7 @@ class ResNet(nn.Module):
         return [{'params': self.get_1x_lr_params(), 'lr': args.learning_rate}]
 
 
-def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pixel_contrast=False, num_classes=19):
+def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, num_classes=19):
     if pretrained:
         raise Exception('pretrained DeepLabv2 + ResNet-101 is not available')
 
