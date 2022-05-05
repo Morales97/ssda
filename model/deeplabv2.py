@@ -100,11 +100,10 @@ class _ASPP(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes, pixel_contrast=False):
+    def __init__(self, block, layers, num_classes):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.num_classes= num_classes
-        self.pixel_contrast = pixel_contrast
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -255,7 +254,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     if pretrained:
         raise Exception('pretrained DeepLabv2 + ResNet-101 is not available')
 
-    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes, pixel_contrast)
+    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes)
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
@@ -297,5 +296,5 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
 
 if __name__ == '__main__':
 
-    model = deeplabv2_rn101(pixel_contrast=False, custom_pretrain_path='model/pretrained/ckpt_mask_v2.tar')
+    model = deeplabv2_rn101(custom_pretrain_path='model/pretrained/ckpt_mask_v2.tar')
     pdb.set_trace()
