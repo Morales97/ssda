@@ -184,7 +184,7 @@ def main(args, wandb):
             '''
             options:
                 - "base": without any selector
-                - "feat_quality": use selectors in memory bank to save the highest quality
+                - "full": use selectors heads in memory bank to save the highest quality and to weight the loss
             '''
 
             # Build feature memory bank, start 'ramp_up_steps' before

@@ -130,7 +130,6 @@ def contrastive_class_to_class(model, features, class_labels, memory, use_select
                 distances = 1 - similarities # values between [0, 2] where 0 means same vectors
                 # M (elements), N (memory)
 
-                
                 # now weight every sample
                 learned_weights_features = selector(features_c.detach()) # detach for trainability
                 learned_weights_features_memory = selector_memory(memory_c)
@@ -146,7 +145,6 @@ def contrastive_class_to_class(model, features, class_labels, memory, use_select
                 rescaled_weights_memory = (learned_weights_features_memory.shape[0] / learned_weights_features_memory.sum(dim=0)) * learned_weights_features_memory
                 rescaled_weights_memory = rescaled_weights_memory.repeat(distances.shape[0], 1)
                 distances = distances * rescaled_weights_memory
-                
 
                 loss = loss + distances.mean()
 
