@@ -208,7 +208,7 @@ class ResNet(nn.Module):
         pred = self.prediction_head(proj)
 
         proj_pc = self.projection_pc(features)
-        proj_pc = F.normalize(prproj_pcoj, p=2, dim=1)  
+        proj_pc = F.normalize(proj_pc, p=2, dim=1)  
         proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
 
         result["out"] = x
