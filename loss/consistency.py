@@ -128,6 +128,31 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
+'''
+def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
+    # NOTE only implented for tau = 0
+    assert tau == 0
+
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    out_s1 = out_s1.permute(0, 2, 3, 1)
+    out_s1 = torch.flatten(out_s1, end_dim=2)
+    out_s2 = out_s2.permute(0, 2, 3, 1)
+    out_s2 = torch.flatten(out_s2, end_dim=2)
+
+    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
+    p_s1 = F.softmax(out_s1, dim=1)    
+    p_s2 = F.softmax(out_s2, dim=1)   
+
+    m = (p_w + p_s1 + p_s2)/3
+    kl1 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')   
+    kl2 = F.kl_div((p_s1 + eps).log(), m, reduction='batchmean')
+    kl3 = F.kl_div((p_s2 + eps).log(), m, reduction='batchmean')
+    loss_cr = (kl1 + kl2 + kl3)/3
+    
+    percent_pl = 100
+    return loss_cr, percent_pl
+'''
 
 # *** KL Divergence ***
 def cr_KL(p_w, p_s, eps=1e-8):
