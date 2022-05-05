@@ -201,7 +201,7 @@ def main(args, wandb):
             if step >= args.warmup_steps:
                 # ** Labeled CL **
                 # NOTE beware that it can compete with our PC!
-                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t)
+                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t, model)
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
@@ -209,7 +209,7 @@ def main(args, wandb):
                     outputs_tu = model(images_tu, 1*torch.ones(images_tu.shape[0], dtype=torch.long)) 
                 else:
                     outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
-                loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu)
+                loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu, model)
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
 

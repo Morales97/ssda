@@ -223,7 +223,7 @@ class AlonsoContrastiveLearner:
                 self.feature_memory.add_features(model, proj_s_selected, labels_s_down_selected, args.batch_size_s)
 
 
-    def labeled_pc(self, outputs_s, outputs_t, labels_s, labels_t):
+    def labeled_pc(self, outputs_s, outputs_t, labels_s, labels_t, model):
         loss_labeled = 0
         pred_s = outputs_s['pred']
         pred_tl = outputs_t['pred']
@@ -284,7 +284,7 @@ class AlonsoContrastiveLearner:
                 raise Exception('Mode not available')
         return loss_labeled
 
-    def unlabeled_pc(self, outputs_tu):
+    def unlabeled_pc(self, outputs_tu, model):
         pred_tu = outputs_tu['pred']
 
         # compute pseudolabel
