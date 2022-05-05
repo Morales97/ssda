@@ -22,7 +22,7 @@
 
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=dsbn_l1_alonso_tu_0.9 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --alonso_contrast=base --dsbn=True
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=alonso_FQ --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --alonso_contrast=feat_quality
-python main_SSDA.py --seed=2 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=CE_no_ema --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=ce --cr_ema=False #--custom_pretrainmodel/pretrained/ckpt_mask_dlrn50_CS_400.tar
+python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=CE_no_ema --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=ce --cr_ema=False #--custom_pretrainmodel/pretrained/ckpt_mask_dlrn50_CS_400.tar
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=LAB_color --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --lab_color=True
 #python main_SSDA.py --seed=1 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --size=small --expt_name=KLE_GTA_cycada --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl
 
