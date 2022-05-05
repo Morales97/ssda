@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=js_no_ema
+#SBATCH --job-name=kl_no_ema
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
