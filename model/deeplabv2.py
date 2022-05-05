@@ -204,7 +204,7 @@ class ResNet(nn.Module):
         x = self.layer5(features)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
-        proj = self.projection_head(x_f)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+        proj = self.projection_head(features)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
         pred = self.prediction_head(proj)
 
         proj_pc = self.projection_pc(features)
