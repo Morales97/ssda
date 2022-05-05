@@ -438,5 +438,5 @@ if __name__ == '__main__':
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=gjs --n_augmentations=2 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_steps=0
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
 

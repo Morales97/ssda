@@ -249,7 +249,7 @@ class AlonsoContrastiveLearner:
             labels_s_down = labels_s_down[mask]
             
             if self.mode == 'full':
-                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, self.feature_memory.memory, use_selector=True)
+                loss_labeled = loss_labeled + contrastive_class_to_class(model, pred_s, labels_s_down, self.feature_memory.memory, use_selector=True)
             elif self.mode == 'base':
                 loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_s, labels_s_down, self.feature_memory.memory, use_selector=False)
             else:
@@ -277,7 +277,7 @@ class AlonsoContrastiveLearner:
 
             
             if self.mode == 'full':
-                loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, self.feature_memory.memory, use_selector=True)
+                loss_labeled = loss_labeled + contrastive_class_to_class(model, pred_tl, labels_t_down, self.feature_memory.memory, use_selector=True)
             elif self.mode == 'base':
                 loss_labeled = loss_labeled + contrastive_class_to_class(None, pred_tl, labels_t_down, self.feature_memory.memory, use_selector=False)
             else:
@@ -303,7 +303,7 @@ class AlonsoContrastiveLearner:
         pseudo_lbl_down = pseudo_lbl_down[mask]
 
         if self.mode == 'full':
-            loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, self.feature_memory.memory, use_selector=True)
+            loss_unlabeled = contrastive_class_to_class(model, pred_tu, pseudo_lbl_down, self.feature_memory.memory, use_selector=True)
         elif self.mode == 'base':
             loss_unlabeled = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, self.feature_memory.memory, use_selector=False)
         else:
