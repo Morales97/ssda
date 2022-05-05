@@ -9,7 +9,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     # Weak augmentations
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    p_w = F.softmax(out_w, dim=1).detach()    # compute softmax along classes dimension
+    p_w = F.softmax(out_w, dim=1).detach()    # stop gradient in weak augmentation
 
     # Strong augmentations
     out_s = out_s.permute(0, 2, 3, 1)         # (N, H, W, C)
@@ -34,6 +34,39 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_KL_one_hot(p_w, p_s, tau)
     else:
         raise Exception('Consistency regularization type not supported')
+
+
+def cr_multiple_augs(args, images, model):
+    # NOTE for the moment only support 2 augmentations
+    assert args.n_augmentations == 2 and args.cr == 'gjs'
+    images_weak = images[0].cuda()
+    images_strong1 = images[1].cuda()
+    images_strong2 = images[2].cuda()
+
+    outputs_w = model(images_weak)                   # (N, C, H, W)
+    outputs_strong1 = model(images_strong1)
+    outputs_strong2 = model(images_strong2)
+    if type(outputs_w) == OrderedDict:
+        out_w = outputs_w['out']
+        out_strong1 = outputs_strong1['out']
+        out_strong2 = outputs_strong2['out']
+    else:
+        out_w = outputs_w
+        out_strong1 = outputs_strong1
+        out_strong2 = outputs_strong2
+
+    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
+    out_s1 = out_s1.permute(0, 2, 3, 1)
+    out_s1 = torch.flatten(out_s1, end_dim=2)
+    out_s2 = out_s2.permute(0, 2, 3, 1)
+    out_s2 = torch.flatten(out_s2, end_dim=2)
+
+    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
+    p_s1 = F.softmax(out_s1, dim=1)    
+    p_s2 = F.softmax(out_s2, dim=1)  
+
+    return cr_GJS(p_w, p_s1, p_s2)
 
 
 def _apply_threshold(p_w, tau):
@@ -128,31 +161,23 @@ def cr_JS_one_hot(p_w, p_s, tau, eps=1e-8):
     percent_pl = len(idxs) / n * 100
     return loss_cr, percent_pl
 
-'''
-def cr_JS_2_augs(out_w, out_s1, out_s2, tau=0, eps=1e-8):
-    # NOTE only implented for tau = 0
-    assert tau == 0
 
-    out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
-    out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
-    out_s1 = out_s1.permute(0, 2, 3, 1)
-    out_s1 = torch.flatten(out_s1, end_dim=2)
-    out_s2 = out_s2.permute(0, 2, 3, 1)
-    out_s2 = torch.flatten(out_s2, end_dim=2)
-
-    p_w = F.softmax(out_w, dim=1).detach()      # stop gradient in original example   
-    p_s1 = F.softmax(out_s1, dim=1)    
-    p_s2 = F.softmax(out_s2, dim=1)   
-
-    m = (p_w + p_s1 + p_s2)/3
-    kl1 = F.kl_div((p_w + eps).log(), m, reduction='batchmean')   
-    kl2 = F.kl_div((p_s1 + eps).log(), m, reduction='batchmean')
-    kl3 = F.kl_div((p_s2 + eps).log(), m, reduction='batchmean')
-    loss_cr = (kl1 + kl2 + kl3)/3
+def cr_GJS(p_w, p_s1, p_s2, eps=1e-8):
+    # Generalized JS loss (Englesson & Azizpour)
+    # NOTE should change all (p + eps).log to p.clamp(1e-7, 1.0).log(), which is more correct as the prob wont go higher than 1
     
+    # consistency to pseudo-label
+    p_s = (p_s1 + p_s2)/2
+    loss_pseudo, _ = cr_JS(p_w, p_s)
+    
+    # consistency between augmentations
+    loss_augs, _ = cr_JS(p_s1, p_s2)
+
+    loss_cr = loss_pseudo + loss_augs
     percent_pl = 100
+    pdb.set_trace()
     return loss_cr, percent_pl
-'''
+
 
 # *** KL Divergence ***
 def cr_KL(p_w, p_s, eps=1e-8):

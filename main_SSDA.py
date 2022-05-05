@@ -399,18 +399,14 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
             with ema.average_parameters() and torch.no_grad():
                 outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
         else:
-            with torch.no_grad():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))
-            #outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))
+            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
         outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
     else:
         if step >= args.warmup_steps:
             with ema.average_parameters() and torch.no_grad():
                 outputs_w = model(images_weak)     # (N, C, H, W)
         else:
-            with torch.no_grad():
-                outputs_w = model(images_weak)
-            #outputs_w = model(images_weak)
+            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
         outputs_strong = model(images_strong)
 
     if type(outputs_w) == OrderedDict:
