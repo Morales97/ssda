@@ -16,10 +16,13 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
-    if cr_type == 'one_hot':
+    
+    if cr_type == 'ce':
+        return cr_prob_distr(p_w, out_s)
+    elif cr_type == 'ce_th':
+        return cr_prob_distr_th(p_w, out_s, tau)
+    elif cr_type == 'ce_oh':
         return cr_one_hot(p_w, out_s, tau)
-    elif cr_type == 'prob_distr':
-        return cr_prob_distr(p_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(p_w, p_s)
     elif cr_type == 'js_th':
@@ -100,8 +103,16 @@ def cr_one_hot(p_w, out_s, tau):
     percent_pl = len(torch.where(pseudo_lbl != 250, 1, 0).nonzero()) / len(pseudo_lbl) * 100    # much faster than sum(pseudo_lbl != 250)
 
     return loss_cr, percent_pl
-    
-def cr_prob_distr(p_w, out_s, tau):
+
+def cr_prob_distr(p_w, out_s):
+    '''
+    Consistency regularization with pseudo-labels as a probability distribution
+    '''
+    loss_cr = F.cross_entropy(out_s, p_w)
+    percent_pl = 100
+    return loss_cr, percent_pl
+
+def cr_prob_distr_th(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels as a probability distribution
     '''
