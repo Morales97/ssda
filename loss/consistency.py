@@ -175,7 +175,6 @@ def cr_GJS(p_w, p_s1, p_s2, eps=1e-8):
 
     loss_cr = loss_pseudo + loss_augs
     percent_pl = 100
-    pdb.set_trace()
     return loss_cr, percent_pl
 
 
