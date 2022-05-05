@@ -201,7 +201,7 @@ def main(args, wandb):
             if step >= args.warmup_steps:
                 # ** Labeled CL **
                 # NOTE beware that it can compete with our PC!
-                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t, model)
+                #loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t, model)
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
