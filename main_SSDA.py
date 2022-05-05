@@ -21,8 +21,7 @@ from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class, AlonsoContrastiveLearner
-from loss.consistency import consistency_reg
-from loss.consistency_old import cr_multiple_augs
+from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
@@ -437,7 +436,7 @@ if __name__ == '__main__':
         main(args, None)
     
 
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=one_hot --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=gjs --n_augmentations=2 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_steps=0
 
