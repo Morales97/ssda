@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=alo
+#SBATCH --job-name=js_alo
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
