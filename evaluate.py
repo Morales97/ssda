@@ -62,14 +62,12 @@ def evaluate(args):
     # --- Model ---
     model = get_model(args)
     model.cuda()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
 
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
-        if 'ema_state_dict' in checkpoint.keys():
-            ema.load_state_dict(checkpoint['ema_state_dict'])
+        if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
+            model.load_state_dict(checkpoint['ema_state_dict']['shadow_params'], strict=False)
         step = checkpoint['step'] + 1
         print('Loading model trained until step {}'.format(step))
     else:
