@@ -62,6 +62,8 @@ def evaluate(args):
     # --- Model ---
     model = get_model(args)
     model.cuda()
+    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
 
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
@@ -72,7 +74,7 @@ def evaluate(args):
         #pdb.set_trace()
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
             print('Loading EMA teacher')
-            model.load_state_dict(checkpoint['ema_state_dict']['shadow_params'])
+            ema.load_state_dict(checkpoint['ema_state_dict']['shadow_params'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
@@ -86,10 +88,17 @@ def evaluate(args):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.dsbn:
-                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+            if args.eval_ema:
+                with ema.average_parameters():
+                    if args.dsbn:
+                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+                    else:
+                        outputs = model(images_val)
             else:
-                outputs = model(images_val)
+                if args.dsbn:
+                    outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+                else:
+                    outputs = model(images_val)
 
             if type(outputs) == OrderedDict:
                 outputs = outputs['out']
