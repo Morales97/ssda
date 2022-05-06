@@ -22,6 +22,7 @@ from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 from loader.cityscapes_ds import cityscapesDataset
+from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
 
 import pdb
@@ -61,10 +62,14 @@ def evaluate(args):
     # --- Model ---
     model = get_model(args)
     model.cuda()
+    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
 
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'])
+        if 'ema_state_dict' in checkpoint.keys():
+            ema.load_state_dict(checkpoint['ema_state_dict'])
         step = checkpoint['step'] + 1
         print('Loading model trained until step {}'.format(step))
     else:
@@ -78,11 +83,18 @@ def evaluate(args):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.dsbn:
-                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+            if args.ema:
+                with ema.average_parameters():
+                    if args.dsbn:
+                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+                    else:
+                        outputs = model(images_val)
             else:
-                outputs = model(images_val)
-            
+                if args.dsbn:
+                    outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+                else:
+                    outputs = model(images_val)
+
             if type(outputs) == OrderedDict:
                 outputs = outputs['out']
 
@@ -125,4 +137,4 @@ if __name__ == '__main__':
 
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_30k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_50k_FS_tiny.tar --size=tiny
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_50k_FS_tiny.tar --size=tiny --ema=True
