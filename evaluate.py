@@ -83,7 +83,8 @@ def evaluate(args):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.ema:
+            if args.eval_ema:
+                print('Evaluating on EMA teacher')
                 with ema.average_parameters():
                     if args.dsbn:
                         outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
@@ -137,4 +138,4 @@ if __name__ == '__main__':
 
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_30k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/SS_kle_40k.tar --size=tiny --eval_ema=True
+# python evaluate.py --net=deeplabv2_rn101 --resume=model/pretrained/SS_kle_40k.tar --size=tiny --eval_ema=True
