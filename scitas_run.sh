@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=ss_kle
+#SBATCH --job-name=ss_klalo
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
