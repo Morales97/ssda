@@ -66,6 +66,7 @@ def main(args, wandb):
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('Resuming from train step {}'.format(start_step))
+            _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
@@ -304,7 +305,7 @@ def main(args, wandb):
             
         # Log Validation
         if step % args.val_interval == 0:
-            _log_validation(model, val_loader, loss_fn, wandb)
+            _log_validation(model, val_loader, loss_fn, step, wandb)
         
         # Save checkpoint
         if step % args.save_interval == 0:
@@ -378,8 +379,8 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
     return out_w, out_strong
 
 
-def _log_validation(model, val_loader, loss_fn, wandb):
-    running_metrics_val = runningScore(target_loader.dataset.n_classes)
+def _log_validation(model, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     val_loss_meter = averageMeter()
     model.eval()
     with torch.no_grad():
@@ -439,7 +440,7 @@ if __name__ == '__main__':
     
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=ce --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --ent_min=True
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --val_interval=1 --ent_min=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
 
