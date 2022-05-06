@@ -67,7 +67,7 @@ def evaluate(args):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
-            model.load_state_dict(checkpoint['ema_state_dict']['shadow_params'], strict=False)
+            model.load_state_dict(checkpoint['ema_state_dict'], strict=False)  
         step = checkpoint['step'] + 1
         print('Loading model trained until step {}'.format(step))
     else:
