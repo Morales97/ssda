@@ -66,10 +66,14 @@ def evaluate(args):
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+
+        sd_model = checkpoint['model_state_dict']
+        sd_ema = checkpoint['ema_state_dict']
+        pdb.set_trace()
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
             print('Loading EMA teacher')
             model.load_state_dict(checkpoint['ema_state_dict'], strict=False)  
-        step = checkpoint['step'] + 1
+        step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
         raise Exception('No file found at {}'.format(args.resume))
