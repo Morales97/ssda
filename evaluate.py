@@ -67,6 +67,7 @@ def evaluate(args):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
+            print('Loading EMA teacher')
             model.load_state_dict(checkpoint['ema_state_dict'], strict=False)  
         step = checkpoint['step'] + 1
         print('Loading model trained until step {}'.format(step))
@@ -81,18 +82,10 @@ def evaluate(args):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.eval_ema:
-                print('Evaluating on EMA teacher')
-                with ema.average_parameters():
-                    if args.dsbn:
-                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                    else:
-                        outputs = model(images_val)
+            if args.dsbn:
+                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
             else:
-                if args.dsbn:
-                    outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                else:
-                    outputs = model(images_val)
+                outputs = model(images_val)
 
             if type(outputs) == OrderedDict:
                 outputs = outputs['out']
