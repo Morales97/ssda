@@ -77,13 +77,11 @@ def main(args, wandb):
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
-    running_metrics_val = runningScore(target_loader.dataset.n_classes)
     best_mIoU = 0 
     step = start_step
     time_meter = averageMeter()
     time_meter_cr = averageMeter()
     time_meter_update = averageMeter()
-    val_loss_meter = averageMeter()
     train_loss_meter = averageMeter()
     source_ce_loss_meter = averageMeter()
     target_ce_loss_meter = averageMeter()
@@ -306,45 +304,7 @@ def main(args, wandb):
             
         # Log Validation
         if step % args.val_interval == 0:
-            model.eval()
-            with torch.no_grad():
-                for (images_val, labels_val) in val_loader:
-                    images_val = images_val.cuda()
-                    labels_val = labels_val.cuda()
-
-                    if args.dsbn:
-                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                    else:
-                        outputs = model(images_val)
-                    
-                    if type(outputs) == OrderedDict:
-                        outputs = outputs['out']
-                    val_loss = loss_fn(input=outputs, target=labels_val)
-
-                    pred = outputs.data.max(1)[1].cpu().numpy()
-                    gt = labels_val.data.cpu().numpy()
-
-                    running_metrics_val.update(gt, pred)
-                    val_loss_meter.update(val_loss.item())
-
-            log_info = OrderedDict({
-                'Train Step': step,
-                'Validation loss': val_loss_meter.avg
-            })
-            
-            score, class_iou = running_metrics_val.get_scores()
-            for k, v in score.items():
-                log_info.update({k: FormattedLogItem(v, '{:.6f}')})
-
-            #for k, v in class_iou.items():
-            #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
-
-            log_str = get_log_str(args, log_info, title='Validation Log')
-            print(log_str)
-            wandb.log(rm_format(log_info))
-
-            val_loss_meter.reset()
-            running_metrics_val.reset()
+            _log_validation(model, val_loader, loss_fn, wandb)
         
         # Save checkpoint
         if step % args.save_interval == 0:
@@ -416,6 +376,48 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         out_strong = outputs_strong
 
     return out_w, out_strong
+
+
+def _log_validation(model, val_loader, loss_fn, wandb):
+    running_metrics_val = runningScore(target_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+    model.eval()
+    with torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            if args.dsbn:
+                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+            else:
+                outputs = model(images_val)
+            
+            if type(outputs) == OrderedDict:
+                outputs = outputs['out']
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    #for k, v in class_iou.items():
+    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log')
+    print(log_str)
+    wandb.log(rm_format(log_info))
+
 
 
 if __name__ == '__main__':
