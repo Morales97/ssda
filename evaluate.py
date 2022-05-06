@@ -67,7 +67,7 @@ def evaluate(args):
 
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
-        model.load_state_dict(checkpoint['model_state_dict'])
+        model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         if 'ema_state_dict' in checkpoint.keys():
             ema.load_state_dict(checkpoint['ema_state_dict'], strict=False)
         step = checkpoint['step'] + 1
