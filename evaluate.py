@@ -72,7 +72,7 @@ def evaluate(args):
         #pdb.set_trace()
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
             print('Loading EMA teacher')
-            model.load_state_dict(checkpoint['ema_state_dict'])
+            model.load_state_dict(checkpoint['ema_state_dict']['shadow_params'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
