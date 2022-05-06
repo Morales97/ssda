@@ -16,7 +16,6 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
-    
     if cr_type == 'ce':
         return cr_prob_distr(p_w, out_s)
     elif cr_type == 'ce_th':
