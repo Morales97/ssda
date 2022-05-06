@@ -97,7 +97,7 @@ def get_parser():
                         help='whether or not to use wandb')    
     parser.add_argument('--ent_min', type=boolfromstr, default=False,
                         help='Use entropy minimization')     
-    parser.add_argument('--cr_ema', type=boolfromstr, default=True,
+    parser.add_argument('--cr_ema', type=boolfromstr, default=False,
                         help='Use EMA model for CR')                      
     '''
     parser.add_argument('--net', type=str, default='resnet34',
