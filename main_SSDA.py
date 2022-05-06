@@ -326,6 +326,8 @@ def main(args, wandb):
             
             
         if step >= args.steps:
+            if args.ema:
+                _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
             break
 
 
@@ -414,7 +416,42 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
     print(log_str)
     wandb.log(rm_format(log_info))
 
+def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+    model.eval()
+    with ema.average_parameters() and torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
 
+            if args.dsbn:
+                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
+            else:
+                outputs = model(images_val)
+            
+            if type(outputs) == OrderedDict:
+                outputs = outputs['out']
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss on EMA': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log on EMA')
+    print(log_str)
+    wandb.log(rm_format(log_info))
 
 if __name__ == '__main__':
     args = parse_args()

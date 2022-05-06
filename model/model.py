@@ -19,7 +19,7 @@ def get_model(args):
     elif args.net == 'deeplabv2_rn101':
         model = deeplabv2_rn101(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain)
     elif args.net == 'deeplabv2_rn101_old':
-        model = deeplabv2_rn101_old(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain)
+        model = deeplabv2_rn101_old(args.pre_trained, args.pre_trained_backbone, args.custom_pretrain, args.pixel_contrast)
     #elif args.net == 'dl_mobilenet':
     #    model = deeplabv3_mobilenetv3_large(args.pre_trained, args.pre_trained_backbone)
     elif args.net == 'lraspp_mobilenet':
