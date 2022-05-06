@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=ce_alov2
+#SBATCH --job-name=ss_kle
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
