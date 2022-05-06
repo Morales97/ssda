@@ -34,6 +34,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         return cr_KL_th(p_w, p_s, tau)
     elif cr_type == 'kl_oh':
         return cr_KL_one_hot(p_w, p_s, tau)
+    elif cr_type == 'L2':
+        return cr_L2(p_w, p_s)
     else:
         raise Exception('Consistency regularization type not supported')
 
@@ -226,6 +228,10 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
 
     return loss_cr, percent_pl
 
+def cr_L2(p_w, p_s):
+    pdb.set_trace()
+    dist = torch.cdist(p_w, p_s)
+    return
 
 def custom_kl_div(prediction, target):
     '''
