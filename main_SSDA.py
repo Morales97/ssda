@@ -350,6 +350,7 @@ def _forward(args, model, images_s, images_t):
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
     if args.dsbn:
         if args.cr_ema:
+            # warmup removed
             with ema.average_parameters() and torch.no_grad():
                 outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
         else:
