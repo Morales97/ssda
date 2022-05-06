@@ -98,7 +98,9 @@ def get_parser():
     parser.add_argument('--ent_min', type=boolfromstr, default=False,
                         help='Use entropy minimization')     
     parser.add_argument('--cr_ema', type=boolfromstr, default=False,
-                        help='Use EMA model for CR')                      
+                        help='Use EMA model for CR')  
+    parser.add_argument('--eval_ema', type=boolfromstr, default=False,
+                        help='Evaluate on student or on EMA teacher. For evaluate.py')                      
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

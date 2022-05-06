@@ -137,4 +137,4 @@ if __name__ == '__main__':
 
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
 # python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_30k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_50k_FS_tiny.tar --size=tiny --ema=True
+# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/SS_kle_40k.tar --size=tiny --eval_ema=True
