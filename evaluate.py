@@ -65,14 +65,14 @@ def evaluate(args):
 
     if os.path.isfile(args.resume):
         checkpoint = torch.load(args.resume)
-        model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+        model.load_state_dict(checkpoint['model_state_dict'])
 
-        sd_model = checkpoint['model_state_dict']
-        sd_ema = checkpoint['ema_state_dict']
-        pdb.set_trace()
+        #sd_model = checkpoint['model_state_dict']
+        #sd_ema = checkpoint['ema_state_dict']
+        #pdb.set_trace()
         if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
             print('Loading EMA teacher')
-            model.load_state_dict(checkpoint['ema_state_dict'], strict=False)  
+            model.load_state_dict(checkpoint['ema_state_dict'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
