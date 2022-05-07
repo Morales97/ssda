@@ -188,7 +188,7 @@ def main(args, wandb):
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
-                with ema.average_parameters() and torch.no_grad():  
+                with ema.average_parameters():
                     if args.dsbn:
                         outputs_t_ema = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))  
                     else:
