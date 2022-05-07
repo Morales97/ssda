@@ -440,15 +440,16 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
-
-    log_info = OrderedDict({
-        'Train Step': step,
-        'Validation loss on EMA': val_loss_meter.avg
-    })
     
     score, class_iou = running_metrics_val.get_scores()
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss on EMA': val_loss_meter.avg,
+        'mIoU on EMA': score['mIoU'],
+    })
 
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')
     print(log_str)
