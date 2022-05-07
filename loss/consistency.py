@@ -232,6 +232,7 @@ def cr_L2(p_w, p_s):
     dist = torch.sqrt(pow(p_w - p_s, 2))
     dist = dist.sum(axis=1)
     print(dist.mean())
+    pdb.set_trace()
     return dist.mean(), 100
 
 def custom_kl_div(prediction, target):
