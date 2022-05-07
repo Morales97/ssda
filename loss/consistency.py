@@ -19,8 +19,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     dist = torch.sqrt(torch.pow(p_w - p_s, 2))
     dist = dist.sum(axis=1)
     print(dist.mean())
-    print(torch.norm(p_w-p_s))
-    #pdb.set_trace()
+    print(torch.linalg.norm(p_w-p_s, dim=1).mean())
+    pdb.set_trace()
 
     if cr_type == 'ce':
         return cr_prob_distr(p_w, out_s)
