@@ -66,7 +66,7 @@ def main(args, wandb):
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('Resuming from train step {}'.format(start_step))
-            _log_validation(model, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
@@ -299,7 +299,7 @@ def main(args, wandb):
             
         # Log Validation
         if step % args.val_interval == 0:
-            _log_validation(model, val_loader, loss_fn, step, wandb)
+            score = _log_validation(model, val_loader, loss_fn, step, wandb)
         
         # Save checkpoint
         if step % args.save_interval == 0:
@@ -415,6 +415,8 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
     log_str = get_log_str(args, log_info, title='Validation Log')
     print(log_str)
     wandb.log(rm_format(log_info))
+
+    return score
 
 def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
