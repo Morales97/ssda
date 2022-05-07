@@ -442,13 +442,12 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
             val_loss_meter.update(val_loss.item())
     
     score, class_iou = running_metrics_val.get_scores()
-    for k, v in score.items():
-        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
     log_info = OrderedDict({
         'Train Step': step,
         'Validation loss on EMA': val_loss_meter.avg,
         'mIoU on EMA': score['mIoU'],
+        'Overall acc on EMA': score['Overall Acc'],
     })
 
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')

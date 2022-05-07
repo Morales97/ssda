@@ -97,10 +97,10 @@ def get_parser():
                         help='whether or not to use wandb')    
     parser.add_argument('--ent_min', type=boolfromstr, default=False,
                         help='Use entropy minimization')     
-    parser.add_argument('--cr_ema', type=boolfromstr, default=False,
+    parser.add_argument('--cr_ema', type=boolfromstr, default=True,
                         help='Use EMA model for CR')  
     parser.add_argument('--eval_ema', type=boolfromstr, default=False,
-                        help='Evaluate on student or on EMA teacher. For evaluate.py')                      
+                        help='For evaluate.py. Evaluate on student or on EMA teacher')                      
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
