@@ -16,12 +16,6 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
-    dist = torch.sqrt(torch.pow(p_w - p_s, 2))
-    dist = dist.sum(axis=1)
-    print(dist.mean())
-    print(torch.linalg.norm(p_w-p_s, dim=1).mean())
-    pdb.set_trace()
-
     if cr_type == 'ce':
         return cr_prob_distr(p_w, out_s)
     elif cr_type == 'ce_th':
@@ -235,12 +229,9 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_L2(p_w, p_s):
-    dist = torch.sqrt(torch.pow(p_w - p_s, 2))
-    dist = dist.sum(axis=1)
-
-    #print(dist.mean())
-    #pdb.set_trace()
-    return dist.mean(), 100
+    l2_norm = torch.linalg.norm(p_w-p_s, dim=1).mean() 
+    print(l2_norm)  
+    return l2_norm, 100
 
 def custom_kl_div(prediction, target):
     '''
