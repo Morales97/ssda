@@ -225,12 +225,11 @@ class AlonsoContrastiveLearner:
 
     def labeled_pc(self, outputs_s, outputs_t, labels_s, labels_t, model):
         loss_labeled = 0
-        pred_s = outputs_s['pred']
-        pred_tl = outputs_t['pred']
 
         use_s = False
         if use_s:
 
+            pred_s = outputs_s['pred']
             labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(pred_s.shape[2], pred_s.shape[3]), mode='nearest').squeeze()
             ignore_label = 250
             mask = (labels_s_down != ignore_label)
@@ -258,6 +257,7 @@ class AlonsoContrastiveLearner:
         use_tl = False
         if use_tl:
 
+            pred_tl = outputs_t['pred']
             labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(pred_tl.shape[2], pred_tl.shape[3]), mode='nearest').squeeze()
             ignore_label = 250
             mask = (labels_t_down != ignore_label)
