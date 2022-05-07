@@ -55,6 +55,9 @@ def main(args, wandb):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
 
+    # Custom loss function. Ignores index 250
+    loss_fn = cross_entropy2d   
+
     # To resume from a checkpoint
     start_step = 0
     if args.resume:
@@ -70,8 +73,6 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
-    # Custom loss function. Ignores index 250
-    loss_fn = cross_entropy2d   
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast is not None:
