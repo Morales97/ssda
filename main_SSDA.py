@@ -129,7 +129,6 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
-        optimizer.zero_grad()
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
@@ -239,9 +238,10 @@ def main(args, wandb):
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
-
+        loss = loss_s + loss_t
         # Update
         start_ts_update = time.time()
+        optimizer.zero_grad()
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
