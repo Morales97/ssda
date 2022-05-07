@@ -240,7 +240,7 @@ def main(args, wandb):
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
         print(loss)
         
-        loss = loss_s + loss_t
+        #loss = loss_s + loss_t
         print(loss_s + loss_t)
         pdb.set_trace()
         # Update
