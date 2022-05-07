@@ -20,7 +20,7 @@ from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import FeatureMemory, contrastive_class_to_class
+from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loader.loaders import get_loaders
 from evaluation.metrics import averageMeter, runningScore
@@ -72,8 +72,8 @@ def main(args, wandb):
     loss_fn = cross_entropy2d   
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
-    if args.alonso_contrast:
-        feature_memory = FeatureMemory(num_samples=args.target_samples)
+    if args.alonso_contrast is not None:
+        alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
     running_metrics_val = runningScore(target_loader.dataset.n_classes)
@@ -156,58 +156,38 @@ def main(args, wandb):
         ramp_up_steps = 500
         loss_cl_alonso = 0
 
-        if args.alonso_contrast:
+        if args.alonso_contrast is not None:
+            '''
+            options:
+                - "base": without any selector
+                - "full": use selectors heads in memory bank to save the highest quality and to weight the loss
+            '''
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
-                with ema.average_parameters() and torch.no_grad():  # NOTE if instead of using EMA we reuse out_s from CE (and detach() it), we might make it quite faster
-                    #outputs_s = model(images_s) # TODO extend to use also S
-                    outputs_t = model(images_t)   
+                with ema.average_parameters() and torch.no_grad():  
+                    if args.dsbn:
+                        outputs_t_ema = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))  
+                    else:
+                        outputs_t_ema = model(images_t)   
 
-                #prob_s, pred_s = torch.max(torch.softmax(outputs_s['out'], dim=1), dim=1)  
-                prob_t, pred_t = torch.max(torch.softmax(outputs_t['out'], dim=1), dim=1)  
-
-                # save the projected features if the prediction is correct and more confident than 0.95
-                # the projected features are not upsampled, it is a lower resolution feature map. Downsample labels and preds (x8)
-                #proj_s = outputs_s['proj']
-                proj_t = outputs_t['proj']
-                #labels_s_down = F.interpolate(labels_s.unsqueeze(0).float(), size=(proj_s.shape[2], proj_s.shape[3]), mode='nearest').squeeze()
-                labels_t_down = F.interpolate(labels_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-                pred_t_down = F.interpolate(pred_t.unsqueeze(0).float(), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-                prob_t_down = F.interpolate(prob_t.unsqueeze(0), size=(proj_t.shape[2], proj_t.shape[3]), mode='nearest').squeeze()
-                
-                mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
-                labels_t_down_selected = labels_t_down[mask]
-
-                proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
-                proj_t_selected = proj_t[mask, :]
-                
-                if proj_t_selected.shape[0] > 0:
-                    feature_memory.add_features(None, proj_t_selected, labels_t_down_selected, args.batch_size_tl)
+                alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
             # Contrastive Learning
             if step >= args.warmup_steps:
-                # Labeled CL 
-                # NOTE not implemented (Alonso et al does). Can try to implement this - but beware that it can compete with our PC!
+                # ** Labeled CL **
+                # NOTE beware that it can compete with our PC!
+                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t, model)
 
-                # Unlabeled CL
+                # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-                outputs_tu = model(images_tu)
-                pred_tu = outputs_tu['pred']
+                if args.dsbn:
+                    outputs_tu = model(images_tu, 1*torch.ones(images_tu.shape[0], dtype=torch.long)) 
+                else:
+                    outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+                loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu, model)
 
-                # compute pseudolabel
-                _, pseudo_lbl = torch.max(F.softmax(outputs_tu['out'], dim=1).detach(), dim=1)
-                pseudo_lbl_down = F.interpolate(pseudo_lbl.unsqueeze(0).float(), size=(pred_tu.shape[2], pred_tu.shape[3]), mode='nearest').squeeze()
-
-                # take out the features from black pixels from zooms out and augmetnations 
-                ignore_label = 250
-                mask = (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
-
-                pred_tu = pred_tu.permute(0, 2, 3, 1)
-                pred_tu = pred_tu[mask, ...]
-                pseudo_lbl_down = pseudo_lbl_down[mask]
-
-                loss_cl_alonso = contrastive_class_to_class(None, pred_tu, pseudo_lbl_down, feature_memory.memory)
+                loss_cl_alonso = loss_labeled + loss_unlabeled
 
 
         # Total Loss
@@ -392,5 +372,4 @@ if __name__ == '__main__':
         main(args, None)
     
 
-# python main_SSDA.py --net=deeplabv3_rn50_densecl --wandb=False
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True
+# python main_SemiSup.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_step=0
