@@ -414,7 +414,7 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print(log_str)
-    #wandb.log(rm_format(log_info))
+    wandb.log(rm_format(log_info))
 
     return score
 
@@ -474,7 +474,7 @@ if __name__ == '__main__':
     
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=L2 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --val_interval=1 --save_interval=1
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
 
