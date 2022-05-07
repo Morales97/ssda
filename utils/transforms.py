@@ -13,7 +13,10 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 import pdb
-
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image, to_tensor
+from torchvision.utils import save_image
+import torch
+import torch.nn.functional as F
 from utils.blur import Blur
 
 def Brightness(img, v, max_v, bias=0):
@@ -213,6 +216,13 @@ def _float_parameter(v, max_v):
 def _int_parameter(v, max_v):
     return int(v * max_v / 10)
 
+
+
+
 if __name__ == '__main__':
-    ra = RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool())
+    image = Image.open('/Users/dani/Desktop/sample_img.jpg')
+    image = to_tensor(image)
+
+    #save_image(image_blurred, '/Users/dani/Desktop/sample_blurred.jpg')
+
     pdb.set_trace()
