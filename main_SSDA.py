@@ -148,6 +148,19 @@ def main(args, wandb):
 
                 # Forward pass for CR
                 out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
+                
+                out_weak = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
+                out_weak = torch.flatten(out_weak, end_dim=2)   # (N·H·W, C)
+                p_w = F.softmax(out_weak, dim=1).detach()    # stop gradient in weak augmentation
+
+                # Strong augmentations
+                out_str = out_strong.permute(0, 2, 3, 1)         # (N, H, W, C)
+                out_str = torch.flatten(out_str, end_dim=2)   # (N·H·W, C)
+                p_s = F.softmax(out_str, dim=1)  
+
+                dist = torch.sqrt(torch.pow(p_w - p_s, 2))
+                dist = dist.sum(axis=1)
+                print(dist.mean())
                 #loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
