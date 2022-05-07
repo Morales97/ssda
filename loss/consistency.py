@@ -230,7 +230,6 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
 
 def cr_L2(p_w, p_s):
     l2_norm = torch.linalg.norm(p_w-p_s, dim=1).mean() 
-    print(l2_norm)  
     return l2_norm, 100
 
 def custom_kl_div(prediction, target):
