@@ -327,8 +327,7 @@ def main(args, wandb):
             
             
         if step >= args.steps:
-            if args.ema:
-                _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
+            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
             break
 
 
@@ -353,15 +352,14 @@ def _forward(args, model, images_s, images_t):
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
     if args.dsbn:
         if args.cr_ema:
-            # warmup removed
-            with ema.average_parameters() and torch.no_grad():
+            with ema.average_parameters():
                 outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
         else:
             outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
         outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
     else:
         if args.cr_ema:
-            with ema.average_parameters() and torch.no_grad():
+            with ema.average_parameters():
                 outputs_w = model(images_weak)     # (N, C, H, W)
         else:
             outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
