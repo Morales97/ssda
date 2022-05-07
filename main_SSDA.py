@@ -148,7 +148,7 @@ def main(args, wandb):
 
                 # Forward pass for CR
                 out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
-                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
+                #loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
