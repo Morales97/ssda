@@ -16,9 +16,10 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     out_s = torch.flatten(out_s, end_dim=2)   # (N·H·W, C)
     p_s = F.softmax(out_s, dim=1)  
 
-    #dist = torch.sqrt(torch.pow(p_w - p_s, 2))
-    #dist = dist.sum(axis=1)
-    #print(dist.mean())
+    dist = torch.sqrt(torch.pow(p_w - p_s, 2))
+    dist = dist.sum(axis=1)
+    print(dist.mean())
+    print(torch.norm(p_w-p_s))
     #pdb.set_trace()
 
     if cr_type == 'ce':
@@ -236,6 +237,7 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
 def cr_L2(p_w, p_s):
     dist = torch.sqrt(torch.pow(p_w - p_s, 2))
     dist = dist.sum(axis=1)
+
     #print(dist.mean())
     #pdb.set_trace()
     return dist.mean(), 100
