@@ -236,7 +236,7 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
 def cr_L2(p_w, p_s):
     dist = torch.sqrt(torch.pow(p_w - p_s, 2))
     dist = dist.sum(axis=1)
-    print(dist.mean())
+    #print(dist.mean())
     #pdb.set_trace()
     return dist.mean(), 100
 

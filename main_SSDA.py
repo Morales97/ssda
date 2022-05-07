@@ -161,7 +161,7 @@ def main(args, wandb):
                 dist = torch.sqrt(torch.pow(p_w - p_s, 2))
                 dist = dist.sum(axis=1)
                 print(dist.mean())
-                #loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
+                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
                 assert args.n_augmentations >= 1 and not args.dsbn
