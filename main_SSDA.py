@@ -108,6 +108,11 @@ def main(args, wandb):
         if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
 
+        if args.cr is not None or args.alonso_contrast or args.ent_min:
+            if step % (len(target_loader_unl)-1) == 0:
+                data_iter_t_unl = iter(target_loader_unl)
+            images_t_unl = next(data_iter_t_unl)
+
         images_s, labels_s = next(data_iter_s)
         images_t, labels_t = next(data_iter_t)
 
@@ -115,26 +120,19 @@ def main(args, wandb):
         labels_s = labels_s.cuda()
         images_t = images_t.cuda()
         labels_t = labels_t.cuda()
+        
+        # CutMix
+        if args.cutmix_sup:
+            images_s, images_t, labels_s, labels_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
 
+        # LAB colorspace transform
         if args.lab_color:
             images_s = lab_transform(images_s, images_t)
-
-        if args.cr is not None or args.alonso_contrast or args.ent_min:
-            if step % (len(target_loader_unl)-1) == 0:
-                data_iter_t_unl = iter(target_loader_unl)
-            
-            images_t_unl = next(data_iter_t_unl)
-
 
         start_ts = time.time()
         model.train()
 
         # Forward pass
-        images_s, images_t, labels_s, labels_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
-        save_image(images_s, 'cut_s.jpg')
-        save_image(images_t, 'cut_t.jpg')
-        pdb.set_trace()
-
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
