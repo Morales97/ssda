@@ -129,6 +129,11 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
+        images_s, images_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
+        save_image(images_s, 'cut_s.jpg')
+        save_image(images_t, 'cut_t.jpg')
+        pdb.set_trace()
+        
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
@@ -349,6 +354,23 @@ def _forward(args, model, images_s, images_t):
 
     return out_s, out_t, outputs_s, outputs_t
 
+def _cutmix(args, images_s, images_t, labels_s, labels_t):
+    assert size == 'tiny'
+    assert args.batch_size_s == args.batch_size_tl
+    
+    mask_generator = BoxMaskGenerator((0.25, 0.25))       
+    #mask = mask_generator.generate_params(args.batch_size_s, (32,64))  # (B, 1, H, W)
+    mask = mask_generator.generate_params(args.batch_size_s, (256,512))  # (B, 1, H, W)
+    #up_mask = torch.round(F.interpolate(torch.Tensor(mask), size=(256,512), mode="bilinear", align_corners=False))
+
+    images_s = images_s * up_mask + images_t * (1-up_mask)
+    images_t = images_t * up_mask + images_s * (1-up_mask)   
+
+    #images_s = images_s * up_mask + images_t * (1-up_mask)
+    #images_t = images_t * up_mask + images_s * (1-up_mask)    
+    return images_s, images_t, mask
+
+
 
 def _forward_cr(args, model, ema, images_weak, images_strong, step):
     if args.dsbn:
@@ -374,6 +396,8 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
         out_strong = outputs_strong
 
     return out_w, out_strong
+
+
 
 
 def _log_validation(model, val_loader, loss_fn, step, wandb):
