@@ -114,7 +114,7 @@ def _cutmix_output(args, images, out):
     
     # Generate masks
     mask_generator = BoxMaskGenerator((0.25, 0.25))       
-    mask = mask_generator.generate_params(args.batch_size_tu, (32,64))  # (B, 1, H, W)
+    mask = mask_generator.generate_params(args.batch_size_tu // 2, (32,64))  # (B, 1, H, W)
     mask = torch.Tensor(mask).to('cuda')
     up_mask = torch.round(F.interpolate(mask, size=(256,512), mode="bilinear", align_corners=False))
 
