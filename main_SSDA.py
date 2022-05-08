@@ -363,7 +363,7 @@ def _cutmix(args, images_s, images_t, labels_s, labels_t):
     #mask = mask_generator.generate_params(args.batch_size_s, (32,64))  # (B, 1, H, W)
     mask = mask_generator.generate_params(args.batch_size_s, (256,512))  # (B, 1, H, W)
     #up_mask = torch.round(F.interpolate(torch.Tensor(mask), size=(256,512), mode="bilinear", align_corners=False))
-    up_mask = torch.Tensor(mask)
+    up_mask = torch.Tensor(mask).to('cuda')
 
     images_s = images_s * up_mask + images_t * (1-up_mask)
     images_t = images_t * up_mask + images_s * (1-up_mask)   
