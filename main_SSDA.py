@@ -133,7 +133,7 @@ def main(args, wandb):
         save_image(images_s, 'cut_s.jpg')
         save_image(images_t, 'cut_t.jpg')
         pdb.set_trace()
-        
+
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
@@ -355,7 +355,7 @@ def _forward(args, model, images_s, images_t):
     return out_s, out_t, outputs_s, outputs_t
 
 def _cutmix(args, images_s, images_t, labels_s, labels_t):
-    assert size == 'tiny'
+    assert args.size == 'tiny'
     assert args.batch_size_s == args.batch_size_tl
     
     mask_generator = BoxMaskGenerator((0.25, 0.25))       
@@ -497,7 +497,7 @@ if __name__ == '__main__':
         main(args, None)
     
 
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --cr=L2 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
