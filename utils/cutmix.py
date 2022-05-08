@@ -104,7 +104,7 @@ def _cutmix(args, images_s, images_t, labels_s, labels_t):
     up_mask = up_mask.squeeze(1)
     labels_s_cutmix = labels_s * up_mask + labels_t * (1-up_mask)
     labels_t_cutmix = labels_t * up_mask + labels_s * (1-up_mask)    
-    return images_s_cutmix, images_t_cutmix, labels_s_cutmix, labels_t_cutmix
+    return images_s_cutmix, images_t_cutmix, labels_s_cutmix.long(), labels_t_cutmix.long()
 
 
 if __name__ == '__main__':
