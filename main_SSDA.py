@@ -370,7 +370,7 @@ def _cutmix(args, images_s, images_t, labels_s, labels_t):
 
     #images_s = images_s * up_mask + images_t * (1-up_mask)
     #images_t = images_t * up_mask + images_s * (1-up_mask)    
-    return images_s, images_t, mask
+    return images_s, images_t
 
 
 
