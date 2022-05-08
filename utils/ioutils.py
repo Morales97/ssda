@@ -102,7 +102,9 @@ def get_parser():
     parser.add_argument('--eval_ema', type=boolfromstr, default=False,
                         help='For evaluate.py. Evaluate on student or on EMA teacher')  
     parser.add_argument('--cutmix_sup', type=boolfromstr, default=False,
-                        help='Mix S and T labeled data with CutMix')                      
+                        help='Mix S and T labeled data with CutMix')   
+    parser.add_argument('--cutmix_cr', type=boolfromstr, default=False,
+                        help='Mix T unlabeled data with CutMix')                      
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
