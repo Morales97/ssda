@@ -1,4 +1,8 @@
 
+'''
+from https://github.com/Britefury/cutmix-semisup-seg/blob/master/mask_gen.py
+'''
+
 import random
 
 import PIL
