@@ -29,6 +29,7 @@ from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
+from utils.cutmix import BoxMaskGenerator
 from torchvision.utils import save_image
 import pdb
 
