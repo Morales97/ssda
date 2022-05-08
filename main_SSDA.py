@@ -29,7 +29,7 @@ from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
-from utils.cutmix import _cutmix
+from utils.cutmix import _cutmix, _cutmix_output
 from torchvision.utils import save_image
 import pdb
 
@@ -148,9 +148,12 @@ def main(args, wandb):
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
-
+                save_image(images_strong, 'xx.jpg')
                 # Forward pass for CR
-                out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
+                if args.cutmix_cr:
+                    out_w, out_strong = _forward_cr_cutmix(args, model, ema, images_weak, images_strong)
+                else:
+                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
@@ -355,7 +358,7 @@ def _forward(args, model, images_s, images_t):
 
 
 
-def _forward_cr(args, model, ema, images_weak, images_strong, step):
+def _forward_cr(args, model, ema, images_weak, images_strong):
     if args.dsbn:
         if args.cr_ema:
             with ema.average_parameters():
@@ -371,17 +374,38 @@ def _forward_cr(args, model, ema, images_weak, images_strong, step):
             outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
         outputs_strong = model(images_strong)
 
-    if type(outputs_w) == OrderedDict:
-        out_w = outputs_w['out']
-        out_strong = outputs_strong['out']
-    else:
-        out_w = outputs_w
-        out_strong = outputs_strong
+    out_w = outputs_w['out']
+    out_strong = outputs_strong['out']
 
     return out_w, out_strong
 
 
+def _forward_cr_cutmix(args, model, ema, images_weak, images_strong):
+    # Get psuedo-targets 'out_w'
+    if args.dsbn:
+        if args.cr_ema:
+            with ema.average_parameters():
+                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
+        else:
+            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
+    else:
+        if args.cr_ema:
+            with ema.average_parameters():
+                outputs_w = model(images_weak)     # (N, C, H, W)
+        else:
+            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
+    out_w = outputs_w['out']
 
+    # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
+    images_strong, out_w = _cutmix_output(args, images_strong, out_w)
+    save_image(images_strong, 'xxx.jpg')
+    if args.dsbn:
+        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
+    else:
+        outputs_strong = model(images_strong)
+    out_strong = outputs_strong['out']
+    pdb.set_trace()
+    return out_w, out_strong
 
 def _log_validation(model, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)

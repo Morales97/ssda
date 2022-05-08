@@ -106,6 +106,39 @@ def _cutmix(args, images_s, images_t, labels_s, labels_t):
     labels_t_cutmix = labels_t * up_mask + labels_s * (1-up_mask)    
     return images_s_cutmix, images_t_cutmix, labels_s_cutmix.long(), labels_t_cutmix.long()
 
+def _cutmix_output(args, images, out):
+    '''
+    Apply CutMix to Images (256, 512) and to output logits (32, 64)
+    '''
+    assert args.size == 'tiny'
+    
+    # Generate masks
+    mask_generator = BoxMaskGenerator((0.25, 0.25))       
+    mask = mask_generator.generate_params(args.batch_size_tu, (32,64))  # (B, 1, H, W)
+    mask = torch.Tensor(mask).to('cuda')
+    up_mask = torch.round(F.interpolate(mask, size=(256,512), mode="bilinear", align_corners=False))
+
+    # divide batch in two
+    idx_half = images.shape[0] // 2
+    images_1 = images[:idx_half]
+    images_2 = images[idx_half:]
+    out_1 = out[:idx_half]
+    out_2 = out[idx_half:]
+    assert images_1.shape[0] == images_2.shape[0] 
+
+    # CutMix images
+    images_1_cutmix = images_1 * up_mask + images_2 * (1-up_mask)
+    images_2_cutmix = images_2 * up_mask + images_1 * (1-up_mask)   
+    images_cutmix = torch.cat((images_1_cutmix, images_2_cutmix), dim=0)
+
+    # CutMix output logits
+    mask = mask.squeeze(1)
+    out_1_cutmix = out_1 * mask + out_2 * (1-mask)
+    out_2_cutmix = out_2 * mask + out_1 * (1-mask)    
+    out_cutmix = torch.cat((out_1_cutmix, out_2_cutmix), dim=0)
+
+    return images_cutmix, out_cutmix
+
 
 if __name__ == '__main__':
     image = Image.open('/Users/dani/Desktop/sample_img.jpg')
