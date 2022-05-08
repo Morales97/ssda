@@ -29,7 +29,7 @@ from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
-from utils.cutmix import BoxMaskGenerator
+from utils.cutmix import _cutmix
 from torchvision.utils import save_image
 import pdb
 
@@ -130,7 +130,7 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
-        images_s, images_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
+        images_s, images_t, labels_s, labels_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
         save_image(images_s, 'cut_s.jpg')
         save_image(images_t, 'cut_t.jpg')
         pdb.set_trace()
@@ -354,25 +354,6 @@ def _forward(args, model, images_s, images_t):
         out_t = outputs_t
 
     return out_s, out_t, outputs_s, outputs_t
-
-def _cutmix(args, images_s, images_t, labels_s, labels_t):
-    assert args.size == 'tiny'
-    assert args.batch_size_s == args.batch_size_tl
-    
-    mask_generator = BoxMaskGenerator((0.25, 0.25))       
-    #mask = mask_generator.generate_params(args.batch_size_s, (32,64))  # (B, 1, H, W)
-    mask = mask_generator.generate_params(args.batch_size_s, (256,512))  # (B, 1, H, W)
-    #up_mask = torch.round(F.interpolate(torch.Tensor(mask), size=(256,512), mode="bilinear", align_corners=False))
-    up_mask = torch.Tensor(mask).to('cuda')
-
-    images_s_cutmix = images_s * up_mask + images_t * (1-up_mask)
-    images_t_cutmix = images_t * up_mask + images_s * (1-up_mask)   
-
-    up_mask = up_mask.squeeze(1)
-    labels_s_cutmix = labels_s * up_mask + labels_t * (1-up_mask)
-    labels_t_cutmix = labels_t * up_mask + labels_s * (1-up_mask)    
-    pdb.set_trace()
-    return images_s_cutmix, images_t_cutmix, labels_s_cutmix, labels_t_cutmix
 
 
 
