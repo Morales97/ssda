@@ -148,7 +148,6 @@ def main(args, wandb):
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
-                save_image(images_strong, 'xx.jpg')
                 # Forward pass for CR
                 if args.cutmix_cr:
                     out_w, out_strong = _forward_cr_cutmix(args, model, ema, images_weak, images_strong)
@@ -398,13 +397,11 @@ def _forward_cr_cutmix(args, model, ema, images_weak, images_strong):
 
     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
     images_strong, out_w = _cutmix_output(args, images_strong, out_w)
-    save_image(images_strong, 'xxx.jpg')
     if args.dsbn:
         outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
     else:
         outputs_strong = model(images_strong)
     out_strong = outputs_strong['out']
-    pdb.set_trace()
     return out_w, out_strong
 
 def _log_validation(model, val_loader, loss_fn, step, wandb):

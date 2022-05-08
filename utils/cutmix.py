@@ -126,7 +126,6 @@ def _cutmix_output(args, images, out):
     assert images_1.shape[0] == images_2.shape[0] 
 
     # CutMix images
-    pdb.set_trace()
     images_1_cutmix = images_1 * mask + images_2 * (1-mask)
     images_2_cutmix = images_2 * mask + images_1 * (1-mask)   
     images_cutmix = torch.cat((images_1_cutmix, images_2_cutmix), dim=0)
