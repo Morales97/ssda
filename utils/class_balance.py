@@ -7,5 +7,5 @@ def get_class_weights(dataloader, n_classes=19):
 
     for _, labels in dataloader:
         for c in range(n_classes):
-            class_freq += (labels == c).sum()
+            class_freq[c] += (labels == c).sum()
         pdb.set_trace()
