@@ -5,7 +5,7 @@ import time
 def get_class_weights(dataloader, n_classes=19, precomputed=None):
 
     if precomputed == 'gta_tiny':
-        class_weight =
+        class_weight = None
         return class_weight
 
     ts = time.time()
