@@ -46,7 +46,7 @@ def main(args, wandb):
     # Load data
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
-    get_class_weights(target_loader)
+    get_class_weights(source_loader)
 
     # Load model
     model = get_model(args)
