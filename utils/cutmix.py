@@ -103,6 +103,9 @@ def _cutmix(args, images_s, images_t, labels_s, labels_t):
     #up_mask = torch.round(F.interpolate(torch.Tensor(mask), size=(256,512), mode="bilinear", align_corners=False))
     up_mask = torch.Tensor(mask).to('cuda')
 
+    print(images_s_cutmix.shape)
+    print(up_mask.shape)
+    print(labels_s_cutmix.shape)
     images_s_cutmix = images_s * up_mask + images_t * (1-up_mask)
     images_t_cutmix = images_t * up_mask + images_s * (1-up_mask)   
 
