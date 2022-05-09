@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=100cscw
+#SBATCH --job-name=100dcw
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
