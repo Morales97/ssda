@@ -12,9 +12,15 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None):
     ts = time.time()
     class_freq = np.zeros(n_classes)
 
+    tot_labels = 0
     for _, labels in dataloader:
         for c in range(n_classes):
             class_freq[c] += (labels == c).sum()
+        tot_labels += labels.shape[0]
+        if tot_labels % 100:
+            print(tot_labels)
+        if tot_labels > 2500:   # 2500 GTA labels (shuffled, 10% of dataset) are enough
+            break
     
     class_freq /= class_freq.sum()
     class_weight = np.sqrt(np.median(class_freq) / class_freq)
