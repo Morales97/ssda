@@ -17,7 +17,7 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None):
         for c in range(n_classes):
             class_freq[c] += (labels == c).sum()
         tot_labels += labels.shape[0]
-        if tot_labels % 100:
+        if tot_labels % 100 == 0:
             print(tot_labels)
         if tot_labels > 2500:   # 2500 GTA labels (shuffled, 10% of dataset) are enough
             break
