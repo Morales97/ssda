@@ -27,6 +27,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
+from utils.class_balance import get_class_weights
 
 from torchvision.utils import save_image
 import pdb
@@ -44,6 +45,11 @@ def main(args, wandb):
     # Load data
     _, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
+    n_classes = val_loader.dataset.n_classes
+    class_weigth_t = np.ones(n_classes)
+    if args.class_weight:
+        class_weigth_t = get_class_weights(target_loader)
+
     # Load model
     model = get_model(args)
     model.cuda()
@@ -121,7 +127,7 @@ def main(args, wandb):
 
         # *** Cross Entropy ***
         loss_s = 0
-        loss_t = loss_fn(out_t, labels_t)
+        loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
@@ -372,4 +378,4 @@ if __name__ == '__main__':
         main(args, None)
     
 
-# python main_SemiSup.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=True --warmup_step=0
+# python main_SemiSup.py --net=deeplabv3_rn50 --wandb=False --class_weight=True --alonso_contrast=True --warmup_step=0

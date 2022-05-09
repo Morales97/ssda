@@ -2,7 +2,11 @@ import numpy as np
 import pdb 
 import time
 
-def get_class_weights(dataloader, n_classes=19):
+def get_class_weights(dataloader, n_classes=19, precomputed=None):
+
+    if precomputed == 'gta_tiny':
+        class_weight =
+        return class_weight
 
     ts = time.time()
     class_freq = np.zeros(n_classes)
@@ -14,7 +18,8 @@ def get_class_weights(dataloader, n_classes=19):
     class_freq /= class_freq.sum()
     class_weight = np.sqrt(np.median(class_freq) / class_freq)
     print('Class weighting time [s]: ' + str(time.time()-ts))
-    pdb.set_trace()
+    print(class_weight.round(2))
+    return class_weight
 
 # weights rounded to 2 for 100 CS samples (seed 1)
 # array([0.16, 0.37, 0.21, 0.87, 1.03, 0.89, 2.24, 1.28, 0.24, 0.93, 0.45, 1.  , 2.79, 0.39, 1.8 , 2.35, 1.97, 5.57, 1.99])
