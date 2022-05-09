@@ -45,7 +45,6 @@ def main(args, wandb):
     
     # Load data
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
-    class_weigth_s = get_class_weights(source_loader)
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
