@@ -45,8 +45,7 @@ def main(args, wandb):
     # Load data
     _, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
-    n_classes = val_loader.dataset.n_classes
-    class_weigth_t = np.ones(n_classes)
+    class_weigth_t = None
     if args.class_weight:
         class_weigth_t = get_class_weights(target_loader)
 
