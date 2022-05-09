@@ -7,6 +7,7 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None):
 
     if precomputed == 'gta_tiny':
         class_weight = torch.Tensor([0.1802,  0.381,   0.2665,  0.7628,  1.2932,  1, 2.9145,  3.6078,  0.3848, 0.7138,  0.3473,  1.6041,  5.053,   0.5927,  0.9344, 1.6577,  3.8594,  5.357, 12.3351])
+        print('Retreived GTA class weights')
         return class_weight.to('cuda')
 
     ts = time.time()
