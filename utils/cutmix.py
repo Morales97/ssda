@@ -89,12 +89,17 @@ class BoxMaskGenerator ():
 
 
 def _cutmix(args, images_s, images_t, labels_s, labels_t):
-    assert args.size == 'tiny'
+    if args.size == 'tiny':
+        size = (256, 512)
+    elif args.size == 'small':
+        size = (512, 1024)
+    else:
+        raise Exception('Size not supported')
     assert args.batch_size_s == args.batch_size_tl
     
     mask_generator = BoxMaskGenerator((0.25, 0.25))       
     #mask = mask_generator.generate_params(args.batch_size_s, (32,64))  # (B, 1, H, W)
-    mask = mask_generator.generate_params(args.batch_size_s, (256,512))  # (B, 1, H, W)
+    mask = mask_generator.generate_params(args.batch_size_s, size)  # (B, 1, H, W)
     #up_mask = torch.round(F.interpolate(torch.Tensor(mask), size=(256,512), mode="bilinear", align_corners=False))
     up_mask = torch.Tensor(mask).to('cuda')
 
@@ -110,11 +115,16 @@ def _cutmix_output(args, images, out):
     '''
     Apply CutMix to Images (B, 3, 256, 512) and to upsampled output logits (B, n_classes, 256, 512)
     '''
-    assert args.size == 'tiny'
+    if args.size == 'tiny':
+        size = (256, 512)
+    elif args.size == 'small':
+        size = (512, 1024)
+    else:
+        raise Exception('Size not supported')
     
     # Generate masks
     mask_generator = BoxMaskGenerator((0.25, 0.25))       
-    mask = mask_generator.generate_params(args.batch_size_tu // 2, (256,512))  # (B, 1, H, W)
+    mask = mask_generator.generate_params(args.batch_size_tu // 2, size)  # (B, 1, H, W)
     mask = torch.Tensor(mask).to('cuda')
 
     # divide batch in two
