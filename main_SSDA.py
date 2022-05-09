@@ -28,7 +28,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
-
+from utils.class_balance import get_class_weights
 from utils.cutmix import _cutmix, _cutmix_output
 from torchvision.utils import save_image
 import pdb
@@ -46,6 +46,8 @@ def main(args, wandb):
     # Load data
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     
+    get_class_weights(target_loader)
+
     # Load model
     model = get_model(args)
     model.cuda()
