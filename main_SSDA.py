@@ -530,8 +530,8 @@ if __name__ == '__main__':
     else:
         main(args, None)
 
-    if True:
-        cmd = 'sbatch toy_job.sh'
+    if not args.final_job:
+        cmd = 'sbatch scitas_run_resume.sh'
         status, output = subprocess.getstatusoutput(cmd)
     
 
