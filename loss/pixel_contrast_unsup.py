@@ -306,6 +306,7 @@ class AlonsoContrastiveLearner:
 
         if len(mask.shape) == 2:        # batch size of 1, only two dimensions
             mask = mask.unsqueeze(0)    # Add batch dimension 
+            pseudo_lbl_down = pseudo_lbl_down.unsqueeze(0)
 
         pred_tu = pred_tu.permute(0, 2, 3, 1)
         pred_tu = pred_tu[mask, ...]
