@@ -13,6 +13,8 @@ def get_parser():
                         help='Name of the experiment for wandb')
     parser.add_argument('--steps', type=int, default=5000, metavar='N',
                         help='maximum number of iterations to train')
+    parser.add_argument('--steps_job', type=int, default=0,
+                        help='maximum number of iterations in one slurm job')
     parser.add_argument('--wd', type=float, default=0.0005,
                         help='Weight decay used by optimizer')
     parser.add_argument('--momentum', type=float, default=0.9,

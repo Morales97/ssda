@@ -32,6 +32,8 @@ from utils.class_balance import get_class_weights
 from utils.cutmix import _cutmix, _cutmix_output
 from torchvision.utils import save_image
 import pdb
+import subprocess
+
 
 
 def main(args, wandb):
@@ -78,6 +80,11 @@ def main(args, wandb):
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
+
+    if args.steps_job == 0:
+        job_step_limit = args.steps
+    else:
+        job_step_limit = start_step + args.steps_job    # set the maximum steps in this job
 
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
@@ -321,7 +328,7 @@ def main(args, wandb):
         
         # Save checkpoint
         if step % args.save_interval == 0:
-            ckpt_name = 'checkpoint_' + args.expt_name + '.pth.tar'
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + args.seed + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
@@ -344,7 +351,19 @@ def main(args, wandb):
                 best_mIoU = score['mIoU']
             
             
-        if step >= args.steps:
+        if step >= job_step_limit:
+            # Save checkpoint
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + args.seed + '.pth.tar'
+            if args.save_model:
+                torch.save({
+                    'model_state_dict' : model.state_dict(),
+                    'ema_state_dict' : ema.state_dict(),
+                    'optimizer_state_dict' : optimizer.state_dict(),
+                    'step' : step,
+                }, os.path.join(args.save_dir, ckpt_name))
+                print('Checkpoint saved.')
+
+            # Compute EMA teacher accuracy
             _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
             break
 
@@ -510,6 +529,10 @@ if __name__ == '__main__':
         wandb.finish()
     else:
         main(args, None)
+
+    if True:
+        cmd = 'sbatch toy_job.sh'
+        status, output = subprocess.getstatusoutput(cmd)
     
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cutmix_cr=True --cr=kl
