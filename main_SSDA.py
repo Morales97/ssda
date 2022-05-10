@@ -328,7 +328,7 @@ def main(args, wandb):
         
         # Save checkpoint
         if step % args.save_interval == 0:
-            ckpt_name = 'checkpoint_' + args.expt_name + '_' + args.seed + '.pth.tar'
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
@@ -353,7 +353,7 @@ def main(args, wandb):
             
         if step >= job_step_limit:
             # Save checkpoint
-            ckpt_name = 'checkpoint_' + args.expt_name + '_' + args.seed + '.pth.tar'
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
