@@ -108,9 +108,7 @@ def get_parser():
     parser.add_argument('--cutmix_cr', type=boolfromstr, default=False,
                         help='Mix T unlabeled data with CutMix')  
     parser.add_argument('--class_weight', type=boolfromstr, default=False,
-                        help='Use class weighting in the loss function')   
-    parser.add_argument('--final_job', type=boolfromstr, default=True,
-                        help='Final job to complete the run')                      
+                        help='Use class weighting in the loss function')                   
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],

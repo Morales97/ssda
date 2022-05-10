@@ -531,9 +531,6 @@ if __name__ == '__main__':
     else:
         main(args, None)
 
-    if not args.final_job:
-        cmd = 'sbatch resume_scitas.sh'
-        status, output = subprocess.getstatusoutput(cmd)
     
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cutmix_cr=True --cr=kl
