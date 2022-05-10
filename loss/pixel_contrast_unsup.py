@@ -219,6 +219,9 @@ class AlonsoContrastiveLearner:
             mask = ((pred_s_down == labels_s_down).float() * (prob_s_down > 0.95).float()).bool() # (B, 32, 64)
             labels_s_down_selected = labels_s_down[mask]
 
+            if len(mask.shape) == 2:        # batch size of 1, only two dimensions
+                mask = mask.unsqueeze(0)    # Add batch dimension 
+
             proj_s = proj_s.permute(0,2,3,1)    # (B, 32, 64, C)
             proj_s_selected = proj_s[mask, :]
             
@@ -300,6 +303,9 @@ class AlonsoContrastiveLearner:
         threshold = 0.9
         mask = prob_down > threshold
         mask = mask * (pseudo_lbl_down != ignore_label)    # this is legacy from Alonso et al, but might be useful if we introduce zooms and crops
+
+        if len(mask.shape) == 2:        # batch size of 1, only two dimensions
+            mask = mask.unsqueeze(0)    # Add batch dimension 
 
         pred_tu = pred_tu.permute(0, 2, 3, 1)
         pred_tu = pred_tu[mask, ...]
