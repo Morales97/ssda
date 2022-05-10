@@ -191,6 +191,9 @@ class AlonsoContrastiveLearner:
         mask = ((pred_t_down == labels_t_down).float() * (prob_t_down > 0.95).float()).bool() # (B, 32, 64)
         labels_t_down_selected = labels_t_down[mask]
 
+        if len(mask.shape) == 2:        # batch size of 1, only two dimensions
+            mask = mask.unsqueeze(0)    # Add batch dimension 
+
         proj_t = proj_t.permute(0,2,3,1)    # (B, 32, 64, C)
         proj_t_selected = proj_t[mask, :]
         
