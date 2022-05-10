@@ -70,4 +70,5 @@ def main(args, wandb):
 if __name__ == '__main__':
     args = parse_args()
     wandb = None
-    main(args, wandb)
+    #main(args, wandb)
+    print('Launched test_loader.py')
