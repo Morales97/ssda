@@ -20,6 +20,8 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None):
         tot_labels += labels.shape[0]
         if tot_labels % 100 == 0:
             print(tot_labels)
+        if tot_labels % 2500 == 0:
+            break
         
     
     class_freq /= class_freq.sum()
