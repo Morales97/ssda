@@ -1,5 +1,7 @@
 #! /bin/bash
 # from https://hpc.nih.gov/docs/job_dependencies.html
+#SBATCH --qos=gpu_free
+#SBATCH --gres=gpu:1
 
 # first job - no dependencies
 jid1=$(sbatch toy_job.sh)
