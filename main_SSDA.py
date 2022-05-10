@@ -76,7 +76,8 @@ def main(args, wandb):
                 ema.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
-            print('Resuming from train step {}'.format(start_step))
+            print('*** Loading checkpoint from ', args.resume)
+            print('*** Resuming from train step {}'.format(start_step))
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -531,7 +532,7 @@ if __name__ == '__main__':
         main(args, None)
 
     if not args.final_job:
-        cmd = 'sbatch scitas_run_resume.sh'
+        cmd = 'sbatch resume_scitas.sh'
         status, output = subprocess.getstatusoutput(cmd)
     
 
