@@ -303,24 +303,25 @@ def main(args, wandb):
         
         # Save checkpoint
         if step % args.save_interval == 0:
+            ckpt_name = 'checkpoint_' + args.expt_name + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
                     'ema_state_dict' : ema.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
-                }, os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                }, os.path.join(args.save_dir, ckpt_name))
                 print('Checkpoint saved.')
                 
                 # DM. save model as wandb artifact
                 model_artifact = wandb.Artifact('model_{}'.format(step), type='model')
-                model_artifact.add_file(os.path.join(args.save_dir, 'checkpoint.pth.tar'))
+                model_artifact.add_file(os.path.join(args.save_dir, ckpt_name))
                 wandb.log_artifact(model_artifact)
 
             if score['mIoU'] > best_mIoU:
                 if args.save_model:
                     shutil.copyfile(
-                        os.path.join(args.save_dir, 'checkpoint.pth.tar'),
+                        os.path.join(args.save_dir, ckpt_name),
                         os.path.join(args.save_dir, 'model-best.pth.tar'))
                 best_mIoU = score['mIoU']
             
