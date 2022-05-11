@@ -276,7 +276,7 @@ class cityscapesDataset(data.Dataset):
                 # get image
                 img_path = img_path.rstrip()
                 img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-                img = self.transforms(img)[0].unsqueeze(0).cuda()
+                img = self.transforms(img)[0].cuda()
 
                 # generate pseudolabel
                 pred = model(img)['out']
@@ -291,6 +291,7 @@ class cityscapesDataset(data.Dataset):
                     img_path.split(os.sep)[-2],
                     os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
                 )
+                pdb.set_trace()
                 pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
                 pseudo_lbl = Image.fromarray(pseudo_lbl)
                 pseudo_lbl.save(lbl_path)
