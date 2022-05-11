@@ -122,6 +122,8 @@ def generate_pseudolabels(model, ema, t_unlbl_loader, tau=0.9, ignore_index=250)
                 pseudolabels = torch.cat([pseudolabels, pseudo_lbl])
             
             print(pseudolabels.shape[0])
+            if pseudolabels.shape[0] > 20:
+                break
         
     pdb.set_trace()
 
