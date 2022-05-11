@@ -275,11 +275,10 @@ class cityscapesDataset(data.Dataset):
                 # get image
                 img_path = img_path.rstrip()
                 img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-                img = self.transforms(img)
+                img = self.transforms(img).unsqueeze(0)
 
                 # generate pseudolabel
                 pred = model(img)['out']
-                pdb.set_trace()
                 probs = F.softmax(pred, dim=1)
                 confidence, pseudo_lbl = torch.max(probs, axis=1)
                 pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)
