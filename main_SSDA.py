@@ -352,7 +352,7 @@ def main(args, wandb):
                 best_mIoU = score['mIoU']
             
             
-        if step >= job_step_limit:
+        if step >= job_step_limit or step >= args.steps:
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
