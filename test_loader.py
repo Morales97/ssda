@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     source_loader, target_loader, target_loader_unl, val_loader, target_dataset = get_loaders(args)
 
-    os.makedir('data/cityscapes/pseudo_labels/test')
+    os.mkdir('./data/cityscapes/pseudo_labels/test')
     target_dataset.pseudolabel_folder = 'test_pl'
     target_dataset.generate_pseudolabels(model, ema)
 
