@@ -73,8 +73,10 @@ if __name__ == '__main__':
     wandb = None
     #main(args, wandb)
     
-    path = 'model/pretrained/KLE_PC_LAB_40k.tar'
+    path = 'model/pretrained/checkpoint_KLE1_p2.pth.tar'
     args.net = 'deeplabv2_rn101'
+    args.size='small'
+    
     model = get_model(args)
     model.cuda()
     ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
