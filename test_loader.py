@@ -26,6 +26,7 @@ from evaluation.metrics import averageMeter, runningScore
 import wandb
 import tqdm
 from model.model import get_model
+from torch_ema import ExponentialMovingAverage
 import pdb
 
 def main(args, wandb):
