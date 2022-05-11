@@ -275,7 +275,7 @@ class cityscapesDataset(data.Dataset):
                 # get image
                 img_path = img_path.rstrip()
                 img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-                img = self.transforms(img)[0].unsqueeze(0)
+                img = self.transforms(img)[0].unsqueeze(0).cuda()
 
                 # generate pseudolabel
                 pred = model(img)['out']
