@@ -99,3 +99,17 @@ def get_loaders(args, num_t_samples=2975):
 
     return s_loader, t_lbl_loader, t_unlbl_loader, val_loader #, idxs, idxs_lbl, idxs_unlbl
     
+
+def generate_pseudolabels(model, ema, t_unlbl_loader):
+
+    pseudolabels = []
+
+    model.eval()
+    with ema.average_parameters() and torch.no_grad():
+        for images in t_lbl_loader:
+            images_original = images[0].cuda()
+            pred = model(images_original)
+            probs = F.softmax(pred, dim=1)
+
+            pdb.set_trace()
+

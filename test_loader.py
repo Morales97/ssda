@@ -71,4 +71,20 @@ if __name__ == '__main__':
     args = parse_args()
     wandb = None
     #main(args, wandb)
-    print('Launched test_loader.py')
+    
+    path = 'model/pretrained/KLE_PC_LAB_40k.tar'
+    model = get_model(args)
+    model.cuda()
+    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+
+    checkpoint = torch.load(path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    if 'ema_state_dict' in checkpoint.keys():
+        ema.load_state_dict(checkpoint['ema_state_dict'])
+
+    source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+
+    generate_pseudolabels(model, ema, target_loader_unl)
+
+
