@@ -25,7 +25,7 @@ from loss.cross_entropy import cross_entropy2d
 from evaluation.metrics import averageMeter, runningScore
 import wandb
 import tqdm
-
+from model.model import get_model
 import pdb
 
 def main(args, wandb):
