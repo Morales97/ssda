@@ -5,6 +5,7 @@ import numpy as np
 import pdb 
 from PIL import Image
 import torchvision
+import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 import random
 from torch.utils import data
