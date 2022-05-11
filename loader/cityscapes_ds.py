@@ -291,7 +291,7 @@ class cityscapesDataset(data.Dataset):
                     img_path.split(os.sep)[-2],
                     os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
                 )
-                pseudo_lbl = np.asarray(pseudo_lbl, dtype=np.uint8)
+                pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
                 pseudo_lbl = Image.fromarray(pseudo_lbl)
                 pseudo_lbl.save(lbl_path)
                 pdb.set_trace()
