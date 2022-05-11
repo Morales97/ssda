@@ -107,7 +107,7 @@ def generate_pseudolabels(model, ema, t_unlbl_loader):
 
     model.eval()
     with ema.average_parameters() and torch.no_grad():
-        for images in t_lbl_loader:
+        for images in t_unlbl_loader:
             images_original = images[0].cuda()
             pred = model(images_original)
             probs = F.softmax(pred, dim=1)
