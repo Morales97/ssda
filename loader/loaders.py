@@ -99,7 +99,7 @@ def get_loaders(args, num_t_samples=2975):
     )    
     
 
-    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader #, idxs, idxs_lbl, idxs_unlbl
+    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader, t_unlbl_dataset #, idxs, idxs_lbl, idxs_unlbl
     
 
 def generate_pseudolabels(model, ema, t_unlbl_loader, tau=0.9, ignore_index=250):
