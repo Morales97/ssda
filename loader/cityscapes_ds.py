@@ -290,10 +290,9 @@ class cityscapesDataset(data.Dataset):
                     #self.pseudolabel_folder,
                     #img_path.split(os.sep)[-2],
                     './data/cityscapes/pseudo_labels/test',
-                    os.path.basename(img_path)[:-15] + ".pt",
+                    os.path.basename(img_path)[:-14] + ".pt",
                 )
-                pdb.set_trace()
-                torch.save(pseudo_lbl, lbl_path)
+                torch.save(pseudo_lbl.int(), lbl_path)
                 #pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
                 #pseudo_lbl = Image.fromarray(pseudo_lbl)
                 #pseudo_lbl.save(lbl_path)
