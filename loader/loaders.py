@@ -4,6 +4,7 @@ from loader.cityscapes_ds import cityscapesDataset
 from loader.gta_ds import gtaDataset
 import pdb
 import torch
+import torch.nn.functional as F
 
 
 def get_loaders(args, num_t_samples=2975):
