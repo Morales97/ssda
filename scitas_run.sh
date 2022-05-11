@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=klpccw
+#SBATCH --job-name=cepc
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,8 +19,8 @@
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_no_ema_no_grad --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --warmup_steps=5000
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_oh_0.1 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl_oh --lmbda=0.1
 
-#python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --size=small --expt_name=CE_p2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=ce --resume=expts/tmp_last/checkpoint_CE_3.pth.tar
-python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --project=GTA_to_CS_small --size=small --expt_name=KL_pc_cw_p2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --class_weight=True --resume=expts/tmp_last/checkpoint_KL_pc_cw.pth.tar
+python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --size=small --expt_name=CE_pc --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=ce --pixel_contrast=True --pc_mixed=True 
+#python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --project=GTA_to_CS_small --size=small --expt_name=KL_pc_cw_p2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --class_weight=True --resume=expts/tmp_last/checkpoint_KL_pc_cw.pth.tar
 #python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --size=small --expt_name=CE_full_bs1_p2 --net=deeplabv2_rn101 --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --resume=expts/tmp_last/checkpoint_CE_full_bs1.pth.tar
 #python main_SSDA.py --save_model=False --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=5000 --project=GTA_to_CS_small --size=small --expt_name=KL_full_equip_v2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --cutmix_sup=True --cutmix_cr=True --resume=expts/tmp_last/
 #python main_SemiSup.py --save_model=False --seed=1 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --expt_name=SS_KLE_alo_tau0_cw --net=deeplabv2_rn101 --size=small --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --class_weight=True --cr=kl --alonso_contrast=full #--pixel_contrast=True --pc_mixed=True 
