@@ -353,6 +353,9 @@ def main(args, wandb):
             
             
         if step >= job_step_limit or step >= args.steps:
+            # Compute EMA teacher accuracy
+            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
+
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
@@ -363,9 +366,6 @@ def main(args, wandb):
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
                 print('Checkpoint saved.')
-
-            # Compute EMA teacher accuracy
-            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
             break
 
 
