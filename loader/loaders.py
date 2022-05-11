@@ -104,7 +104,7 @@ def get_loaders(args, num_t_samples=2975):
 
 def generate_pseudolabels(model, ema, t_unlbl_loader, tau=0.9, ignore_index=250):
 
-    pseudolabels = []
+    pseudolabels = None
 
     model.eval()
     with ema.average_parameters() and torch.no_grad():
