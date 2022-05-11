@@ -90,6 +90,7 @@ if __name__ == '__main__':
 
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
 
-    generate_pseudolabels(model, ema, target_loader_unl)
+    target_loader_unl.pseudolabel_folder = 'test_pl'
+    target_loader_unl.generate_pseudolabels(model, ema)
 
 

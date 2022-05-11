@@ -63,12 +63,16 @@ class cityscapesDataset(data.Dataset):
         do_crop=False,
         hflip=True,
         strong_aug_level = 4,
-        downsample_gt = True
+        downsample_gt = True,
+        use_pseudo_labels = False,
+        pseudolabel_folder = None
     ):
         self.image_path = image_path
         self.label_path = label_path
         self.split = split
-        
+        self.use_pseudo_labels = use_pseudo_labels
+        self.pseudolabel_folder = pseudolabel_folder
+
         self.hflip = hflip
         self.do_crop = True if size == 'small' and split == 'train' else do_crop
         if size == "small":
@@ -174,13 +178,16 @@ class cityscapesDataset(data.Dataset):
         """__getitem__
         :param index:
         """
+        if self.use_pseudo_labels:
+            return _getitem_pl(index)
+
         img_path = self.files[self.split][index].rstrip()
         lbl_path = os.path.join(
             self.annotations_base,
             img_path.split(os.sep)[-2],
             os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
         )
-            
+      
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
         if self.downsample_gt:
@@ -217,6 +224,78 @@ class cityscapesDataset(data.Dataset):
 
         return img, lbl
 
+
+    def _getitem_pl(self, index):
+        img_path = self.files[self.split][index].rstrip()
+        lbl_path = os.path.join(
+            self.annotations_base,
+            img_path.split(os.sep)[-2],
+            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+        )
+      
+        # Load image and segmentation map
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        # TODO load lbl
+
+        # Data Augmentation
+        # Crop
+        if self.do_crop:
+            i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
+            img = TF.crop(img, i, j, h, w)
+            lbl = TF.crop(lbl, i, j, h, w)        
+
+        # Random horizontal flipping
+        if self.hflip and random.random() > 0.5:
+            img = TF.hflip(img)
+            lbl = TF.hflip(lbl)
+
+        img = self.transforms(img)
+        if self.unlabeled:
+            return img
+
+        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
+
+        if not np.all(classes == np.unique(lbl)):
+            print("WARN: resizing labels yielded fewer classes")
+        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
+            print("after det", classes, np.unique(lbl))
+            raise ValueError("Segmentation map contained invalid class values")
+        lbl = torch.from_numpy(lbl).long()
+
+        return img, lbl
+
+    def generate_pseudolabels(self, model, ema, tau=0.9, ignore_index=250):
+
+        model.eval()
+        with ema.average_parameters() and torch.no_grad():
+            for img_path in self.files[self.split]:
+
+                # get image
+                img_path = img_path.rstrip()
+                img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+                img = self.transforms(img)
+
+                # generate pseudolabel
+                pred = model(images_original)['out']
+                probs = F.softmax(pred, dim=1)
+                confidence, pseudo_lbl = torch.max(probs, axis=1)
+                pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)
+
+                # save pseudolabel
+                lbl_path = os.path.join(
+                    self.annotations_base,
+                    self.pseudolabel_folder,
+                    img_path.split(os.sep)[-2],
+                    os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+                )
+                pseudo_lbl = np.asarray(pseudo_lbl, dtype=np.uint8)
+                pseudo_lbl = Image.fromarray(pseudo_lbl)
+                pseudo_lbl.save(lbl_path)
+                pdb.set_trace()
+
+        
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])

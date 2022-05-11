@@ -125,5 +125,7 @@ def generate_pseudolabels(model, ema, t_unlbl_loader, tau=0.9, ignore_index=250)
             if pseudolabels.shape[0] > 20:
                 break
         
+    percent_pl = (pseudolabels != 250).sum() / pseudolabels.nelement()
+    
     pdb.set_trace()
 
