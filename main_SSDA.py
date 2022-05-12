@@ -46,8 +46,10 @@ def main(args, wandb):
     print('Seed: ', args.seed)
     
     # Load data
-    #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
-    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+    if args.pseudolabel_folder is None
+        source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+    else:
+        source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
     
     # Load model
     model = get_model(args)
@@ -79,6 +81,16 @@ def main(args, wandb):
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
             print('*** Resuming from train step {}'.format(start_step))
+            score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
+        else:
+            raise Exception('No file found at {}'.format(args.resume))
+
+    # To start next training round from the previous final model
+    if args.round_start:
+        if os.path.isfile(args.resume):
+            checkpoint = torch.load(args.resume)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            print('*** Loading model from ', args.round_start)
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))

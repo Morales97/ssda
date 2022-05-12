@@ -112,6 +112,7 @@ def get_loaders_pseudolabels(args, num_t_samples=2975):
     '''
     
     n_lbl_samples = args.target_samples
+    
     size = args.size
     assert size in ['tiny', 'small']
 
@@ -127,6 +128,7 @@ def get_loaders_pseudolabels(args, num_t_samples=2975):
         #print('*** GTA5 stylized as CS with CyCada ***')
     label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
+    pseudolabel_path_cs = os.path.join('data/cityscapes/pseudo_labels/', args.pseudolabel_folder)
 
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
