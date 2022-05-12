@@ -168,6 +168,7 @@ class cityscapesDataset(data.Dataset):
         self.ignore_index = 250
         self.class_map = dict(zip(self.valid_classes, range(19)))
         self.inverted_class_map = dict(zip(range(19), self.valid_classes))
+        self.inverted_class_map[self.ignore_index] = self.ignore_index
 
         if not self.files[split]:
             raise Exception("No files for split=[%s] found in %s" % (split, self.images_base))
