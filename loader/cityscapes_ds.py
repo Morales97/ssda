@@ -289,25 +289,24 @@ class cityscapesDataset(data.Dataset):
 
                 # save pseudolabel
                 lbl_path = os.path.join(
-                    #self.annotations_base,
-                    #self.pseudolabel_folder,
-                    #img_path.split(os.sep)[-2],
-                    './data/cityscapes/pseudo_labels/test',
+                    './data/cityscapes/pseudo_labels/,
+                    self.pseudolabel_folder,
                     os.path.basename(img_path)[:-16] + ".png",
                 )
                 pseudo_lbl = np.array(pseudo_lbl.cpu(), dtype=np.uint8)
-                print(np.unique(pseudo_lbl, return_counts=True))
-
                 pseudo_lbl = self.encode_from_trainid_to_id(pseudo_lbl)
-                print(np.unique(pseudo_lbl, return_counts=True))
                 pseudo_lbl_im = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
                 pseudo_lbl_im.save(lbl_path)
 
-                # How to load the label
-                lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True) # NOTE no need to 'encode_segmap' this label, it is already using the trainIDs!
+                # How to load the pseudolabel
+                '''
+                lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True) 
                 lbl = np.array(lbl, dtype=np.uint8)
                 lbl = self.encode_segmap(lbl)
-                print(np.unique(lbl, return_counts=True))
+                '''
+
+                # How to viz the pseudolabel
+                '''
                 lbl_col = self.decode_segmap(lbl)
                 path2 = lbl_path[:-4] + 'color.png'
                 lbl_im = Image.fromarray((lbl_col*255).astype('uint8'), 'RGB')
@@ -320,6 +319,7 @@ class cityscapesDataset(data.Dataset):
                 print(path2)
                 print(lbl_path_org)
                 pdb.set_trace()
+                '''
         
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()

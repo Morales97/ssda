@@ -88,10 +88,11 @@ if __name__ == '__main__':
     if 'ema_state_dict' in checkpoint.keys():
         ema.load_state_dict(checkpoint['ema_state_dict'])
 
-    source_loader, target_loader, target_loader_unl, val_loader, target_dataset = get_loaders(args)
+    source_loader, target_loader, target_loader_unl, val_loader, target_unlbl_dataset = get_loaders(args)
 
-    os.makedirs('data/cityscapes/pseudo_labels/test', exist_ok=True)
-    target_dataset.pseudolabel_folder = 'test_pl'
-    target_dataset.generate_pseudolabels(model, ema)
+    
+    target_unlbl_dataset.pseudolabel_folder = args.expt_name + str(args.seed)
+    os.makedirs('data/cityscapes/pseudo_labels/' + target_unlbl_dataset.pseudolabel_folder, exist_ok=True)
+    target_unlbl_dataset.generate_pseudolabels(model, ema)
 
 
