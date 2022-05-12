@@ -162,7 +162,7 @@ def main(args, wandb):
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
-        loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
+        loss_s = 0#loss_fn(out_s, labels_s, weight=class_weigth_s)
         loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
 
 
@@ -301,8 +301,9 @@ def main(args, wandb):
                     param_group['lr'] = param_group['lr'] * 0.1
 
         # Update class weights after 5% of total steps
-        if args.class_weight and step == np.floor(args.steps * 0.05):
-            class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
+        # NOTE: no noticable effect in performance. Maybe more useful in case of really scarce labels
+        #if args.class_weight and step == np.floor(args.steps * 0.05):
+        #    class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
 
         step += 1
         # Log Training
