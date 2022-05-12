@@ -289,7 +289,7 @@ class cityscapesDataset(data.Dataset):
 
                 # save pseudolabel
                 lbl_path = os.path.join(
-                    './data/cityscapes/pseudo_labels/,
+                    './data/cityscapes/pseudo_labels/',
                     self.pseudolabel_folder,
                     os.path.basename(img_path)[:-16] + ".png",
                 )
