@@ -45,6 +45,10 @@ def main(args, wandb):
     random.seed(args.seed)
     print('Seed: ', args.seed)
     
+    # Load data
+    #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+    
     # Load model
     model = get_model(args)
     model.cuda()
@@ -55,13 +59,6 @@ def main(args, wandb):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
 
-    # Load data
-    #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
-    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args, model, ema)
-
-    print('*** end')
-    return 
-    
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
