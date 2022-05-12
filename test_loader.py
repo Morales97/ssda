@@ -27,7 +27,7 @@ import wandb
 import tqdm
 from model.model import get_model
 from torch_ema import ExponentialMovingAverage
-from loader.loaders import get_loaders, generate_pseudolabels
+from loader.loaders import get_loaders
 import pdb
 
 def main(args, wandb):
