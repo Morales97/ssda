@@ -87,13 +87,13 @@ def main(args, wandb):
 
     # To start next training round from the previous final model
     if args.round_start:
-        if os.path.isfile(args.resume):
-            checkpoint = torch.load(args.resume)
+        if os.path.isfile(args.round_start):
+            checkpoint = torch.load(args.round_start)
             model.load_state_dict(checkpoint['model_state_dict'])
             print('*** Loading model from ', args.round_start)
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
-            raise Exception('No file found at {}'.format(args.resume))
+            raise Exception('No file found at {}'.format(args.round_start))
 
     if args.steps_job == 0:
         job_step_limit = args.steps
