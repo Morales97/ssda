@@ -57,8 +57,9 @@ def main(args, wandb):
 
     # Load data
     #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
-    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args, model, ema)
     pdb.set_trace()
+
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
@@ -539,5 +540,5 @@ if __name__ == '__main__':
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --warmup_steps=0
-
+# python main_SSDA.py --net=deeplabv2_rn101 --size=small --expt_name=test_pl --wandb=False --resume=model/pretrained/checkpoint_KLE1_p2.pth.tar
 
