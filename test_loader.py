@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     source_loader, target_loader, target_loader_unl, val_loader, target_dataset = get_loaders(args)
 
-    img, lbl = target_loader.test()
+    img, lbl = target_dataset.test()
     pdb.set_trace()
 
     os.makedirs('data/cityscapes/pseudo_labels/test', exist_ok=True)
