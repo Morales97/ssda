@@ -300,6 +300,10 @@ def main(args, wandb):
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
+        # Update class weights after 5% of total steps
+        if args.class_weight and (step == 100 or step == np.floor(args.steps * 0.05)):
+            class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
+
         step += 1
         # Log Training
         if step % args.log_interval == 0:
@@ -546,7 +550,7 @@ if __name__ == '__main__':
 
     
 
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cutmix_cr=True --cr=kl
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
