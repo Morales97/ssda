@@ -212,6 +212,7 @@ class cityscapesDataset(data.Dataset):
         if self.unlabeled:
             return img
 
+        return img, lbl
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         classes = np.unique(lbl)
         lbl = lbl.astype(int)
