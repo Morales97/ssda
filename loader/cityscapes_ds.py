@@ -281,7 +281,7 @@ class cityscapesDataset(data.Dataset):
                 # generate pseudolabel
                 pred = model(img)['out']
                 probs = F.softmax(pred, dim=1)
-                confidence, pseudo_lbl = torch.max(probs, axis=1)
+                confidence, pseudo_lbl = torch.max(probs, dim=1)
                 pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)
 
                 # save pseudolabel
