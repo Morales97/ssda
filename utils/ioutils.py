@@ -109,7 +109,7 @@ def get_parser():
                         help='Mix T unlabeled data with CutMix')  
     parser.add_argument('--class_weight', type=boolfromstr, default=False,
                         help='Use class weighting in the loss function')      
-    parser.add_argument('--pseudolabel_path', type=str, default=None,
+    parser.add_argument('--pseudolabel_folder', type=str, default=None,
                         help='path to folder with pseudolabels')   
     parser.add_argument('--round_start', type=str, default=None,
                         help='path to model to start with in this next training round')             
