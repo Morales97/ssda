@@ -296,22 +296,17 @@ class cityscapesDataset(data.Dataset):
                 )
                 pseudo_lbl = np.array(pseudo_lbl.cpu(), dtype=np.uint8)
                 print(np.unique(pseudo_lbl, return_counts=True))
-                #pseudo_lbl2 = self.encode_from_trainid_to_id(pseudo_lbl)
-                #a = pseudo_lbl
-                #d = self.inverted_class_map
-                #u,inv = np.unique(a,return_inverse = True)
-                #pseudo_lbl = np.array([d[x] for x in u])[inv].reshape(a.shape)
-                #pseudo_lbl = np.vectorize(self.inverted_class_map.get)(pseudo_lbl) # np.vectorize(my_dict.get)(array) -- maps every element of np array according to dict
-                #pdb.set_trace()
-                #print(np.unique(pseudo_lbl2, return_counts=True))
+
+                pseudo_lbl = self.encode_from_trainid_to_id(pseudo_lbl)
+                print(np.unique(pseudo_lbl, return_counts=True))
                 pseudo_lbl_im = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
                 pseudo_lbl_im.save(lbl_path)
-                lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
-                print(np.unique(np.array(lbl, dtype=np.uint8), return_counts=True))
+
+                # How to load the label
+                lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True) # NOTE no need to 'encode_segmap' this label, it is already using the trainIDs!
                 lbl = np.array(lbl, dtype=np.uint8)
-                #lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-                #print(np.unique(lbl, return_counts=True))
-                pdb.set_trace()                
+                lbl = self.encode_segmap(lbl)
+                print(np.unique(lbl, return_counts=True))
                 lbl_col = self.decode_segmap(lbl)
                 path2 = lbl_path[:-4] + 'color.png'
                 lbl_im = Image.fromarray((lbl_col*255).astype('uint8'), 'RGB')
@@ -355,9 +350,9 @@ class cityscapesDataset(data.Dataset):
 
     def encode_from_trainid_to_id(self, mask):
         # Put all void classes to zero
-
+        maks_orig = copy.deepcopy(mask)
         for _trainid in range(19):
-            mask[mask == _trainid] = self.inverted_class_map[_trainid]
+            mask[maks_orig == _trainid] = self.inverted_class_map[_trainid]
         return mask
 
     def encode_segmap(self, mask):
