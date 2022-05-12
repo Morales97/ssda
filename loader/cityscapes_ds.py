@@ -229,51 +229,9 @@ class cityscapesDataset(data.Dataset):
 
         return img, lbl
 
-
-    def _getitem_pl(self, index):
-        img_path = self.files[self.split][index].rstrip()
-        lbl_path = os.path.join(
-            self.annotations_base,
-            img_path.split(os.sep)[-2],
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
-        )
-      
-        # Load image and segmentation map
-        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
-        # TODO load lbl
-
-        # Data Augmentation
-        # Crop
-        if self.do_crop:
-            i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
-            img = TF.crop(img, i, j, h, w)
-            lbl = TF.crop(lbl, i, j, h, w)        
-
-        # Random horizontal flipping
-        if self.hflip and random.random() > 0.5:
-            img = TF.hflip(img)
-            lbl = TF.hflip(lbl)
-
-        img = self.transforms(img)
-        if self.unlabeled:
-            return img
-
-        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-        classes = np.unique(lbl)
-        lbl = lbl.astype(int)
-
-        if not np.all(classes == np.unique(lbl)):
-            print("WARN: resizing labels yielded fewer classes")
-        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
-            print("after det", classes, np.unique(lbl))
-            raise ValueError("Segmentation map contained invalid class values")
-        lbl = torch.from_numpy(lbl).long()
-
-        return img, lbl
-
     def generate_pseudolabels(self, model, ema, tau=0.9, ignore_index=250):
         assert self.unlabeled
-        
+
         model.eval()
         with ema.average_parameters() and torch.no_grad():
             for i, img_path in enumerate(self.files[self.split]):
