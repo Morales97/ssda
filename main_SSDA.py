@@ -58,8 +58,10 @@ def main(args, wandb):
     # Load data
     #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args, model, ema)
-    pdb.set_trace()
 
+    print('*** end')
+    return 
+    
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
