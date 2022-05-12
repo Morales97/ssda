@@ -303,8 +303,8 @@ class cityscapesDataset(data.Dataset):
                 #pseudo_lbl = np.vectorize(self.inverted_class_map.get)(pseudo_lbl) # np.vectorize(my_dict.get)(array) -- maps every element of np array according to dict
                 pdb.set_trace()
                 print(np.unique(pseudo_lbl, return_counts=True))
-                pseudo_lbl = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
-                pseudo_lbl.save(lbl_path)
+                pseudo_lbl_im = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
+                pseudo_lbl_im.save(lbl_path)
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
                 lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
                 lbl_col = self.decode_segmap(lbl)
