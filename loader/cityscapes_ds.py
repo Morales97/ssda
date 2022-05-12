@@ -304,7 +304,7 @@ class cityscapesDataset(data.Dataset):
                 #pseudo_lbl = np.vectorize(self.inverted_class_map.get)(pseudo_lbl) # np.vectorize(my_dict.get)(array) -- maps every element of np array according to dict
                 #pdb.set_trace()
                 #print(np.unique(pseudo_lbl2, return_counts=True))
-                pseudo_lbl_im = Image.fromarray(pseudo_lbl2.squeeze(0), mode='L')   
+                pseudo_lbl_im = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
                 pseudo_lbl_im.save(lbl_path)
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
                 print(np.unique(np.array(lbl, dtype=np.uint8), return_counts=True))
