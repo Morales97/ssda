@@ -46,7 +46,7 @@ def main(args, wandb):
     print('Seed: ', args.seed)
     
     # Load data
-    source_loader, target_loader, target_loader_unl, val_loader, _ = get_loaders(args)
+    source_loader, target_loader, target_loader_unl, val_loader, _, _ = get_loaders(args)
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:

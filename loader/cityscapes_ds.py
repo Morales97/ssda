@@ -10,6 +10,7 @@ import torchvision.transforms.functional as TF
 import random
 from torch.utils import data
 import copy 
+import shutil
 
 sys.path.append(os.path.abspath('..'))
 from loader.loader_utils import pil_loader
@@ -271,7 +272,8 @@ class cityscapesDataset(data.Dataset):
         return img, lbl
 
     def generate_pseudolabels(self, model, ema, tau=0.9, ignore_index=250):
-
+        assert self.unlabeled
+        
         model.eval()
         with ema.average_parameters() and torch.no_grad():
             for i, img_path in enumerate(self.files[self.split]):
@@ -325,6 +327,29 @@ class cityscapesDataset(data.Dataset):
                 '''
 
         # TODO copy the 100 labels into the same folder, so a new dataloader can be created seamlessly
+
+    def save_gt_labels(self):
+        '''
+        save ground truth labels to the pseudolabels folder
+        '''
+        assert not self.unlabeled 
+        for img_path in self.files[self.split]:
+            img_path = img_path.rstrip()
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-2],
+                os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            )
+
+            new_lbl_path = os.path.join(
+                './data/cityscapes/pseudo_labels/',
+                self.pseudolabel_folder,
+                os.path.basename(img_path)[:-16] + ".png",
+            )
+
+            shutil.copyfile(lbl_path, new_lbl_path)
+        
+        print('Saved %d target labels in pseudolabels folder.' % len(self.files[self.split]))
 
         
     def viz_cr_augment(self, index):
