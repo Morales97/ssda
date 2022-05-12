@@ -167,6 +167,7 @@ class cityscapesDataset(data.Dataset):
 
         self.ignore_index = 250
         self.class_map = dict(zip(self.valid_classes, range(19)))
+        self.inverted_class_map = dict(zip(range(19), self.valid_classes))
 
         if not self.files[split]:
             raise Exception("No files for split=[%s] found in %s" % (split, self.images_base))
@@ -292,7 +293,10 @@ class cityscapesDataset(data.Dataset):
                     './data/cityscapes/pseudo_labels/test',
                     os.path.basename(img_path)[:-16] + ".png",
                 )
-                pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
+                pseudo_lbl = np.array(pseudo_lbl.cpu(), dtype=np.uint8)
+                print(np.unique(pseudo_lbl, return_counts=True))
+                pseudo_lbl = np.vectorize(self.inverted_class_map.get)(pseudo_lbl) # np.vectorize(my_dict.get)(array) -- maps every element of np array according to dict
+                print(np.unique(pseudo_lbl, return_counts=True))
                 pseudo_lbl = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
                 pseudo_lbl.save(lbl_path)
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
