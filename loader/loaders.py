@@ -102,30 +102,4 @@ def get_loaders(args, num_t_samples=2975):
     return s_loader, t_lbl_loader, t_unlbl_loader, val_loader, t_lbl_dataset, t_unlbl_dataset #, idxs, idxs_lbl, idxs_unlbl
     
 
-def generate_pseudolabels(model, ema, t_unlbl_loader, tau=0.9, ignore_index=250):
-
-    pseudolabels = None
-
-    model.eval()
-    with ema.average_parameters() and torch.no_grad():
-        for images in t_unlbl_loader:
-            images_original = images[0].cuda()
-            pred = model(images_original)['out']
-            probs = F.softmax(pred, dim=1)
-
-            confidence, pseudo_lbl = torch.max(probs, axis=1)
-            pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)
-
-            if pseudolabels is None:
-                pseudolabels = pseudo_lbl
-            else:
-                pseudolabels = torch.cat([pseudolabels, pseudo_lbl])
-            
-            print(pseudolabels.shape[0])
-            if pseudolabels.shape[0] > 20:
-                break
-        
-    percent_pl = (pseudolabels != 250).sum() / pseudolabels.nelement()
-    
-    pdb.set_trace()
 
