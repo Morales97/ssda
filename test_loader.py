@@ -74,10 +74,12 @@ if __name__ == '__main__':
     wandb = None
     #main(args, wandb)
     
-    path = 'model/pretrained/checkpoint_KLE1_p2.pth.tar'
+    #path = 'model/pretrained/checkpoint_KLE1_p2.pth.tar'
+    path = 'model/pretrained/model_40k_KL_pc.tar '
     args.net = 'deeplabv2_rn101'
     args.size = 'small'
-    args.expt_name = 'KLE1_p2_'
+    args.seed = 3  
+    args.expt_name = 'KL_pc_40k_'
 
     model = get_model(args)
     model.cuda()
