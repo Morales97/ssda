@@ -224,7 +224,7 @@ class cityscapesDataset(data.Dataset):
             raise ValueError("Segmentation map contained invalid class values")
         lbl = torch.from_numpy(lbl).long()
         pdb.set_trace()
-        
+
         return img, lbl
 
     def __getitem__(self, index):
@@ -346,7 +346,7 @@ class cityscapesDataset(data.Dataset):
                 )
                 pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
                 pseudo_lbl = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
-                pseudo_lbl.save(lbl_path)
+                pseudo_lbl.save(lbl_path, format='L')
                 pdb.set_trace()
 
         
