@@ -52,7 +52,8 @@ def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n
             
             for c in range(n_classes):
                 class_freq[c] += (lbl == c).sum()
-    
+            pdb.set_trace()
+
     class_freq /= class_freq.sum()
     class_weight = torch.sqrt(torch.median(class_freq) / class_freq)
     print('Class weighting time [s]: ' + str(time.time()-ts))

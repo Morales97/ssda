@@ -301,7 +301,7 @@ def main(args, wandb):
                     param_group['lr'] = param_group['lr'] * 0.1
 
         # Update class weights after 5% of total steps
-        if args.class_weight and step == np.floor(args.steps * 0.05):
+        if args.class_weight and step == 10: #step == np.floor(args.steps * 0.05):
             class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
 
         step += 1
