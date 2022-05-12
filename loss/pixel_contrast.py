@@ -130,6 +130,8 @@ class PixelContrastLoss(nn.Module):
         feats = feats.permute(0, 2, 3, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
 
+        # TODO mask out ignorelabels
+
         feats_, labels_ = self._hard_anchor_sampling(feats, labels, predict)
 
         loss = self._contrastive(feats_, labels_)

@@ -162,7 +162,7 @@ def main(args, wandb):
         out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
 
         # *** Cross Entropy ***
-        loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
+        loss_s = 0#loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
         loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
 
 
