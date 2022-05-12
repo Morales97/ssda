@@ -6,30 +6,10 @@ import time
 import copy
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import DataLoader
 
 from model.model import get_model
-#from utils.eval import test
-from utils.ioutils import FormattedLogItem
-from utils.ioutils import gen_unique_name
-from utils.ioutils import get_log_str
-from utils.ioutils import parse_args
-from utils.ioutils import rm_format
-from loss.cross_entropy import cross_entropy2d
-from loss.pixel_contrast import PixelContrastLoss
-from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
-from loss.consistency import consistency_reg, cr_multiple_augs
-from loader.loaders import get_loaders, get_loaders_pseudolabels
-from evaluation.metrics import averageMeter, runningScore
-from utils.lab_color import lab_transform
-import wandb
+from loader.loaders import get_loaders, generate_pseudolabels
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
-from utils.class_balance import get_class_weights
-
-from torchvision.utils import save_image
 import pdb
 
 
