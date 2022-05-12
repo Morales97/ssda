@@ -297,12 +297,11 @@ class cityscapesDataset(data.Dataset):
                 pseudo_lbl.save(lbl_path)
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
                 lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
-                pdb.set_trace()
                 lbl_col = self.decode_segmap(lbl)
-                lbl_col.save(lbl_path[:-4] + 'color.png')
-                print(lbl_path[:-4] + 'color.png')
+                path2 = lbl_path[:-4] + 'color.png'
                 pdb.set_trace()
-
+                lbl_im = Image.fromarray(lbl_col)
+                lbl_im.save(path2)
         
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
