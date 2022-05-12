@@ -175,7 +175,7 @@ class cityscapesDataset(data.Dataset):
         """__len__"""
         return len(self.files[self.split])
 
-    def __getitem__(self, index):
+    def test(self, index=0):
         """__getitem__
         :param index:
         """
@@ -213,6 +213,44 @@ class cityscapesDataset(data.Dataset):
             return img
 
         return img, lbl
+
+    def __getitem__(self, index):
+        """__getitem__
+        :param index:
+        """
+        if self.use_pseudo_labels:
+            return _getitem_pl(index)
+
+        img_path = self.files[self.split][index].rstrip()
+        lbl_path = os.path.join(
+            self.annotations_base,
+            img_path.split(os.sep)[-2],
+            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+        )
+      
+        # Load image and segmentation map
+        img = pil_loader(img_path, self.img_size[0], self.img_size[1])
+        if self.downsample_gt:
+            lbl = pil_loader(lbl_path, self.img_size[0], self.img_size[1], is_segmentation=True)
+        else:
+            lbl = pil_loader(lbl_path, self.orig_size[0], self.orig_size[1], is_segmentation=True)
+
+        # Data Augmentation
+        # Crop
+        if self.do_crop:
+            i, j, h, w = torchvision.transforms.RandomCrop.get_params(img, self.crop_size)
+            img = TF.crop(img, i, j, h, w)
+            lbl = TF.crop(lbl, i, j, h, w)        
+
+        # Random horizontal flipping
+        if self.hflip and random.random() > 0.5:
+            img = TF.hflip(img)
+            lbl = TF.hflip(lbl)
+
+        img = self.transforms(img)
+        if self.unlabeled:
+            return img
+
         lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
         classes = np.unique(lbl)
         lbl = lbl.astype(int)

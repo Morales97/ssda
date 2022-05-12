@@ -90,9 +90,8 @@ if __name__ == '__main__':
 
     source_loader, target_loader, target_loader_unl, val_loader, target_dataset = get_loaders(args)
 
-    for img, lbl in target_loader:
-        pdb.set_trace()
-        break
+    img, lbl = target_loader.test()
+    pdb.set_trace()
 
     os.makedirs('data/cityscapes/pseudo_labels/test', exist_ok=True)
     target_dataset.pseudolabel_folder = 'test_pl'
