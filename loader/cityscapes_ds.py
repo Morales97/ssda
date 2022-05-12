@@ -354,7 +354,7 @@ class cityscapesDataset(data.Dataset):
     def encode_from_trainid_to_id(self, mask):
         # Put all void classes to zero
         for _trainid in range(19):
-            mask[mask == _trainid] = self.inverted_class_map[_validc]
+            mask[mask == _trainid] = self.inverted_class_map[_trainid]
         return mask
 
     def encode_segmap(self, mask):
