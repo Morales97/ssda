@@ -346,7 +346,7 @@ class cityscapesDataset(data.Dataset):
                 )
                 pseudo_lbl = np.asarray(pseudo_lbl.cpu(), dtype=np.uint8)
                 pseudo_lbl = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
-                pseudo_lbl.save(lbl_path, format='L')
+                pseudo_lbl.save(lbl_path)
                 pdb.set_trace()
 
         
