@@ -149,7 +149,7 @@ def main(args, wandb):
         # *** Pixel Contrastive Learning (supervised) ***
         loss_cl_s, loss_cl_t = 0, 0
         if args.pixel_contrast and step >= args.warmup_steps:
-            proj_t = outputs_t['proj']
+            proj_t = outputs_t['proj_pc']
             _, pred_t = torch.max(out_t, 1)
 
 
