@@ -274,7 +274,10 @@ class cityscapesDataset(data.Dataset):
 
         model.eval()
         with ema.average_parameters() and torch.no_grad():
-            for img_path in self.files[self.split]:
+            for i, img_path in enumerate(self.files[self.split]):
+                
+                if i % 100 == 0:
+                    print(i)
 
                 # get image
                 img_path = img_path.rstrip()
@@ -320,6 +323,9 @@ class cityscapesDataset(data.Dataset):
                 print(lbl_path_org)
                 pdb.set_trace()
                 '''
+
+        # TODO copy the 100 labels into the same folder, so a new dataloader can be created seamlessly
+
         
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()

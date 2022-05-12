@@ -76,7 +76,8 @@ if __name__ == '__main__':
     
     path = 'model/pretrained/checkpoint_KLE1_p2.pth.tar'
     args.net = 'deeplabv2_rn101'
-    args.size='small'
+    args.size = 'small'
+    args.expt_name = 'KLE1_p2_'
 
     model = get_model(args)
     model.cuda()
