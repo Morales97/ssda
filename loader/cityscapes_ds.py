@@ -297,8 +297,9 @@ class cityscapesDataset(data.Dataset):
                 pseudo_lbl.save(lbl_path)
                 pdb.set_trace()
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
-                lbl_col = decode_segmap(lbl)
+                lbl_col = self.decode_segmap(lbl)
                 lbl_col.save(lbl_path[:-4] + 'color.png')
+                print(lbl_path[:-4] + 'color.png')
                 pdb.set_trace()
 
         
