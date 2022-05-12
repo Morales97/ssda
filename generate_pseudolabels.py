@@ -68,4 +68,4 @@ if __name__ == '__main__':
     args = parse_args()
     main(args)
 
-# python generate_pseudolabels --seed=3 --size=small --expt_name=KL_pc_40k --net=deeplabv2_rn101 --resume=model/pretrained/model_40k_KL_pc.tar
+# python generate_pseudolabels.py --seed=3 --size=small --expt_name=KL_pc_40k --net=deeplabv2_rn101 --resume=model/pretrained/model_40k_KL_pc.tar
