@@ -183,15 +183,18 @@ class cityscapesDataset(data.Dataset):
         """__getitem__
         :param index:
         """
-        if self.use_pseudo_labels:
-            return _getitem_pl(index)
-
         img_path = self.files[self.split][index].rstrip()
-        lbl_path = os.path.join(
-            self.annotations_base,
-            img_path.split(os.sep)[-2],
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
-        )
+        if self.use_pseudo_labels:
+            lbl_path = os.path.join(
+                self.label_path,
+                os.path.basename(img_path)[:-16] + ".png",
+            )
+        else:
+            lbl_path = os.path.join(
+                self.annotations_base,
+                img_path.split(os.sep)[-2],
+                os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            )
       
         # Load image and segmentation map
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])

@@ -23,7 +23,7 @@ from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
-from loader.loaders import get_loaders
+from loader.loaders import get_loaders, get_loaders_pseudolabels
 from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 import wandb
@@ -45,14 +45,6 @@ def main(args, wandb):
     random.seed(args.seed)
     print('Seed: ', args.seed)
     
-    # Load data
-    source_loader, target_loader, target_loader_unl, val_loader, _, _ = get_loaders(args)
-
-    class_weigth_s, class_weigth_t = None, None
-    if args.class_weight:
-        class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
-        class_weigth_t = get_class_weights(target_loader)
-
     # Load model
     model = get_model(args)
     model.cuda()
@@ -62,6 +54,15 @@ def main(args, wandb):
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
                             weight_decay=args.wd, nesterov=True)
+
+    # Load data
+    #source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+    source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+    pdb.set_trace()
+    class_weigth_s, class_weigth_t = None, None
+    if args.class_weight:
+        class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
+        class_weigth_t = get_class_weights(target_loader)
 
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
