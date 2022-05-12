@@ -307,7 +307,7 @@ class cityscapesDataset(data.Dataset):
             shutil.copyfile(lbl_path, new_lbl_path)
             original_name = os.path.basename(img_path)[:-15] + "gtFine_labelIds.png"
             new_name = os.path.basename(img_path)[:-16] + ".png"
-            shutil.move(original_name, new_name)
+            shutil.move(new_lbl_path + original_name, new_lbl_path + new_name)
         
         print('Saved %d target labels in pseudolabels folder.' % len(self.files[self.split]))
 
