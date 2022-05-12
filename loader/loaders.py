@@ -150,7 +150,7 @@ def get_loaders_pseudolabels(args, num_t_samples=2975):
     # *** Target loader(s)
     # pseudo_dataset has 100 labels + 2875 pseudolabels
     t_pseudo_dataset = cityscapesDataset(image_path=image_path_cs, 
-                                        label_path=psuedolabel_path_cs, 
+                                        label_path=pseudolabel_path_cs, 
                                         size=size, 
                                         split='train', 
                                         use_pseudo_labels=True)      
