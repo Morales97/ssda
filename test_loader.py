@@ -72,6 +72,7 @@ def main(args, wandb):
 if __name__ == '__main__':
     args = parse_args()
     wandb = None
+    print('starting...')
     #main(args, wandb)
     
     #path = 'model/pretrained/checkpoint_KLE1_p2.pth.tar'
