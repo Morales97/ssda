@@ -46,6 +46,7 @@ def main(args):
     pseudo_lbl_path = generate_pseudolabels(args, model, ema)
 
 if __name__ == '__main__':
+    print('..')
     args = parse_args()
     main(args)
 
