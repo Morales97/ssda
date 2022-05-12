@@ -57,7 +57,7 @@ def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n
     class_freq /= class_freq.sum()
     class_weight = torch.sqrt(torch.median(class_freq) / class_freq)
     print('Class weighting time [s]: ' + str(time.time()-ts))
-    print(class_weight.round(4))
+    print(torch.round(class_weight, 4))
     return class_weight
 
 # weights rounded to 2 for 100 CS samples (seed 1)
