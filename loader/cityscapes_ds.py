@@ -209,9 +209,22 @@ class cityscapesDataset(data.Dataset):
             lbl = TF.hflip(lbl)
 
         img = self.transforms(img)
-        if self.unlabeled:
-            return img
+       
+        
+        pdb.set_trace()
+        
+        lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
+        classes = np.unique(lbl)
+        lbl = lbl.astype(int)
 
+        if not np.all(classes == np.unique(lbl)):
+            print("WARN: resizing labels yielded fewer classes")
+        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
+            print("after det", classes, np.unique(lbl))
+            raise ValueError("Segmentation map contained invalid class values")
+        lbl = torch.from_numpy(lbl).long()
+        pdb.set_trace()
+        
         return img, lbl
 
     def __getitem__(self, index):
