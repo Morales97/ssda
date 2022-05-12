@@ -93,10 +93,10 @@ if __name__ == '__main__':
 
     source_loader, target_loader, target_loader_unl, val_loader, target_lbl_dataset, target_unlbl_dataset = get_loaders(args)
 
-    
-    target_lbl_dataset.pseudolabel_folder = args.expt_name + str(args.seed)
-    target_unlbl_dataset.pseudolabel_folder = args.expt_name + str(args.seed)
-    #os.makedirs('data/cityscapes/pseudo_labels/' + target_unlbl_dataset.pseudolabel_folder, exist_ok=True)
+    pseudolabel_folder = args.expt_name + str(args.seed)
+    target_lbl_dataset.pseudolabel_folder = pseudolabel_folder
+    target_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
+    os.makedirs('data/cityscapes/pseudo_labels/' + pseudolabel_folder, exist_ok=True)
     target_lbl_dataset.save_gt_labels()
     #target_unlbl_dataset.generate_pseudolabels(model, ema)
 
