@@ -299,16 +299,16 @@ class cityscapesDataset(data.Dataset):
                 lbl = self.encode_segmap(np.array(lbl, dtype=np.uint8))
                 lbl_col = self.decode_segmap(lbl)
                 path2 = lbl_path[:-4] + 'color.png'
-                pdb.set_trace()
                 lbl_im = Image.fromarray((lbl_col*255).astype('uint8'), 'RGB')
                 lbl_im.save(path2)
                 lbl_path = os.path.join(
                     self.annotations_base,
                     img_path.split(os.sep)[-2],
-                    os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+                    os.path.basename(img_path)[:-15] + "gtFine_color.png",
                 )
                 print(path2)
                 print(lbl_path)
+                pdb.set_trace()
         
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
