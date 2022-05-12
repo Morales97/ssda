@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 import random
 from torch.utils import data
+import copy 
 
 sys.path.append(os.path.abspath('..'))
 from loader.loader_utils import pil_loader
