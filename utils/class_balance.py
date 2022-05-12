@@ -30,6 +30,35 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None):
     print(class_weight.round(4))
     return torch.Tensor(class_weight).to('cuda')
 
+def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n_classes=19):
+    '''
+    estimate target domain class weights by combining labels (L) and predictions (U)
+    '''
+    ts = time.time()
+    class_freq = np.zeros(n_classes)
+
+    # labeled data
+    for _, labels in dataloader_lbl:
+        for c in range(n_classes):
+            class_freq[c] += (labels == c).sum()
+        
+    # unlabaled data
+    class_freq = torch.Tensor(class_freq).to('cuda')
+    with ema.average_parameters() and torch.no_grad():
+        for images in dataloader_unlbl:
+            images = images[0].cuda()
+            pred = model(images)['out']
+            _, lbl = torch.max(pred, dim=1)
+            
+            for c in range(n_classes):
+                class_freq[c] += (lbl == c).sum()
+    
+    class_freq /= class_freq.sum()
+    class_weight = torch.sqrt(torch.median(class_freq) / class_freq)
+    print('Class weighting time [s]: ' + str(time.time()-ts))
+    print(class_weight.round(4))
+    return class_weight
+
 # weights rounded to 2 for 100 CS samples (seed 1)
 # array([0.16, 0.37, 0.21, 0.87, 1.03, 0.89, 2.24, 1.28, 0.24, 0.93, 0.45, 1.  , 2.79, 0.39, 1.8 , 2.35, 1.97, 5.57, 1.99])
 

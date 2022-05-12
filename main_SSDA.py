@@ -28,7 +28,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
-from utils.class_balance import get_class_weights
+from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
 from torchvision.utils import save_image
 import pdb
@@ -46,7 +46,7 @@ def main(args, wandb):
     print('Seed: ', args.seed)
     
     # Load data
-    if args.pseudolabel_folder is None
+    if args.pseudolabel_folder is None:
         source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
     else:
         source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
