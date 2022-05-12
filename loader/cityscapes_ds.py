@@ -296,13 +296,14 @@ class cityscapesDataset(data.Dataset):
                 )
                 pseudo_lbl = np.array(pseudo_lbl.cpu(), dtype=np.uint8)
                 print(np.unique(pseudo_lbl, return_counts=True))
+                pseudo_lbl = self.encode_from_trainid_to_id(pseudo_lbl)
                 #a = pseudo_lbl
                 #d = self.inverted_class_map
                 #u,inv = np.unique(a,return_inverse = True)
                 #pseudo_lbl = np.array([d[x] for x in u])[inv].reshape(a.shape)
                 #pseudo_lbl = np.vectorize(self.inverted_class_map.get)(pseudo_lbl) # np.vectorize(my_dict.get)(array) -- maps every element of np array according to dict
                 #pdb.set_trace()
-                #print(np.unique(pseudo_lbl, return_counts=True))
+                print(np.unique(pseudo_lbl, return_counts=True))
                 pseudo_lbl_im = Image.fromarray(pseudo_lbl.squeeze(0), mode='L')   
                 pseudo_lbl_im.save(lbl_path)
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True)
@@ -349,6 +350,12 @@ class cityscapesDataset(data.Dataset):
         rgb[:, :, 1] = g / 255.0
         rgb[:, :, 2] = b / 255.0
         return rgb
+
+    def encode_from_trainid_to_id(self, mask):
+        # Put all void classes to zero
+        for _trainid in range(19):
+            mask[mask == _trainid] = self.inverted_class_map[_validc]
+        return mask
 
     def encode_segmap(self, mask):
         # Put all void classes to zero
