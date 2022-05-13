@@ -203,7 +203,7 @@ def main(args, wandb):
             if args.pc_memory:
                 # NOTE implement for T as for now
                 key = proj_t.detach()
-                key_lbl = labels_t.detach()     # I don't think this detach() is necessary...
+                key_lbl = labels_t
                 pdb.set_trace()
                 model._dequeue_and_enqueue(key, key_lbl)
                 
