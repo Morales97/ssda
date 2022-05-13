@@ -91,7 +91,8 @@ def main(args, wandb):
             checkpoint = torch.load(args.round_start)
             model.load_state_dict(checkpoint['model_state_dict'])
             print('*** Loading model from ', args.round_start)
-            #score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
+            if args.wandb:
+                score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.round_start))
 

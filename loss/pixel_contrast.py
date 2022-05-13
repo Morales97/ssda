@@ -77,12 +77,11 @@ class PixelContrastLoss(nn.Module):
 
         return X_, y_
 
-    def _contrastive(self, feats_, labels_):
+    def _contrastive(self, feats_, labels_, weight):
         anchor_num, n_view = feats_.shape[0], feats_.shape[1]
 
         labels_ = labels_.contiguous().view(-1, 1)
         mask = torch.eq(labels_, torch.transpose(labels_, 0, 1)).float().cuda()
-        pdb.set_trace()
 
         contrast_count = n_view
         contrast_feature = torch.cat(torch.unbind(feats_, dim=1), dim=0)
@@ -101,8 +100,9 @@ class PixelContrastLoss(nn.Module):
         logits_mask = torch.ones_like(mask).scatter_(1,
                                                      torch.arange(anchor_num * anchor_count).view(-1, 1).cuda(),
                                                      0)
+        pdb.set_trace()
         mask = mask * logits_mask
-
+        pdb.set_trace()
         neg_logits = torch.exp(logits) * neg_mask
         neg_logits = neg_logits.sum(1, keepdim=True)
 
@@ -117,7 +117,7 @@ class PixelContrastLoss(nn.Module):
 
         return loss
 
-    def forward(self, feats, labels=None, predict=None):
+    def forward(self, feats, labels=None, predict=None, weight=None):
         '''
         feats: projected feature embeddings
         labels: ground truth
@@ -135,11 +135,8 @@ class PixelContrastLoss(nn.Module):
         feats = feats.permute(0, 2, 3, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
 
-        pdb.set_trace()
-        # TODO mask out ignorelabels
-
         feats_, labels_ = self._hard_anchor_sampling(feats, labels, predict)
 
-        loss = self._contrastive(feats_, labels_)
+        loss = self._contrastive(feats_, labels_, weight)
         return loss
 
