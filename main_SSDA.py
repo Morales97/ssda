@@ -66,8 +66,6 @@ def main(args, wandb):
         class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
         class_weigth_t = get_class_weights(target_loader)
 
-    class_weight_t = get_class_weights(None, precomputed='gta_tiny')
-
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
 
