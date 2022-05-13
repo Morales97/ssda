@@ -117,9 +117,13 @@ class PixelContrastLoss(nn.Module):
         return loss
 
     def forward(self, feats, labels=None, predict=None):
+        '''
+        feats: projected feature embeddings
+        labels: ground truth
+        predict: predicted class
+        '''
         labels = labels.unsqueeze(1).float().clone()
-        labels = torch.nn.functional.interpolate(labels,
-                                                 (feats.shape[2], feats.shape[3]), mode='nearest')
+        labels = torch.nn.functional.interpolate(labels, (feats.shape[2], feats.shape[3]), mode='nearest')
         labels = labels.squeeze(1).long()
         assert labels.shape[-1] == feats.shape[-1], '{} {}'.format(labels.shape, feats.shape)
 
@@ -130,6 +134,7 @@ class PixelContrastLoss(nn.Module):
         feats = feats.permute(0, 2, 3, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
 
+        pdb.set_trace()
         # TODO mask out ignorelabels
 
         feats_, labels_ = self._hard_anchor_sampling(feats, labels, predict)

@@ -559,5 +559,5 @@ if __name__ == '__main__':
 # python main_SSDA.py --net=deeplabv2_rn101 --size=small --expt_name=test_pl --wandb=False --resume=model/pretrained/checkpoint_KLE1_p2.pth.tar
 
 # next round of ST
-#python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar
+#python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar
 
