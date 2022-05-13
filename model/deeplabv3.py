@@ -37,7 +37,7 @@ model_urls = {
 }
 
 
-class DeepLabV3_custom_MEM(nn.Module):
+class DeepLabV3_custom(nn.Module):
     '''
     a custom deeplabv3 model that combines all elements:
         - pixel contrast cross-image
@@ -68,13 +68,12 @@ class DeepLabV3_custom_MEM(nn.Module):
                             nn.Conv2d(256, dim_embed, 1, bias=False)
                         )
         
-        # They use memory for both pixel-to-pixel and pixel-to-region contrast
-        # segment_queue looks like the "region" memory
+        # segment_queue is the "region" memory
         self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, dim_embed))
         self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
         self.register_buffer("segment_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
-        # pixel_queue looks like the "pixel" memory
+        # pixel_queue is the "pixel" memory
         self.register_buffer("pixel_queue", torch.randn(num_classes, self.memory_size, dim_embed))
         self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
         self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
@@ -183,99 +182,6 @@ class DeepLabV3_custom_MEM(nn.Module):
                     self.pixel_queue[lb, ptr:ptr + K, :] = nn.functional.normalize(feat, p=2, dim=1)
                     self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + K) % self.memory_size
                 
-
-class DeepLabV3_custom(nn.Module):
-    '''
-    a custom deeplabv3 model that combines all elements:
-        - pixel contrast cross-image
-        - Alonso's PC
-        - DSBN
-    '''
-    def __init__(self, backbone: nn.Module, in_channels, num_classes, dim_embed=256, is_dsbn=False) -> None:
-        super().__init__()
-        self.is_dsbn = is_dsbn
-        self.backbone = backbone
-        self.aspp = ASPP(in_channels, [12, 24, 36])
-        self.decoder1 = nn.Sequential(
-                            nn.Conv2d(256, 256, 3, padding=1, bias=False),
-                            nn.BatchNorm2d(256),
-                            nn.ReLU(),
-                        )
-        self.decoder2 = nn.Conv2d(256, num_classes, 1)
-        
-        # for pixel contrast
-        self.projection_pc = nn.Sequential(
-                            nn.Conv2d(256, 256, 1, bias=False),
-                            nn.BatchNorm2d(256),
-                            nn.ReLU(inplace=True),
-                            nn.Conv2d(256, dim_embed, 1, bias=False)
-                        )
-        # for Alonso's PC
-        dim_in = 256
-        feat_dim = 256
-        self.projection_head = nn.Sequential(
-                                    nn.Conv2d(dim_in, feat_dim, 1, bias=False), # difference to original Alonso: nn.Linear(dim_in, feat_dim)
-                                    nn.BatchNorm2d(feat_dim),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
-                                )
-        self.prediction_head = nn.Sequential(
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
-                                    nn.BatchNorm2d(feat_dim),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
-                                )
-        
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
-
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
-        
-        print('Using custom DeepLabV3 model')
-
-
-    def forward(self, x: Tensor, domain=None) -> Dict[str, Tensor]:
-        input_shape = x.shape[-2:]
-        # contract: features is a dict of tensors
-        if self.is_dsbn:
-            features = self.backbone(x, domain)
-        else:
-            features = self.backbone(x)
-
-        result = OrderedDict()  
-        aspp_f = self.aspp(features["out"])     # aspp_f is input to projection_pc head
-        x_f = self.decoder1(aspp_f)             # x_f is input to projection head
-        x = self.decoder2(x_f)
-        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
-
-        proj = self.projection_head(x_f)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
-        pred = self.prediction_head(proj)
-
-        proj_pc = self.projection_pc(aspp_f)
-        proj_pc = F.normalize(proj_pc, p=2, dim=1)  #need to normalize the projection
-        proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
-
-        result["out"] = x
-        result["feat"] = x_f
-        result["proj"] = proj
-        result["pred"] = pred
-        result["proj_pc"] = proj_pc
-
-        return result
-
 class ASPPConv(nn.Sequential):
     def __init__(self, in_channels: int, out_channels: int, dilation: int) -> None:
         modules = [
@@ -350,35 +256,11 @@ def _deeplabv3_resnet50(
         backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
         return DeepLabV3_custom(backbone, 2048, num_classes, 256)
 
-def _deeplabv3_resnet50_MEM(
-    pretrained_backbone: bool, 
-    dsbn: bool,
-    in_channels = 2048,
-    num_classes = 19
-) -> DeepLabV3_custom:
-    
-    return_layers = {"layer4": "out"}
-    if pretrained_backbone: print('Loading backbone with ImageNet weights')
-
-    if dsbn:
-        backbone = resnet_dsbn.resnet50dsbn(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
-        backbone = resnet_dsbn.IntermediateLayerGetterDSBN(backbone, return_layers=return_layers)
-        return DeepLabV3_custom_MEM(backbone, 2048, num_classes, is_dsbn=True)
-    else:
-        backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
-        backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
-        return DeepLabV3_custom_MEM(backbone, 2048, num_classes, 256)
-
-
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain=None, dsbn=False, pc_memory=False):
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain=None, dsbn=False):
     if custom_pretrain is not None:
         pretrained_backbone=False
 
-    if not pc_memory:
-        model = _deeplabv3_resnet50(pretrained_backbone, dsbn=dsbn)   
-    else:
-        model = _deeplabv3_resnet50_MEM(pretrained_backbone, dsbn=dsbn)   
-
+    model = _deeplabv3_resnet50(pretrained_backbone, dsbn=dsbn)   
 
     if custom_pretrain == 'denseCL':
         return _load_denseCL(model)

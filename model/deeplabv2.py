@@ -98,6 +98,10 @@ class ResNet(nn.Module):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.num_classes= num_classes
+        self.dim_embed = 256
+        self.memory_size = 5000
+        self.pixel_update_freq = 10
+        self.ignore_label = 250
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -117,8 +121,18 @@ class ResNet(nn.Module):
                         nn.Conv2d(2048, 2048, 1, bias=False),
                         nn.BatchNorm2d(2048),
                         nn.ReLU(inplace=True),
-                        nn.Conv2d(2048, 256, 1, bias=False)
+                        nn.Conv2d(2048, self.dim_embed, 1, bias=False)
                     )
+
+        # segment_queue is the "region" memory
+        self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
+        self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
+        self.register_buffer("segment_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
+
+        # pixel_queue is the "pixel" memory
+        self.register_buffer("pixel_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
+        self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
+        self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
         # for Alonso's PC
         dim_in = 2048
@@ -213,6 +227,43 @@ class ResNet(nn.Module):
 
         return result
 
+    def _dequeue_and_enqueue(self, keys, labels):
+        batch_size = keys.shape[0]
+        feat_dim = keys.shape[1]
+
+        # I think this selects one in every network_stride values. it is a way to downsample the label. Not necessery if I have downsampled it before
+        #labels = labels[:, ::self.network_stride, ::self.network_stride]    
+        # TODO assert that commenting this line is fine
+
+        for bs in range(batch_size):
+            this_feat = keys[bs].contiguous().view(feat_dim, -1)
+            this_label = labels[bs].contiguous().view(-1)
+            this_label_ids = torch.unique(this_label)
+            this_label_ids = [x for x in this_label_ids if x != self.ignore_label]
+
+            for lb in this_label_ids:
+                idxs = (this_label == lb).nonzero()
+
+                # segment enqueue and dequeue
+                feat = torch.mean(this_feat[:, idxs], dim=1).squeeze(1)
+                ptr = int(self.segment_queue_ptr[lb])
+                self.segment_queue[lb, ptr, :] = nn.functional.normalize(feat.view(-1), p=2, dim=0)
+                self.segment_queue_ptr[lb] = (self.segment_queue_ptr[lb] + 1) % self.memory_size
+
+                # pixel enqueue and dequeue
+                num_pixel = idxs.shape[0]
+                perm = torch.randperm(num_pixel)
+                K = min(num_pixel, self.pixel_update_freq)
+                feat = this_feat[:, perm[:K]]
+                feat = torch.transpose(feat, 0, 1)
+                ptr = int(self.pixel_queue_ptr[lb])
+
+                if ptr + K >= self.memory_size:
+                    self.pixel_queue[lb, -K:, :] = nn.functional.normalize(feat, p=2, dim=1)
+                    self.pixel_queue_ptr[lb] = 0
+                else:
+                    self.pixel_queue[lb, ptr:ptr + K, :] = nn.functional.normalize(feat, p=2, dim=1)
+                    self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + K) % self.memory_size
 
     def get_1x_lr_params(self):
         """
