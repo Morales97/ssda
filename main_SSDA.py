@@ -199,6 +199,9 @@ def main(args, wandb):
             ramp_up_steps = 500
             if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
                 # NOTE implement for T as for now
+                proj_s = outputs_s['proj_pc']
+                proj_t = outputs_t['proj_pc']
+                
                 key = proj_t.detach()
                 key_lbl = labels_t
 
