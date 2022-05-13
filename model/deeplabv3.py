@@ -49,7 +49,7 @@ class DeepLabV3_custom_MEM(nn.Module):
         self.is_dsbn = is_dsbn
         self.memory_size = 5000 # TODO un-hardcode
         self.pixel_update_freq = 10 # TODO un-hardcode
-        
+
         self.backbone = backbone
         self.aspp = ASPP(in_channels, [12, 24, 36])
         self.decoder1 = nn.Sequential(
@@ -349,12 +349,35 @@ def _deeplabv3_resnet50(
         backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
         return DeepLabV3_custom(backbone, 2048, num_classes, 256)
 
+def _deeplabv3_resnet50_MEM(
+    pretrained_backbone: bool, 
+    dsbn: bool,
+    in_channels = 2048,
+    num_classes = 19
+) -> DeepLabV3_custom:
+    
+    return_layers = {"layer4": "out"}
+    if pretrained_backbone: print('Loading backbone with ImageNet weights')
 
-def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain=None, dsbn=False):
+    if dsbn:
+        backbone = resnet_dsbn.resnet50dsbn(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
+        backbone = resnet_dsbn.IntermediateLayerGetterDSBN(backbone, return_layers=return_layers)
+        return DeepLabV3_custom_MEM(backbone, 2048, num_classes, is_dsbn=True)
+    else:
+        backbone = resnet.resnet50(pretrained=pretrained_backbone, replace_stride_with_dilation=[False, True, True])
+        backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
+        return DeepLabV3_custom_MEM(backbone, 2048, num_classes, 256)
+
+
+def deeplabv3_rn50(pretrained=False, pretrained_backbone=True, custom_pretrain=None, dsbn=False, pc_memory=False):
     if custom_pretrain is not None:
         pretrained_backbone=False
 
-    model = _deeplabv3_resnet50(pretrained_backbone, dsbn=dsbn)   
+    if not pc_memory:
+        model = _deeplabv3_resnet50(pretrained_backbone, dsbn=dsbn)   
+    else:
+        model = _deeplabv3_resnet50_MEM(pretrained_backbone, dsbn=dsbn)   
+
 
     if custom_pretrain == 'denseCL':
         return _load_denseCL(model)
