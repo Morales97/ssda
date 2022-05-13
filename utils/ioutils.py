@@ -83,6 +83,8 @@ def get_parser():
                         help='Use pixel contrast regularization')
     parser.add_argument('--pc_mixed', type=boolfromstr, default=False,
                         help='Pixel contrast: mix S and T samples or not')   
+    parser.add_argument('--pc_memory', type=boolfromstr, default=False,
+                        help='Pixel contrast: use memory or not')   
     parser.add_argument('--gamma', type=float, default=0.1,
                         help='weight of pixel contrast loss')
     parser.add_argument('--warmup_steps', type=int, default=1000,

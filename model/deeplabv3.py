@@ -36,6 +36,153 @@ model_urls = {
     "deeplabv3_mobilenet_v3_large_coco": "https://download.pytorch.org/models/deeplabv3_mobilenet_v3_large-fc3c493d.pth",
 }
 
+
+class DeepLabV3_custom_MEM(nn.Module):
+    '''
+    a custom deeplabv3 model that combines all elements:
+        - pixel contrast cross-image
+        - Alonso's PC
+        - DSBN
+    '''
+    def __init__(self, backbone: nn.Module, in_channels, num_classes, dim_embed=256, is_dsbn=False) -> None:
+        super().__init__()
+        self.is_dsbn = is_dsbn
+        self.memory_size = 5000 # TODO un-hardcode
+        self.pixel_update_freq = 10 # TODO un-hardcode
+        
+        self.backbone = backbone
+        self.aspp = ASPP(in_channels, [12, 24, 36])
+        self.decoder1 = nn.Sequential(
+                            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(),
+                        )
+        self.decoder2 = nn.Conv2d(256, num_classes, 1)
+        
+        # for pixel contrast
+        self.projection_pc = nn.Sequential(
+                            nn.Conv2d(256, 256, 1, bias=False),
+                            nn.BatchNorm2d(256),
+                            nn.ReLU(inplace=True),
+                            nn.Conv2d(256, dim_embed, 1, bias=False)
+                        )
+        
+        # They use memory for both pixel-to-pixel and pixel-to-region contrast
+        # segment_queue looks like the "region" memory
+        self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, dim_embed))
+        self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
+        self.register_buffer("segment_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
+
+        # pixel_queue looks like the "pixel" memory
+        self.register_buffer("pixel_queue", torch.randn(num_classes, self.memory_size, dim_embed))
+        self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
+        self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
+        
+        # for Alonso's PC
+        dim_in = 256
+        feat_dim = 256
+        self.projection_head = nn.Sequential(
+                                    nn.Conv2d(dim_in, feat_dim, 1, bias=False), # difference to original Alonso: nn.Linear(dim_in, feat_dim)
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
+        self.prediction_head = nn.Sequential(
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
+                                    nn.BatchNorm2d(feat_dim),
+                                    nn.ReLU(inplace=True),
+                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                )
+        
+        for class_c in range(num_classes):
+            selector = nn.Sequential(
+                nn.Linear(feat_dim, feat_dim),
+                nn.BatchNorm1d(feat_dim),
+                nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                nn.Linear(feat_dim, 1)
+            )
+            self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
+
+        for class_c in range(num_classes):
+            selector = nn.Sequential(
+                nn.Linear(feat_dim, feat_dim),
+                nn.BatchNorm1d(feat_dim),
+                nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                nn.Linear(feat_dim, 1)
+            )
+            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
+        
+        print('Using custom DeepLabV3 model')
+
+
+    def forward(self, x: Tensor, domain=None) -> Dict[str, Tensor]:
+        input_shape = x.shape[-2:]
+        # contract: features is a dict of tensors
+        if self.is_dsbn:
+            features = self.backbone(x, domain)
+        else:
+            features = self.backbone(x)
+
+        result = OrderedDict()  
+        aspp_f = self.aspp(features["out"])     # aspp_f is input to projection_pc head
+        x_f = self.decoder1(aspp_f)             # x_f is input to projection head
+        x = self.decoder2(x_f)
+        x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+
+        proj = self.projection_head(x_f)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+        pred = self.prediction_head(proj)
+
+        proj_pc = self.projection_pc(aspp_f)
+        proj_pc = F.normalize(proj_pc, p=2, dim=1)  #need to normalize the projection
+        proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
+
+        result["out"] = x
+        result["feat"] = x_f
+        result["proj"] = proj
+        result["pred"] = pred
+        result["proj_pc"] = proj_pc
+
+        return result
+
+    def _dequeue_and_enqueue(self, keys, labels):
+        batch_size = keys.shape[0]
+        feat_dim = keys.shape[1]
+
+        # I think this selects one in every network_stride values. it is a way to downsample the label. Not necessery if I have downsampled it before
+        #labels = labels[:, ::self.network_stride, ::self.network_stride]    
+        # TODO assert that commenting this line is fine
+
+        for bs in range(batch_size):
+            this_feat = keys[bs].contiguous().view(feat_dim, -1)
+            this_label = labels[bs].contiguous().view(-1)
+            this_label_ids = torch.unique(this_label)
+            this_label_ids = [x for x in this_label_ids if x > 0]
+
+            for lb in this_label_ids:
+                idxs = (this_label == lb).nonzero()
+
+                # segment enqueue and dequeue
+                feat = torch.mean(this_feat[:, idxs], dim=1).squeeze(1)
+                ptr = int(self.segment_queue_ptr[lb])
+                self.segment_queue[lb, ptr, :] = nn.functional.normalize(feat.view(-1), p=2, dim=0)
+                self.segment_queue_ptr[lb] = (self.segment_queue_ptr[lb] + 1) % self.memory_size
+
+                # pixel enqueue and dequeue
+                num_pixel = idxs.shape[0]
+                perm = torch.randperm(num_pixel)
+                K = min(num_pixel, self.pixel_update_freq)
+                feat = this_feat[:, perm[:K]]
+                feat = torch.transpose(feat, 0, 1)
+                ptr = int(self.pixel_queue_ptr[lb])
+
+                if ptr + K >= self.memory_size:
+                    self.pixel_queue[lb, -K:, :] = nn.functional.normalize(feat, p=2, dim=1)
+                    self.pixel_queue_ptr[lb] = 0
+                else:
+                    self.pixel_queue[lb, ptr:ptr + K, :] = nn.functional.normalize(feat, p=2, dim=1)
+                    self.pixel_queue_ptr[lb] = (pixel_queue_ptr[lb] + 1) % self.memory_size
+
+
 class DeepLabV3_custom(nn.Module):
     '''
     a custom deeplabv3 model that combines all elements:

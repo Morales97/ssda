@@ -19,7 +19,7 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
-from loss.pixel_contrast import PixelContrastLoss
+from loss.pixel_contrast import PixelContrastLoss, PixelContrastLoss_MEM
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
@@ -102,7 +102,10 @@ def main(args, wandb):
         job_step_limit = start_step + args.steps_job    # set the maximum steps in this job
 
     if args.pixel_contrast:
-        pixel_contrast = PixelContrastLoss()
+        if args.pc_memory:
+            pixel_contrast = PixelContrastLoss_MEM()
+        else:
+            pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast is not None:
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
@@ -196,6 +199,20 @@ def main(args, wandb):
 
             _, pred_s = torch.max(out_s, 1) 
             _, pred_t = torch.max(out_t, 1)
+
+            if args.pc_memory:
+                # NOTE implement for T as for now
+                key = proj_t.detach()
+                key_lbl = labels_t.detach()     # I don't think this detach() is necessary...
+                pdb.set_trace()
+                model._dequeue_and_enqueue(key, key_lbl)
+                
+                queue = torch.cat((model.segment_queue, model.pixel_queue), dim=1)
+                pdb.set_trace()
+
+                # TODO implement for pc_mixed
+                loss_cl_s = 0
+                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue)
 
             if not args.pc_mixed:
                 loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
@@ -552,6 +569,7 @@ if __name__ == '__main__':
 
     
 
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --warmup_steps=0
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
