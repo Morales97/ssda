@@ -96,7 +96,7 @@ class PixelContrastLoss(nn.Module):
 
         mask_ = mask.repeat(anchor_count, contrast_count)
         neg_mask = 1 - mask_
-        for i in mask.shape[0]:
+        for i in range(mask.shape[0]):
             class_ = labels_[i]
             mask[i, :] *= weight[class_]
         pdb.set_trace()
