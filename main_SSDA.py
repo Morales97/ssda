@@ -216,7 +216,7 @@ def main(args, wandb):
 
                 if not args.pc_mixed:
                     loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-                    loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
+                    loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, weight=class_weigth_t, queue=queue)
                 else:
                     loss_cl_s = 0
                     proj = torch.cat([proj_s, proj_t], dim=0)

@@ -5,7 +5,7 @@ import pdb
 
 class PixelContrastLoss(nn.Module):
     def __init__(self):
-        super(PixelContrastLoss_MEM, self).__init__()
+        super(PixelContrastLoss, self).__init__()
 
         self.temperature = 0.1
         self.base_temperature = 0.07    # TODO not hardcode these params
