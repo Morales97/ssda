@@ -19,7 +19,7 @@ from utils.ioutils import get_log_str
 from utils.ioutils import parse_args
 from utils.ioutils import rm_format
 from loss.cross_entropy import cross_entropy2d
-from loss.pixel_contrast import PixelContrastLoss, PixelContrastLoss_MEM
+from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
 from loss.entropy_min import entropy_loss
@@ -102,10 +102,7 @@ def main(args, wandb):
         job_step_limit = start_step + args.steps_job    # set the maximum steps in this job
 
     if args.pixel_contrast:
-        if args.pc_memory:
-            pixel_contrast = PixelContrastLoss_MEM()
-        else:
-            pixel_contrast = PixelContrastLoss()
+        pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast is not None:
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
@@ -201,7 +198,7 @@ def main(args, wandb):
                 # NOTE implement for T as for now
                 proj_s = outputs_s['proj_pc']
                 proj_t = outputs_t['proj_pc']
-                
+
                 key = proj_t.detach()
                 key_lbl = labels_t
 
@@ -217,21 +214,15 @@ def main(args, wandb):
                 _, pred_s = torch.max(out_s, 1) 
                 _, pred_t = torch.max(out_t, 1)
 
-                if args.pc_memory:
-                    # TODO implement for pc_mixed
-                    loss_cl_s = 0
+                if not args.pc_mixed:
+                    loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
                     loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
-
                 else:
-                    if not args.pc_mixed:
-                        loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-                        loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
-                    else:
-                        loss_cl_s = 0
-                        proj = torch.cat([proj_s, proj_t], dim=0)
-                        labels = torch.cat([labels_s, labels_t], dim=0)
-                        pred = torch.cat([pred_s, pred_t], dim=0)
-                        loss_cl_t = pixel_contrast(proj, labels, pred, class_weigth_t)
+                    loss_cl_s = 0
+                    proj = torch.cat([proj_s, proj_t], dim=0)
+                    labels = torch.cat([labels_s, labels_t], dim=0)
+                    pred = torch.cat([pred_s, pred_t], dim=0)
+                    loss_cl_t = pixel_contrast(proj, labels, pred, weight=class_weigth_t, queue=queue)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
