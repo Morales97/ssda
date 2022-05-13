@@ -49,6 +49,7 @@ class DeepLabV3_custom_MEM(nn.Module):
         self.is_dsbn = is_dsbn
         self.memory_size = 5000 # TODO un-hardcode
         self.pixel_update_freq = 10 # TODO un-hardcode
+        self.ignore_label = 250
 
         self.backbone = backbone
         self.aspp = ASPP(in_channels, [12, 24, 36])
@@ -156,7 +157,7 @@ class DeepLabV3_custom_MEM(nn.Module):
             this_feat = keys[bs].contiguous().view(feat_dim, -1)
             this_label = labels[bs].contiguous().view(-1)
             this_label_ids = torch.unique(this_label)
-            this_label_ids = [x for x in this_label_ids if x > 0]
+            this_label_ids = [x for x in this_label_ids if x > 0 and x != self.ignore_label]
 
             for lb in this_label_ids:
                 idxs = (this_label == lb).nonzero()
