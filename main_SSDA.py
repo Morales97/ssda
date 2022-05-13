@@ -90,6 +90,8 @@ def main(args, wandb):
         if os.path.isfile(args.round_start):
             checkpoint = torch.load(args.round_start)
             model.load_state_dict(checkpoint['model_state_dict'])
+            if 'ema_state_dict' in checkpoint.keys():
+                ema.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading model from ', args.round_start)
             if args.wandb:
                 score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
@@ -194,6 +196,7 @@ def main(args, wandb):
         if args.pixel_contrast:
             # fill memory. NOTE if not enough warmup steps, the memory is initialized with random values and the PC will be harmful until memory is full
             ramp_up_steps = 500
+            queue = None
             if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
                 # NOTE implement for T as for now
                 proj_s = outputs_s['proj_pc']
@@ -219,13 +222,15 @@ def main(args, wandb):
 
                 if not args.pc_mixed:
                     loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-                    loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, weight=class_weigth_t, queue=queue)
+                    #loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, weight=class_weigth_t, queue=queue)
+                    loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
                 else:
                     loss_cl_s = 0
                     proj = torch.cat([proj_s, proj_t], dim=0)
                     labels = torch.cat([labels_s, labels_t], dim=0)
                     pred = torch.cat([pred_s, pred_t], dim=0)
-                    loss_cl_t = pixel_contrast(proj, labels, pred, weight=class_weigth_t, queue=queue)
+                    #loss_cl_t = pixel_contrast(proj, labels, pred, weight=class_weigth_t, queue=queue)
+                    loss_cl_t = pixel_contrast(proj, labels, pred, queue=queue)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
