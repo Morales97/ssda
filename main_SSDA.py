@@ -214,15 +214,16 @@ def main(args, wandb):
                 loss_cl_s = 0
                 loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue)
 
-            if not args.pc_mixed:
-                loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
-                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
             else:
-                loss_cl_s = 0
-                proj = torch.cat([proj_s, proj_t], dim=0)
-                labels = torch.cat([labels_s, labels_t], dim=0)
-                pred = torch.cat([pred_s, pred_t], dim=0)
-                loss_cl_t = pixel_contrast(proj, labels, pred, class_weigth_t)
+                if not args.pc_mixed:
+                    loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
+                    loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+                else:
+                    loss_cl_s = 0
+                    proj = torch.cat([proj_s, proj_t], dim=0)
+                    labels = torch.cat([labels_s, labels_t], dim=0)
+                    pred = torch.cat([pred_s, pred_t], dim=0)
+                    loss_cl_t = pixel_contrast(proj, labels, pred, class_weigth_t)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
