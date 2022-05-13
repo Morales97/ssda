@@ -98,9 +98,10 @@ class PixelContrastLoss(nn.Module):
         neg_mask = 1 - mask_
 
         # DM: apply class weights
-        for i in range(mask.shape[0]):
-            class_ = labels_[i].long()
-            mask[i, :] *= weight[class_]
+        if weight is not None:
+            for i in range(mask.shape[0]):
+                class_ = labels_[i].long()
+                mask[i, :] *= weight[class_]
         mask = mask.repeat(anchor_count, contrast_count)
 
         logits_mask = torch.ones_like(mask).scatter_(1,
@@ -265,9 +266,10 @@ class PixelContrastLoss_MEM(nn.Module):
         neg_mask = 1 - mask_
 
         # DM: apply class weights
-        for i in range(mask.shape[0]):
-            class_ = labels_[i].long()
-            mask[i, :] *= weight[class_]
+        if weight is not None:
+            for i in range(mask.shape[0]):
+                class_ = labels_[i].long()
+                mask[i, :] *= weight[class_]
         mask = mask.repeat(anchor_count, contrast_count)
 
         logits_mask = torch.ones_like(mask).scatter_(1,
