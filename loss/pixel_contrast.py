@@ -94,15 +94,19 @@ class PixelContrastLoss(nn.Module):
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
         logits = anchor_dot_contrast - logits_max.detach()
 
+        mask_ = mask.repeat(anchor_count, contrast_count)
+        neg_mask = 1 - mask_
+        for i in mask.shape[0]:
+            class_ = labels_[i]
+            mask[i, :] *= weight[class_]
+        pdb.set_trace()
         mask = mask.repeat(anchor_count, contrast_count)
-        neg_mask = 1 - mask
 
         logits_mask = torch.ones_like(mask).scatter_(1,
                                                      torch.arange(anchor_num * anchor_count).view(-1, 1).cuda(),
                                                      0)
-        pdb.set_trace()
         mask = mask * logits_mask
-        pdb.set_trace()
+
         neg_logits = torch.exp(logits) * neg_mask
         neg_logits = neg_logits.sum(1, keepdim=True)
 

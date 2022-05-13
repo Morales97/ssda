@@ -66,6 +66,8 @@ def main(args, wandb):
         class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
         class_weigth_t = get_class_weights(target_loader)
 
+    class_weight_t = get_class_weights(None, precomputed='gta_tiny')
+
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
 
@@ -205,7 +207,7 @@ def main(args, wandb):
                 proj = torch.cat([proj_s, proj_t], dim=0)
                 labels = torch.cat([labels_s, labels_t], dim=0)
                 pred = torch.cat([pred_s, pred_t], dim=0)
-                loss_cl_t = pixel_contrast(proj, labels, pred)
+                loss_cl_t = pixel_contrast(proj, labels, pred, class_weight_t)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
