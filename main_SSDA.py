@@ -212,7 +212,7 @@ def main(args, wandb):
 
                 # TODO implement for pc_mixed
                 loss_cl_s = 0
-                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue)
+                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
 
             else:
                 if not args.pc_mixed:
