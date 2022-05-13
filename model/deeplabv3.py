@@ -47,7 +47,7 @@ class DeepLabV3_custom_MEM(nn.Module):
     def __init__(self, backbone: nn.Module, in_channels, num_classes, dim_embed=256, is_dsbn=False) -> None:
         super().__init__()
         self.is_dsbn = is_dsbn
-        self.memory_size = 5000 # TODO un-hardcode
+        self.memory_size = 1000 #5000 # TODO un-hardcode
         self.pixel_update_freq = 10 # TODO un-hardcode
         self.ignore_label = 250
 
@@ -175,7 +175,7 @@ class DeepLabV3_custom_MEM(nn.Module):
                 feat = this_feat[:, perm[:K]]
                 feat = torch.transpose(feat, 0, 1)
                 ptr = int(self.pixel_queue_ptr[lb])
-
+                pdb.set_trace()
                 if ptr + K >= self.memory_size:
                     self.pixel_queue[lb, -K:, :] = nn.functional.normalize(feat, p=2, dim=1)
                     self.pixel_queue_ptr[lb] = 0
