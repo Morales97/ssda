@@ -181,8 +181,8 @@ class DeepLabV3_custom_MEM(nn.Module):
                     self.pixel_queue_ptr[lb] = 0
                 else:
                     self.pixel_queue[lb, ptr:ptr + K, :] = nn.functional.normalize(feat, p=2, dim=1)
-                    self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + ptr) % self.memory_size
-
+                    self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + K) % self.memory_size
+                pdb.set_trace()
 
 class DeepLabV3_custom(nn.Module):
     '''
