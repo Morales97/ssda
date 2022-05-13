@@ -175,13 +175,13 @@ class DeepLabV3_custom_MEM(nn.Module):
                 feat = this_feat[:, perm[:K]]
                 feat = torch.transpose(feat, 0, 1)
                 ptr = int(self.pixel_queue_ptr[lb])
-                pdb.set_trace()
+
                 if ptr + K >= self.memory_size:
                     self.pixel_queue[lb, -K:, :] = nn.functional.normalize(feat, p=2, dim=1)
                     self.pixel_queue_ptr[lb] = 0
                 else:
                     self.pixel_queue[lb, ptr:ptr + K, :] = nn.functional.normalize(feat, p=2, dim=1)
-                    self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + 1) % self.memory_size
+                    self.pixel_queue_ptr[lb] = (self.pixel_queue_ptr[lb] + ptr) % self.memory_size
 
 
 class DeepLabV3_custom(nn.Module):
