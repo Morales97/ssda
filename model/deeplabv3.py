@@ -157,7 +157,7 @@ class DeepLabV3_custom_MEM(nn.Module):
             this_feat = keys[bs].contiguous().view(feat_dim, -1)
             this_label = labels[bs].contiguous().view(-1)
             this_label_ids = torch.unique(this_label)
-            this_label_ids = [x for x in this_label_ids if x > 0 and x != self.ignore_label]
+            this_label_ids = [x for x in this_label_ids if x != self.ignore_label]
 
             for lb in this_label_ids:
                 idxs = (this_label == lb).nonzero()
