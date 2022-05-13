@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import pdb
 
 class PixelContrastLoss(nn.Module):
     def __init__(self):
@@ -82,6 +82,7 @@ class PixelContrastLoss(nn.Module):
 
         labels_ = labels_.contiguous().view(-1, 1)
         mask = torch.eq(labels_, torch.transpose(labels_, 0, 1)).float().cuda()
+        pdb.set_trace()
 
         contrast_count = n_view
         contrast_feature = torch.cat(torch.unbind(feats_, dim=1), dim=0)
