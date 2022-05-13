@@ -205,7 +205,7 @@ def main(args, wandb):
                 proj = torch.cat([proj_s, proj_t], dim=0)
                 labels = torch.cat([labels_s, labels_t], dim=0)
                 pred = torch.cat([pred_s, pred_t], dim=0)
-                loss_cl_t = pixel_contrast(proj, labels, pred, class_weight_t)
+                loss_cl_t = pixel_contrast(proj, labels, pred, class_weigth_t)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
