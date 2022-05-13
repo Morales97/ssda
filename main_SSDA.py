@@ -208,7 +208,6 @@ def main(args, wandb):
 
                 model._dequeue_and_enqueue(key, key_lbl)
                 queue = torch.cat((model.segment_queue, model.pixel_queue), dim=1)
-                pdb.set_trace()
 
             # Pixel contrast
             if step >= args.warmup_steps:
