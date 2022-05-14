@@ -198,7 +198,7 @@ def main(args, wandb):
             ramp_up_steps = 500
             queue = None
             if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
-                # NOTE implement for T as for now
+                # NOTE always saving in memory from S and T (mixed)
                 proj_s = outputs_s['proj_pc']
                 proj_t = outputs_t['proj_pc']
 
@@ -577,7 +577,7 @@ if __name__ == '__main__':
 
     
 
-# python main_SSDA.py --net=deeplabv3_rn50_mem --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --warmup_steps=0
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False

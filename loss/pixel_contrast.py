@@ -137,7 +137,7 @@ class PixelContrastLoss(nn.Module):
         neg_logits = neg_logits.sum(1, keepdim=True)
 
         exp_logits = torch.exp(logits)
-
+        pdb.set_trace()
         log_prob = logits - torch.log(exp_logits + neg_logits)
 
         mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1)
