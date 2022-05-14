@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=klv2
+#SBATCH --job-name=cegtav2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
