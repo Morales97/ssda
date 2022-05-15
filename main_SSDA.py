@@ -63,8 +63,8 @@ def main(args, wandb):
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
-        #class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
-        class_weigth_s = get_class_weights(source_loader)
+        class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
+        #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
     # Custom loss function. Ignores index 250
