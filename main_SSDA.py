@@ -63,7 +63,7 @@ def main(args, wandb):
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
-        class_weigth_s = get_class_weights(None, precomputed='gta_tiny')
+        class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
         #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
@@ -199,7 +199,6 @@ def main(args, wandb):
             ramp_up_steps = 500
             queue = None
             if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
-                # NOTE always saving in memory from S and T (mixed)
                 proj_s = outputs_s['proj_pc']
                 proj_t = outputs_t['proj_pc']
 
