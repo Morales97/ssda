@@ -85,7 +85,8 @@ def main(args, wandb):
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
-
+    step = start_step
+    
     # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -385,7 +386,7 @@ def main(args, wandb):
 
 def _initialize():
     best_mIoU = 0 
-    step = start_step
+
     time_meter = averageMeter()
     time_meter_cr = averageMeter()
     time_meter_update = averageMeter()
