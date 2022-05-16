@@ -86,7 +86,7 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
     step = start_step
-    
+
     # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -100,7 +100,10 @@ def main(args, wandb):
 
     # Set up metrics
     _initialize()
-
+    data_iter_s = iter(source_loader)
+    data_iter_t = iter(target_loader)
+    data_iter_t_unl = iter(target_loader_unl)
+    
     # Training loop
     while step <= args.steps:
 
@@ -400,9 +403,6 @@ def _initialize():
     alonso_contrast_meter = averageMeter()
     entropy_meter = averageMeter()
 
-    data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
 
 def _forward(args, model, images_s, images_t):
     if args.dsbn:
