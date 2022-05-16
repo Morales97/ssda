@@ -17,11 +17,11 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     p_s = F.softmax(out_s, dim=1)  
 
     if cr_type == 'ce':
-        return cr_prob_distr(p_w, out_s)
+        return cr_CE(p_w, out_s)
     elif cr_type == 'ce_th':
-        return cr_prob_distr_th(p_w, out_s, tau)
+        return cr_CE_th(p_w, out_s, tau)
     elif cr_type == 'ce_oh':
-        return cr_one_hot(p_w, out_s, tau)
+        return cr_CR_one_hot(p_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(p_w, p_s)
     elif cr_type == 'js_th':
@@ -40,7 +40,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
         raise Exception('Consistency regularization type not supported')
 
 
-def cr_multiple_augs(args, images, model):
+def cr_multiple_augs(args, images, model, ema):
     # NOTE for the moment only support 2 augmentations
     assert args.n_augmentations == 2 and args.cr == 'gjs'
     images_weak = images[0].cuda()
@@ -48,16 +48,12 @@ def cr_multiple_augs(args, images, model):
     images_strong2 = images[2].cuda()
 
     outputs_w = model(images_weak)                   # (N, C, H, W)
-    outputs_strong1 = model(images_strong1)
-    outputs_strong2 = model(images_strong2)
-    if type(outputs_w) == OrderedDict:
-        out_w = outputs_w['out']
-        out_s1 = outputs_strong1['out']
-        out_s2 = outputs_strong2['out']
-    else:
-        out_w = outputs_w
-        out_s1 = outputs_strong1
-        out_s2 = outputs_strong2
+    with ema.average_parameters():
+        outputs_strong1 = model(images_strong1)
+        outputs_strong2 = model(images_strong2)
+    out_w = outputs_w['out']
+    out_s1 = outputs_strong1['out']
+    out_s2 = outputs_strong2['out']
 
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
@@ -71,6 +67,7 @@ def cr_multiple_augs(args, images, model):
     p_s2 = F.softmax(out_s2, dim=1)  
 
     return cr_GJS(p_w, p_s1, p_s2)
+    #return cr_CE_and_JS(p_w, p_s1, p_s1)
 
 
 def _apply_threshold(p_w, tau):
@@ -89,7 +86,7 @@ def _to_one_hot(pseudo_lbl, n_classes):
     return pseudo_lbl_oh
 
 # *** Cross-Entropy ***
-def cr_one_hot(p_w, out_s, tau):
+def cr_CE_one_hot(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels encoded as One-hot.
     '''
@@ -105,7 +102,7 @@ def cr_one_hot(p_w, out_s, tau):
 
     return loss_cr, percent_pl
 
-def cr_prob_distr(p_w, out_s):
+def cr_CE(p_w, out_s):
     '''
     Consistency regularization with pseudo-labels as a probability distribution
     '''
@@ -113,7 +110,7 @@ def cr_prob_distr(p_w, out_s):
     percent_pl = 100
     return loss_cr, percent_pl
 
-def cr_prob_distr_th(p_w, out_s, tau):
+def cr_CE_th(p_w, out_s, tau):
     '''
     Consistency regularization with pseudo-labels as a probability distribution
     '''
@@ -189,6 +186,23 @@ def cr_GJS(p_w, p_s1, p_s2, eps=1e-8):
     percent_pl = 100
     return loss_cr, percent_pl
 
+
+def cr_CE_and_JS(p_w, p_s1, p_s2, eps=1e-8):
+    # Generalized JS loss (Englesson & Azizpour)
+    # NOTE should change all (p + eps).log to p.clamp(1e-7, 1.0).log(), which is more correct as the prob wont go higher than 1
+    
+    # consistency to pseudo-label
+    p_s = (p_s1 + p_s2)/2
+    # TODO need to conver prob p_s to logits
+
+    loss_pseudo, _ = cr_CE(p_w, p_s)
+    
+    # consistency between augmentations
+    loss_augs, _ = cr_JS(p_s1, p_s2)
+
+    loss_cr = loss_pseudo + loss_augs
+    percent_pl = 100
+    return loss_cr, percent_pl
 
 # *** KL Divergence ***
 def cr_KL(p_w, p_s, eps=1e-8):

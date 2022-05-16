@@ -142,7 +142,10 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
-        out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s, images_t)
+        outputs_s = model(images_s)
+        outputs_t = model(images_t)
+        out_s = outputs_s['out'] 
+        out_t = outputs_t['out']  
 
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
@@ -165,8 +168,8 @@ def main(args, wandb):
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
-                assert args.n_augmentations >= 1 and not args.dsbn
-                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
+                assert args.n_augmentations >= 1
+                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema) 
 
             time_cr = time.time() - start_ts_cr
             
@@ -226,10 +229,7 @@ def main(args, wandb):
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
                 with ema.average_parameters():
-                    if args.dsbn:
-                        outputs_t_ema = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))  
-                    else:
-                        outputs_t_ema = model(images_t)   
+                    outputs_t_ema = model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
@@ -241,10 +241,7 @@ def main(args, wandb):
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-                if args.dsbn:
-                    outputs_tu = model(images_tu, 1*torch.ones(images_tu.shape[0], dtype=torch.long)) 
-                else:
-                    outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+                outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu, model)
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
@@ -391,69 +388,18 @@ def main(args, wandb):
                 print('Checkpoint saved.')
             break
 
-def _forward(args, model, images_s, images_t):
-    if args.dsbn:
-        outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
-        outputs_t = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))
-    else:
-        outputs_s = model(images_s)
-        outputs_t = model(images_t)
-
-    if type(outputs_t) == OrderedDict:
-        out_s = outputs_s['out'] 
-        out_t = outputs_t['out']  
-    else:
-        out_s = outputs_s
-        out_t = outputs_t
-
-    return out_s, out_t, outputs_s, outputs_t
-
-
 
 def _forward_cr(args, model, ema, images_weak, images_strong):
-    if args.dsbn:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
-        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
-    else:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak)     # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
-        outputs_strong = model(images_strong)
-
-    out_w = outputs_w['out']
-    out_strong = outputs_strong['out']
-
-    return out_w, out_strong
-
-
-def _forward_cr_cutmix(args, model, ema, images_weak, images_strong):
+    
     # Get psuedo-targets 'out_w'
-    if args.dsbn:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
-    else:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak)     # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
+    with ema.average_parameters():         # gradient will be stopped at p_w.detach()
+        outputs_w = model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
-    # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
-    images_strong, out_w = _cutmix_output(args, images_strong, out_w)
-    if args.dsbn:
-        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
-    else:
-        outputs_strong = model(images_strong)
+    if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
+        images_strong, out_w = _cutmix_output(args, images_strong, out_w)
+
+    outputs_strong = model(images_strong)
     out_strong = outputs_strong['out']
     return out_w, out_strong
 
@@ -466,13 +412,9 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.dsbn:
-                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-            else:
-                outputs = model(images_val)
-            
-            if type(outputs) == OrderedDict:
-                outputs = outputs['out']
+            outputs = model(images_val)
+            outputs = outputs['out']
+
             val_loss = loss_fn(input=outputs, target=labels_val)
 
             pred = outputs.data.max(1)[1].cpu().numpy()
@@ -508,13 +450,9 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.dsbn:
-                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-            else:
-                outputs = model(images_val)
-            
-            if type(outputs) == OrderedDict:
-                outputs = outputs['out']
+            outputs = model(images_val)
+            outputs = outputs['out']
+
             val_loss = loss_fn(input=outputs, target=labels_val)
 
             pred = outputs.data.max(1)[1].cpu().numpy()
