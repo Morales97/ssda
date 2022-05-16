@@ -9,7 +9,7 @@ import torch
 
 from utils.ioutils import parse_args
 from model.model import get_model
-from loader.loaders import get_loaders
+from loader.cityscapes_ds import cityscapesDataset
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 import pdb
 
