@@ -99,7 +99,19 @@ def main(args, wandb):
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
-    _initialize()
+    best_mIoU = 0 
+    time_meter = averageMeter()
+    time_meter_cr = averageMeter()
+    time_meter_update = averageMeter()
+    train_loss_meter = averageMeter()
+    source_ce_loss_meter = averageMeter()
+    target_ce_loss_meter = averageMeter()
+    cr_loss_meter = averageMeter()
+    constrast_s_loss_meter = averageMeter()
+    constrast_t_loss_meter = averageMeter()
+    pseudo_lbl_meter = averageMeter()
+    alonso_contrast_meter = averageMeter()
+    entropy_meter = averageMeter()
 
     # Training loop
     while step <= args.steps:
@@ -383,23 +395,6 @@ def main(args, wandb):
                 }, os.path.join(args.save_dir, ckpt_name))
                 print('Checkpoint saved.')
             break
-
-def _initialize():
-    best_mIoU = 0 
-
-    time_meter = averageMeter()
-    time_meter_cr = averageMeter()
-    time_meter_update = averageMeter()
-    train_loss_meter = averageMeter()
-    source_ce_loss_meter = averageMeter()
-    target_ce_loss_meter = averageMeter()
-    cr_loss_meter = averageMeter()
-    constrast_s_loss_meter = averageMeter()
-    constrast_t_loss_meter = averageMeter()
-    pseudo_lbl_meter = averageMeter()
-    alonso_contrast_meter = averageMeter()
-    entropy_meter = averageMeter()
-
 
 def _forward(args, model, images_s, images_t):
     if args.dsbn:
