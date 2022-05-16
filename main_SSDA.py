@@ -12,12 +12,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from model.model import get_model
-#from utils.eval import test
-from utils.ioutils import FormattedLogItem
-from utils.ioutils import gen_unique_name
-from utils.ioutils import get_log_str
-from utils.ioutils import parse_args
-from utils.ioutils import rm_format
+from utils.ioutils import gen_unique_name, get_log_str, parse_args, rm_format, FormattedLogItem
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
@@ -26,14 +21,14 @@ from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders, get_loaders_pseudolabels
 from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
-import wandb
-from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
+
+import wandb
+from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
+
 from torchvision.utils import save_image
 import pdb
-import subprocess
-
 
 
 def main(args, wandb):
@@ -63,7 +58,7 @@ def main(args, wandb):
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
-        class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
+        class_weigth_s = get_class_weights(None, precomputed='gta', size='tiny')# size=args.size)
         #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
