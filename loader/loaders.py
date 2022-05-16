@@ -57,6 +57,26 @@ def get_loaders(args, num_t_samples=2975):
         print('No target domain unlabelled images')
         t_unlbl_loader = None
 
+    # UDA
+    elif n_lbl_samples == 0:
+        t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                            label_path=label_path_cs, 
+                                            size=size, 
+                                            split='train', 
+                                            sample_idxs=idxs_unlbl, 
+                                            unlabeled=True, 
+                                            strong_aug_level=args.aug_level, 
+                                            n_augmentations=args.n_augmentations)
+        t_lbl_loader = None
+        t_unlbl_loader = DataLoader(
+            t_unlbl_dataset,
+            batch_size=args.batch_size_tu,
+            num_workers=args.num_workers,
+            shuffle=True,
+        ) 
+        print('Not loading any target labeled images')
+        print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))
+
     # Semi-supervised
     else:                       
         t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
