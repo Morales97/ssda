@@ -108,7 +108,7 @@ def main(args, wandb):
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast is not None:
-        alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
+        alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, 24968)
 
     # Set up metrics
     best_mIoU = 0 
