@@ -86,19 +86,7 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
-    # To start next training round from the previous final model
-    if args.round_start:
-        if os.path.isfile(args.round_start):
-            checkpoint = torch.load(args.round_start)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
-            print('*** Loading model from ', args.round_start)
-            if args.wandb:
-                score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
-        else:
-            raise Exception('No file found at {}'.format(args.round_start))
-
+    # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
     else:
@@ -110,24 +98,7 @@ def main(args, wandb):
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
-    best_mIoU = 0 
-    step = start_step
-    time_meter = averageMeter()
-    time_meter_cr = averageMeter()
-    time_meter_update = averageMeter()
-    train_loss_meter = averageMeter()
-    source_ce_loss_meter = averageMeter()
-    target_ce_loss_meter = averageMeter()
-    cr_loss_meter = averageMeter()
-    constrast_s_loss_meter = averageMeter()
-    constrast_t_loss_meter = averageMeter()
-    pseudo_lbl_meter = averageMeter()
-    alonso_contrast_meter = averageMeter()
-    entropy_meter = averageMeter()
-
-    data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
+    _initialize()
 
     # Training loop
     while step <= args.steps:
@@ -412,6 +383,25 @@ def main(args, wandb):
                 print('Checkpoint saved.')
             break
 
+def _initialize():
+    best_mIoU = 0 
+    step = start_step
+    time_meter = averageMeter()
+    time_meter_cr = averageMeter()
+    time_meter_update = averageMeter()
+    train_loss_meter = averageMeter()
+    source_ce_loss_meter = averageMeter()
+    target_ce_loss_meter = averageMeter()
+    cr_loss_meter = averageMeter()
+    constrast_s_loss_meter = averageMeter()
+    constrast_t_loss_meter = averageMeter()
+    pseudo_lbl_meter = averageMeter()
+    alonso_contrast_meter = averageMeter()
+    entropy_meter = averageMeter()
+
+    data_iter_s = iter(source_loader)
+    data_iter_t = iter(target_loader)
+    data_iter_t_unl = iter(target_loader_unl)
 
 def _forward(args, model, images_s, images_t):
     if args.dsbn:
@@ -575,7 +565,7 @@ if __name__ == '__main__':
     else:
         main(args, None)
 
-    
+
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
