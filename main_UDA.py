@@ -127,7 +127,6 @@ def main(args, wandb):
     entropy_meter = averageMeter()
 
     data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
     data_iter_t_unl = iter(target_loader_unl)
 
     # Training loop
@@ -566,15 +565,4 @@ if __name__ == '__main__':
         main(args, None)
 
     
-
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
-# python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
-# python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --warmup_steps=0
-# python main_SSDA.py --net=deeplabv2_rn101 --size=small --expt_name=test_pl --wandb=False --resume=model/pretrained/checkpoint_KLE1_p2.pth.tar
-
-# next round of ST
-#python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar
-
+# python main_UDA.py --wandb=False --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --size=small --expt_name=UDA_CE --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=ce --class_weight=True
