@@ -158,7 +158,7 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
-        out_s, out_t, outputs_s, outputs_t = _forward(args, model, images_s)
+        out_s, outputs_s = _forward(args, model, images_s)
 
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
