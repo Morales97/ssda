@@ -12,7 +12,7 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None, size=None):
         elif size == 'small':
             class_weight = torch.Tensor([0.1808,  0.3848,  0.2801,  0.8211,  1.3222,       1,  2.9463,  3.6512,  0.3896,
                                         0.732,   0.3397,  1.7114,  5.7128,  0.5807,  0.9636,  1.7645,  4.5929,  5.4738, 14.5959])
-        print('Retreived GTA class weights for %s resolution', size)
+        print('Retreived GTA class weights for size: ', size)
         return class_weight.to('cuda')
 
     ts = time.time()
