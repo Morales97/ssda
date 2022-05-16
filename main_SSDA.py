@@ -100,10 +100,7 @@ def main(args, wandb):
 
     # Set up metrics
     _initialize()
-    data_iter_s = iter(source_loader)
-    data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
-    
+
     # Training loop
     while step <= args.steps:
 
