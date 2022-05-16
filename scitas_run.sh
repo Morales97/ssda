@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cefull
+#SBATCH --job-name=klr3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -23,7 +23,7 @@
 #python main_SemiSup.py --save_model=False --seed=1 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --expt_name=SS_KLE_alo_tau0_cw --net=deeplabv2_rn101 --size=small --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --class_weight=True --cr=kl --alonso_contrast=full #--pixel_contrast=True --pc_mixed=True 
 
 # FULL, bs=1
-python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --size=small --expt_name=CE_full --net=deeplabv2_rn101 --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --pc_memory=True --alonso_contrast=full --class_weight=True 
+#python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --size=small --expt_name=CE_full --net=deeplabv2_rn101 --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --pc_memory=True --alonso_contrast=full --class_weight=True 
 
 # next round of ST
-#python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=10000 --save_interval=10000 --project=GTA_to_CS_small --size=small --expt_name=KL_pc_round2_noS_EMA --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=KL_pc_40k3_test --round_start=model/pretrained/model_40k_KL_pc.tar
+python main_SSDA.py --seed=3 --lr=0.001 --lr_decay=det --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --size=small --expt_name=KL_pc_cw_r3 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --class_weight=True --pseudolabel_folder=KL_pc_r23_test
