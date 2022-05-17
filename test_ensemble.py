@@ -43,7 +43,7 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb=None):
 if __name__ == '__main__':
     args = parse_args()
 
-    #_, _, _, val_loader = get_loaders(args)
+    _, _, _, val_loader = get_loaders(args)
 
     path_1 = 'expts/tmp_last/checkpoint_KL_pc_cw_r3_3.pth.tar'
     path_2 = 'expts/tmp_last/checkpoint_KL_pc_cw_r3_noPL_3.pth.tar' 
@@ -54,6 +54,9 @@ if __name__ == '__main__':
     model_1.cuda()
     model_2.cuda()
     model_ensemble.cuda()
+    model_1.train()
+    model_2.train()
+    model_ensemble.train()
 
     ema_1 = ExponentialMovingAverage(model_1.parameters(), decay=0.995)
     ema_1.to(torch.device('cuda'))
@@ -76,6 +79,9 @@ if __name__ == '__main__':
     ema_ensemble.shadow_params = ensemble_params
 
     loss_fn = cross_entropy2d   
-    #_log_validation_ema(model_1, ema_ensemble, val_loader, loss_fn, 0)
+    _log_validation_ema(model_ensemble, ema_ensemble, val_loader, loss_fn, 0)
+    _log_validation_ema(model_2, ema_2, val_loader, loss_fn, 0)
+    _log_validation_ema(model_1, ema_1, val_loader, loss_fn, 0)
+    
 
     pdb.set_trace()
