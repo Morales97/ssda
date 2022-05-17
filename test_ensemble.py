@@ -16,9 +16,9 @@ if __name__ == '__main__':
     model_1.cuda()
     model_2.cuda()
 
-    ema_1 = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema_1 = ExponentialMovingAverage(model_1.parameters(), decay=0.995)
     ema_1.to(torch.device('cuda'))
-    ema_2 = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    ema_2 = ExponentialMovingAverage(model_2.parameters(), decay=0.995)
     ema_2.to(torch.device('cuda'))
 
     checkpoint_1 = torch.load(path_1)
