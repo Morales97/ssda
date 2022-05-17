@@ -82,9 +82,9 @@ def main(args, wandb):
             images_t = images_t.cuda()
             labels_t = labels_t.cuda()
             model.eval()
-            out1 = model(images_t)
+            out1 = model(images_t)['out']
             with ema.average_parameters():
-                out2 = model(images_t)
+                out2 = model(images_t)['out']
             pdb.set_trace()
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
             score = _log_validation_ema(model, ema, val_loader, loss_fn, start_step, wandb)
