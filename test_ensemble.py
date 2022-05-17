@@ -7,8 +7,8 @@ import pdb
 if __name__ == '__main__':
     args = parse_args()
 
-    path_1 = ''
-    path_2 = '' 
+    path_1 = 'expts/tmp_last/checkpoint_KL_pc_cw_r3_3.pth.tar'
+    path_2 = 'expts/tmp_last/checkpoint_KL_pc_cw_r3_noPL_3.pth.tar' 
 
     model_1 = get_model(args)
     model_2 = get_model(args)
