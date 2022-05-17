@@ -22,15 +22,15 @@ def get_parser():
     parser.add_argument('--backbone_path', type=str, default='',
                         help='Path to checkpoint to load backbone from')
 
-    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                         help='learning rate (default: 0.01)')
     parser.add_argument('--lr_decay', type=str, default='det',
                         help='lr decay to use (det/poly')         
-    parser.add_argument('--batch_size_s', type=int, default=8,
+    parser.add_argument('--batch_size_s', type=int, default=2,
                         help='Batch size of source labelled data.')
-    parser.add_argument('--batch_size_tl', type=int, default=8,
+    parser.add_argument('--batch_size_tl', type=int, default=2,
                         help='Batch size of target labelled data.')
-    parser.add_argument('--batch_size_tu', type=int, default=8,
+    parser.add_argument('--batch_size_tu', type=int, default=2,
                         help='Batch size of target unlabelled data.')
     parser.add_argument('--num_workers', type=int, default=1,
                         help='Number of worker threads to use in each dataloader')
@@ -39,7 +39,6 @@ def get_parser():
                              'use. Uses torch.set_num_threads()')
     parser.add_argument('--clip_norm', type=float, default=10,
                         help='norm for gradient clipping')
-
     parser.add_argument('--project', type=str, default='GTA_to_CS_tiny',
                         help='wandb project to use')
     parser.add_argument('--entity', type=str, default='morales97',
@@ -63,7 +62,7 @@ def get_parser():
                         help='Segmentation model pretrained end-to-end, usually on COCO')
     parser.add_argument('--pre_trained_backbone', type=boolfromstr, default=True,
                         help='Backbone of the seg model pretrained, usually on ImageNet')
-    parser.add_argument('--net', type=str, default='lraspp_mobilenet',
+    parser.add_argument('--net', type=str, default='deeplabv2_rn101',
                         help='choose model architecture')
     parser.add_argument('--target_samples', type=int, default=100,
                         help='how many target domain samples to use. Default -1: use all samples')
@@ -81,7 +80,7 @@ def get_parser():
                         help='number of augmentations in CR')                       
     parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
                         help='Use pixel contrast regularization')
-    parser.add_argument('--pc_mixed', type=boolfromstr, default=False,
+    parser.add_argument('--pc_mixed', type=boolfromstr, default=True,
                         help='Pixel contrast: mix S and T samples or not')   
     parser.add_argument('--pc_memory', type=boolfromstr, default=False,
                         help='Pixel contrast: use memory or not')   
@@ -89,7 +88,7 @@ def get_parser():
                         help='weight of pixel contrast loss')
     parser.add_argument('--warmup_steps', type=int, default=1000,
                         help='number of warm up steps before pixel contrast loss')    
-    parser.add_argument('--size', type=str, default='tiny',
+    parser.add_argument('--size', type=str, default='small',
                         help='size of the dataset (tiny/small)')     
     parser.add_argument('--dsbn', type=boolfromstr, default=False,
                         help='Use or not Adaptive Batch Norm')    
@@ -107,7 +106,7 @@ def get_parser():
                         help='Mix S and T labeled data with CutMix')   
     parser.add_argument('--cutmix_cr', type=boolfromstr, default=False,
                         help='Mix T unlabeled data with CutMix')  
-    parser.add_argument('--class_weight', type=boolfromstr, default=False,
+    parser.add_argument('--class_weight', type=boolfromstr, default=True,
                         help='Use class weighting in the loss function')      
     parser.add_argument('--pseudolabel_folder', type=str, default=None,
                         help='path to folder with pseudolabels')             

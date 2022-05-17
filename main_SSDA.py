@@ -58,7 +58,7 @@ def main(args, wandb):
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
-        class_weigth_s = get_class_weights(None, precomputed='gta', size='tiny')# size=args.size)
+        class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
         #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
