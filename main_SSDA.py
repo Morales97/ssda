@@ -137,7 +137,7 @@ def main(args, wandb):
         # CutMix
         if args.cutmix_sup:
             images_s, images_t, labels_s, labels_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
-            class_weigth = class_weigth_s + class_weigth_t / 2  # labels will be mixed, do an average of class weights
+            class_weigth = (class_weigth_s + class_weigth_t) / 2  # labels will be mixed, do an average of class weights
             class_weigth_s = class_weigth
             class_weigth_t = class_weigth
 
@@ -157,7 +157,6 @@ def main(args, wandb):
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
         loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
-        pdb.set_trace()
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
