@@ -87,13 +87,13 @@ def main(args, wandb):
             with ema.average_parameters():
                 out2 = model(images_t)['out']
             '''
-            model.train()
+            #model.train()
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
-            model.train()
-            score = _log_validation_ema1(model, ema, val_loader, loss_fn, start_step, wandb)
-            model.train()
-            score = _log_validation_ema2(model, ema, val_loader, loss_fn, start_step, wandb)
-            pdb.set_trace()
+            #model.train()
+            #score = _log_validation_ema1(model, ema, val_loader, loss_fn, start_step, wandb)
+            #model.train()
+            #score = _log_validation_ema2(model, ema, val_loader, loss_fn, start_step, wandb)
+            #pdb.set_trace()
 
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -456,7 +456,7 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print(log_str)
-    #wandb.log(rm_format(log_info))
+    wandb.log(rm_format(log_info))
 
     return score
 
