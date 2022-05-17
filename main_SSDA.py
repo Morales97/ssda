@@ -157,7 +157,7 @@ def main(args, wandb):
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
         loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
-
+        pdb.set_trace()
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
@@ -497,7 +497,7 @@ if __name__ == '__main__':
 
 
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
-# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --cutmix_sup=True
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
 # python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
 # python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
