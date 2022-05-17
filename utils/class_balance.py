@@ -5,6 +5,7 @@ import torch
 
 def get_class_weights(dataloader, n_classes=19, precomputed=None, size=None):
 
+    # GTA
     if precomputed == 'gta':
         if size == 'tiny':
             class_weight = torch.Tensor([0.1802,  0.381,   0.2665,  0.7628,  1.2932,       1, 2.9145,  3.6078,  0.3848, 
@@ -14,6 +15,14 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None, size=None):
                                         0.732,   0.3397,  1.7114,  5.7128,  0.5807,  0.9636,  1.7645,  4.5929,  5.4738, 14.5959])
         print('Retreived GTA class weights for size: ', size)
         return class_weight.to('cuda')
+
+    # Cityscapes
+    # Example of cityscapes class weights on 100 labels + 2875 pseudolabels
+    #[0.0886 0.3026 0.141  1.0897 1.3093 0.9115 1.7992 1.     0.1587 0.7339
+    #0.2549 0.6338 2.1158 0.2336 1.4113 1.2837 1.46   2.6315 1.1661]
+
+    # weights rounded to 2 for 100 CS samples (seed 1)
+    # array([0.16, 0.37, 0.21, 0.87, 1.03, 0.89, 2.24, 1.28, 0.24, 0.93, 0.45, 1.  , 2.79, 0.39, 1.8 , 2.35, 1.97, 5.57, 1.99])
 
     ts = time.time()
     class_freq = np.zeros(n_classes)
@@ -27,6 +36,7 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None, size=None):
         if tot_labels % 5000 == 0:
             break
         
+    pdb.set_trace()
     class_freq /= class_freq.sum()
     class_weight = np.sqrt(np.median(class_freq) / class_freq)
     print('Class weighting time [s]: ' + str(time.time()-ts))
@@ -62,6 +72,30 @@ def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n
     print('Class weighting time [s]: ' + str(time.time()-ts))
     print(class_weight)
     return class_weight
+
+
+if __name__ == '__main__':
+    from loader.cityscapes_ds import cityscapesDataset
+    from torch.utils.data import DataLoader
+    image_path_cs = 'data/cityscapes/leftImg8bit_small'
+    label_path_cs = 'data/cityscapes/gtFine'
+
+    n_lbl_samples = 1
+    idxs = np.arange(num_t_samples)
+    #idxs = np.random.permutation(idxs) # do not shuffle
+    idxs_lbl = idxs[:n_lbl_samples]
+
+    t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                        label_path=label_path_cs, 
+                                        size='small', 
+                                        split='train', 
+                                        sample_idxs=idxs_lbl)
+    t_lbl_loader = DataLoader(
+        t_lbl_dataset,
+        batch_size=1,
+        num_workers=1)
+
+    get_class_weights(t_lbl_loader)
 
 # weights rounded to 2 for 100 CS samples (seed 1)
 # array([0.16, 0.37, 0.21, 0.87, 1.03, 0.89, 2.24, 1.28, 0.24, 0.93, 0.45, 1.  , 2.79, 0.39, 1.8 , 2.35, 1.97, 5.57, 1.99])
