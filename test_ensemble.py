@@ -31,4 +31,5 @@ if __name__ == '__main__':
     if 'ema_state_dict' in checkpoint_2.keys():
         ema_2.load_state_dict(checkpoint_2['ema_state_dict'])
 
+    ensemble_params = [(p1 + p2)/2 for p1, p2 in zip(ema_1._get_parameters(None), ema_2.get_parameters(None))]
     pdb.set_trace()
