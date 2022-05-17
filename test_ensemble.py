@@ -3,6 +3,7 @@ import torch
 from model.model import get_model
 from utils.ioutils import parse_args
 import pdb
+from torch_ema import ExponentialMovingAverage
 
 if __name__ == '__main__':
     args = parse_args()
