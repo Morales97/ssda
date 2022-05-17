@@ -164,13 +164,9 @@ def main(args, wandb):
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
-                # Forward pass for CR
-                if args.cutmix_cr:
-                    out_w, out_strong = _forward_cr_cutmix(args, model, ema, images_weak, images_strong)
-                else:
-                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
-                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
+                out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
+                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
                 loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema) 
