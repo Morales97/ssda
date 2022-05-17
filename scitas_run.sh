@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=plnoS
+#SBATCH --job-name=cmnoblr
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-#python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_pc_mem --net=deeplabv3_rn50_mem --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --pc_memory=True
+python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_CMcr_no_blur --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --pc_memory=True --aug_level=3 --cutmix_cr=True
 #python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=maskC_on_T --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --custom_pretrain=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
 #python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=alonso_full_tau0 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --alonso_contrast=full
 
@@ -32,7 +32,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_full --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_memory=True --alonso_contrast=full 
 
 # next round of ST
-python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_noS --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
+#python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_noS --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_2 --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_r3 --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_r23_test
 
