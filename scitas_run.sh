@@ -11,9 +11,6 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_gaus_blur --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=False --aug_level=5 
-#python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=maskC_on_T --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --custom_pretrain=model/pretrained/ckpt_mask_dlrn50_CS_400.tar
-#python main_SSDA.py --seed=3 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=alonso_full_tau0 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --alonso_contrast=full
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=GJS_pc_cw --cr=gjs --n_augmentations=2 --pixel_contrast=True --class_weight=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=GJS_pc_cw --cr=gjs --n_augmentations=2 --pixel_contrast=True --class_weight=True
@@ -26,6 +23,7 @@ python main_SSDA.py --seed=1 --save_model=False --project=GTA_CS_rn50_tiny --exp
 #python main_SemiSup.py --save_model=False --seed=1 --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --expt_name=SS_KLE_alo_tau0_cw --cr=kl --alonso_contrast=full #--pixel_contrast=True 
 
 # SIZE TINY
+python main_SSDA.py --seed=1 --lr=0.01 --size=tiny --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_gaus_blur --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=False --aug_level=5 
 #python main_SSDA.py --seed=1 --lr=0.01 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_pc_mem --size=tiny --net=deeplabv3_rn50_mem --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --pc_memory=True
 
 # FULL, bs=1
