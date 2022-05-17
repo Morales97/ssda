@@ -68,4 +68,8 @@ if __name__ == '__main__':
         ema_2.load_state_dict(checkpoint_2['ema_state_dict'])
 
     ensemble_params = [(p1 + p2)/2 for p1, p2 in zip(ema_1._get_parameters(None), ema_2._get_parameters(None))]
+    ema_ensemble = ExponentialMovingAverage(model_2.parameters(), decay=0.995)
+    ema_ensemble.to(torch.device('cuda'))
+    ema_ensemble.shadow_params = ensemble_params
+
     pdb.set_trace()
