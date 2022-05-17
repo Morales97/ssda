@@ -76,6 +76,7 @@ def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n
 
 if __name__ == '__main__':
     import os
+    print(os.getcwd())
     path_parent = os.path.dirname(os.getcwd())
     os.chdir(path_parent)
     print(os.getcwd())
