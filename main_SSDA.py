@@ -85,9 +85,10 @@ def main(args, wandb):
             out1 = model(images_t)['out']
             with ema.average_parameters():
                 out2 = model(images_t)['out']
+            #score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation_ema1(model, ema, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation_ema2(model, ema, val_loader, loss_fn, start_step, wandb)
             pdb.set_trace()
-            score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
-            score = _log_validation_ema(model, ema, val_loader, loss_fn, start_step, wandb)
 
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -486,6 +487,70 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')
     print(log_str)
     wandb.log(rm_format(log_info))
+
+def _log_validation_ema1(model, ema, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+    model.eval()
+    with ema.average_parameters() and torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            outputs = model(images_val)
+            outputs = outputs['out']
+
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+    
+    score, class_iou = running_metrics_val.get_scores()
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss on EMA': val_loss_meter.avg,
+        'mIoU on EMA': score['mIoU'],
+        'Overall acc on EMA': score['Overall Acc'],
+    })
+
+    log_str = get_log_str(args, log_info, title='Validation Log on EMA')
+    print(log_str)
+
+def _log_validation_ema2(model, ema, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+    #model.eval()
+    with ema.average_parameters() and torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            outputs = model(images_val)
+            outputs = outputs['out']
+
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+    
+    score, class_iou = running_metrics_val.get_scores()
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss on EMA': val_loss_meter.avg,
+        'mIoU on EMA': score['mIoU'],
+        'Overall acc on EMA': score['Overall Acc'],
+    })
+
+    log_str = get_log_str(args, log_info, title='Validation Log on EMA')
+    print(log_str)
 
 if __name__ == '__main__':
     args = parse_args()
