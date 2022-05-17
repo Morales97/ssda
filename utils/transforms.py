@@ -199,27 +199,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
     return transform
 
 
-# NOTE when implementing CutMix, check out code from Alonso et al at utils/transformsgpu (below). Is this CutMix?
-'''
-def mix(mask, data=None, target=None):
-    if not (data is None):
-        if mask.shape[0] == data.shape[0]:
-            data = torch.cat([(mask[i] * data[i] + (1 - mask[i]) * data[(i + 1) % data.shape[0]]).unsqueeze(0) for i in
-                              range(data.shape[0])])
-        elif mask.shape[0] == data.shape[0] / 2:
-            data = torch.cat((torch.cat([(mask[i] * data[2 * i] + (1 - mask[i]) * data[2 * i + 1]).unsqueeze(0) for i in
-                                         range(int(data.shape[0] / 2))]),
-                              torch.cat([((1 - mask[i]) * data[2 * i] + mask[i] * data[2 * i + 1]).unsqueeze(0) for i in
-                                         range(int(data.shape[0] / 2))])))
-    if not (target is None):
-        target = torch.cat(
-            [(mask[i] * target[i] + (1 - mask[i]) * target[(i + 1) % target.shape[0]]).unsqueeze(0) for i in
-             range(target.shape[0])])
-    return data, target
-'''
 
-
-# TODO what is this? wouldn't it be better to have it random?
 def _float_parameter(v, max_v):
     return float(v) * max_v / 10
 

@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     loss_fn = cross_entropy2d   
     _log_validation_ensemble(model_1, ema_1, model_2, ema_2, val_loader, loss_fn, 0)
-    _log_validation_ema(model_2, ema_2, val_loader, loss_fn, step, wandb=None)
-    _log_validation_ema(model_1, ema_1, val_loader, loss_fn, step, wandb=None)
+    _log_validation_ema(model_2, ema_2, val_loader, loss_fn, 0, wandb=None)
+    _log_validation_ema(model_1, ema_1, val_loader, loss_fn, 0, wandb=None)
 
     pdb.set_trace()
