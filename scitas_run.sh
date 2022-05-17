@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cegaus
+#SBATCH --job-name=cmsup
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
