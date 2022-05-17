@@ -79,6 +79,8 @@ def main(args, wandb):
             print('*** Resuming from train step {}'.format(start_step))
             data_iter_t = iter(target_loader)
             images_t, labels_t = next(data_iter_t)
+            images_t = images_t.cuda()
+            labels_t = labels_t.cuda()
             model.eval()
             out1 = model(images_t)
             with ema.average_parameters():
