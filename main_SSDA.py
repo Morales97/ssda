@@ -90,7 +90,7 @@ def main(args, wandb):
             model_teacher = get_model(args)
             model_teacher.cuda()
             model_teacher.train()
-            ema_teacher = ExponentialMovingAverage(model.parameters(), decay=0.995)
+            ema_teacher = ExponentialMovingAverage(model_teacher.parameters(), decay=0.995)
             ema_teacher.to(torch.device('cuda'))
             checkpoint = torch.load(args.teacher)
             if 'ema_state_dict' in checkpoint.keys():
