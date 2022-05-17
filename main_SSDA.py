@@ -83,6 +83,24 @@ def main(args, wandb):
             raise Exception('No file found at {}'.format(args.resume))
     step = start_step
 
+    # Load EMA from previous round
+    if args.teacher:
+        if os.path.isfile(args.teacher):
+            # load teacher on another model
+            model_teacher = get_model(args)
+            model_teacher.cuda()
+            model_teacher.train()
+            ema_teacher = ExponentialMovingAverage(model.parameters(), decay=0.995)
+            ema_teacher.to(torch.device('cuda'))
+            checkpoint = torch.load(args.teacher)
+            if 'ema_state_dict' in checkpoint.keys():
+                ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
+            print('*** Loading EMA teacher from ', args.teacher)
+            score = _log_validation_ema(model_teacher, ema_teacher, val_loader, loss_fn, start_step, wandb)
+            print('EMA teacher\'s mIoU: ', str(score['mIoU']))
+        else:
+            raise Exception('No file found at {}'.format(args.resume))
+
     # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -168,7 +186,10 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
-                out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
+                if args.teacher is not None:
+                    out_w, out_strong = _forward_cr(args, model_teacher, ema_teacher, images_weak, images_strong)
+                else:
+                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
@@ -477,7 +498,7 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')
     print(log_str)
     wandb.log(rm_format(log_info))
-
+    return score
 
 if __name__ == '__main__':
     args = parse_args()
@@ -504,7 +525,7 @@ if __name__ == '__main__':
 # python main_SSDA.py --size=tiny --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --cr=js --cr_ema=False
 # python main_SSDA.py --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 
 # python main_SSDA.py --wandb=False --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --warmup_steps=0
-# python main_SSDA.py --wandb=False --resume=expts/tmp_last/checkpoint_KL_pc_cw_r3_3.pth.tar
+# python main_SSDA.py --wandb=False --teacher=expts/tmp_last/checkpoint_KL_pc_cw_r3_3.pth.tar
 
 # next round of ST
 #python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar

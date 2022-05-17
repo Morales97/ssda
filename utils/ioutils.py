@@ -109,7 +109,9 @@ def get_parser():
     parser.add_argument('--class_weight', type=boolfromstr, default=True,
                         help='Use class weighting in the loss function')      
     parser.add_argument('--pseudolabel_folder', type=str, default=None,
-                        help='path to folder with pseudolabels')             
+                        help='path to folder with pseudolabels')     
+    parser.add_argument('--teacher', type=str, default=None,
+                        help='path to teacher model')        
     '''
     parser.add_argument('--net', type=str, default='resnet34',
                         choices=['alexnet', 'vgg', 'resnet34'],
