@@ -75,9 +75,8 @@ def get_class_weights_estimation(dataloader_lbl, dataloader_unlbl, model, ema, n
 
 
 if __name__ == '__main__':
-    
 
-    from cityscapes_ds_COPY import cityscapesDataset
+    from loader.cityscapes_ds import cityscapesDataset
     from torch.utils.data import DataLoader
 
     image_path_cs = 'data/cityscapes/leftImg8bit_small'
