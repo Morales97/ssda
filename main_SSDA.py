@@ -77,6 +77,7 @@ def main(args, wandb):
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
             print('*** Resuming from train step {}'.format(start_step))
+            '''
             data_iter_t = iter(target_loader)
             images_t, labels_t = next(data_iter_t)
             images_t = images_t.cuda()
@@ -85,7 +86,9 @@ def main(args, wandb):
             out1 = model(images_t)['out']
             with ema.average_parameters():
                 out2 = model(images_t)['out']
-            #score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
+            '''
+            model.train()
+            score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
             model.train()
             score = _log_validation_ema1(model, ema, val_loader, loss_fn, start_step, wandb)
             model.train()
@@ -453,7 +456,7 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print(log_str)
-    wandb.log(rm_format(log_info))
+    #wandb.log(rm_format(log_info))
 
     return score
 
