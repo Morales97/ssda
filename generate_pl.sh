@@ -11,4 +11,4 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python generate_pseudolabels.py --seed=3 --size=small --expt_name=KL_pc_r2 --net=deeplabv2_rn101 --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_3.pth.tar
+python generate_pseudolabels.py --seed=3 --expt_name=KL_r3_noPL --resume=expts/tmp_last/checkpoint_KL_pc_cw_r3_noPL_3.pth.tar
