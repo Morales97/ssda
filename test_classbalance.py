@@ -14,7 +14,7 @@ if __name__ == '__main__':
     label_path_cs = 'data/cityscapes/gtFine'
 
     n_lbl_samples = 1
-    idxs = np.arange(num_t_samples)
+    idxs = np.arange(2975)
     #idxs = np.random.permutation(idxs) # do not shuffle
     idxs_lbl = idxs[:n_lbl_samples]
 
