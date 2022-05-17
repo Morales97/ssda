@@ -23,6 +23,8 @@ def get_class_weights(dataloader, n_classes=19, precomputed=None, size=None):
 
     # weights rounded to 2 for 100 CS samples (seed 1)
     # array([0.16, 0.37, 0.21, 0.87, 1.03, 0.89, 2.24, 1.28, 0.24, 0.93, 0.45, 1.  , 2.79, 0.39, 1.8 , 2.35, 1.97, 5.57, 1.99])
+    # NOTE there is a big difference in some classes, such as 17 (motorcylce) and 18 (bicycle). These are much more common in Cityscapes than GTA
+    # If cutmix is used in sup. probably it is okay to use an average of the two (as there will be half of labeled pixels from each domain)
 
     ts = time.time()
     class_freq = np.zeros(n_classes)
