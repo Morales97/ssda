@@ -6,6 +6,7 @@ import pdb
 from torch_ema import ExponentialMovingAverage
 from evaluation.metrics import averageMeter, runningScore
 from loss.cross_entropy import cross_entropy2d
+from loader.loaders import get_loaders
 
 def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb=None):
     running_metrics_val = runningScore(19)
