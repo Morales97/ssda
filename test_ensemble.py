@@ -66,15 +66,14 @@ def _log_validation_ensemble(model_1, ema_1, model_2, ema_2, val_loader, loss_fn
 
                 pred = prob_ensemble.data.max(1)[1].cpu().numpy()
                 gt = labels_val.data.cpu().numpy()
-                pdb.set_trace()
                 running_metrics_val.update(gt, pred)
-                val_loss_meter.update(val_loss.item())
+                #val_loss_meter.update(val_loss.item())
     
     score, class_iou = running_metrics_val.get_scores()
 
     log_info = OrderedDict({
         'Train Step': step,
-        'Validation loss on EMA': val_loss_meter.avg,
+        #'Validation loss on EMA': val_loss_meter.avg,
         'mIoU on EMA': score['mIoU'],
         'Overall acc on EMA': score['Overall Acc'],
     })
@@ -122,5 +121,7 @@ if __name__ == '__main__':
 
     loss_fn = cross_entropy2d   
     _log_validation_ensemble(model_1, ema_1, model_2, ema_2, val_loader, loss_fn, 0)
+    _log_validation_ema(model_2, ema_2, val_loader, loss_fn, step, wandb=None)
+    _log_validation_ema(model_1, ema_1, val_loader, loss_fn, step, wandb=None)
 
     pdb.set_trace()
