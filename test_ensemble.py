@@ -5,6 +5,7 @@ from utils.ioutils import parse_args, get_log_str
 import pdb
 from torch_ema import ExponentialMovingAverage
 from evaluation.metrics import averageMeter, runningScore
+from loss.cross_entropy import cross_entropy2d
 
 def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb=None):
     running_metrics_val = runningScore(19)
@@ -49,13 +50,17 @@ if __name__ == '__main__':
 
     model_1 = get_model(args)
     model_2 = get_model(args)
+    model_ensemble = get_model(args)
     model_1.cuda()
     model_2.cuda()
+    model_ensemble.cuda()
 
     ema_1 = ExponentialMovingAverage(model_1.parameters(), decay=0.995)
     ema_1.to(torch.device('cuda'))
     ema_2 = ExponentialMovingAverage(model_2.parameters(), decay=0.995)
     ema_2.to(torch.device('cuda'))
+    ema_ensemble = ExponentialMovingAverage(model_ensemble.parameters(), decay=0.995)
+    ema_ensemble.to(torch.device('cuda'))
 
     checkpoint_1 = torch.load(path_1)
     model_1.load_state_dict(checkpoint_1['model_state_dict'])
@@ -68,8 +73,9 @@ if __name__ == '__main__':
         ema_2.load_state_dict(checkpoint_2['ema_state_dict'])
 
     ensemble_params = [(p1 + p2)/2 for p1, p2 in zip(ema_1._get_parameters(None), ema_2._get_parameters(None))]
-    ema_ensemble = ExponentialMovingAverage(model_2.parameters(), decay=0.995)
-    ema_ensemble.to(torch.device('cuda'))
     ema_ensemble.shadow_params = ensemble_params
+
+    loss_fn = cross_entropy2d   
+    #_log_validation_ema(model_1, ema_ensemble, val_loader, loss_fn, 0)
 
     pdb.set_trace()
