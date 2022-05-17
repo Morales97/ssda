@@ -13,7 +13,7 @@ if __name__ == '__main__':
     image_path_cs = 'data/cityscapes/leftImg8bit_small'
     label_path_cs = 'data/cityscapes/gtFine'
 
-    n_lbl_samples = 10
+    n_lbl_samples = 100
     idxs = np.arange(2975)
     #idxs = np.random.permutation(idxs) # do not shuffle
     idxs_lbl = idxs[:n_lbl_samples]
