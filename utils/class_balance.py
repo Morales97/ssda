@@ -78,6 +78,7 @@ if __name__ == '__main__':
     import os
     path_parent = os.path.dirname(os.getcwd())
     os.chdir(path_parent)
+    print(os.getcwd())
     from loader.cityscapes_ds import cityscapesDataset
     from torch.utils.data import DataLoader
 
