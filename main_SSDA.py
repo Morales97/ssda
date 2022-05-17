@@ -77,13 +77,13 @@ def main(args, wandb):
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
             print('*** Resuming from train step {}'.format(start_step))
-            pdb.set_trace()
             data_iter_t = iter(target_loader)
             images_t, labels_t = next(data_iter_t)
             model.eval()
             out1 = model(images_t)
             with ema.average_parameters():
                 out2 = model(images_t)
+            pdb.set_trace()
             score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
             score = _log_validation_ema(model, ema, val_loader, loss_fn, start_step, wandb)
 
