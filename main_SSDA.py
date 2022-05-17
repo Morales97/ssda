@@ -86,7 +86,9 @@ def main(args, wandb):
             with ema.average_parameters():
                 out2 = model(images_t)['out']
             #score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
+            model.train()
             score = _log_validation_ema1(model, ema, val_loader, loss_fn, start_step, wandb)
+            model.train()
             score = _log_validation_ema2(model, ema, val_loader, loss_fn, start_step, wandb)
             pdb.set_trace()
 
