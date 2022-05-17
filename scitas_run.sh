@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cmnobl
+#SBATCH --job-name=cegaus
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,9 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=GJS_pc_cw --cr=gjs --n_augmentations=2 --pixel_contrast=True --class_weight=True
-#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=GJS_pc_cw --cr=gjs --n_augmentations=2 --pixel_contrast=True --class_weight=True
-#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_cutmixCR --cr=ce --pixel_contrast=True --cutmix_cr=True
+python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_gaus_blur --cr=ce --pixel_contrast=True --aug_level=5
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_mem_cw --cr=ce --pixel_contrast=True --pc_memory=True --class_weight=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw.pth.tar
@@ -23,7 +21,7 @@
 #python main_SemiSup.py --save_model=False --seed=1 --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --expt_name=SS_KLE_alo_tau0_cw --cr=kl --alonso_contrast=full #--pixel_contrast=True 
 
 # SIZE TINY
-python main_SSDA.py --seed=1 --lr=0.01 --size=tiny --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_CMcr_no_blur --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=False --aug_level=3 --cutmix_cr=True #--aug_level=5 
+#python main_SSDA.py --seed=1 --lr=0.01 --size=tiny --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_CMcr_no_blur --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=False --aug_level=3 --cutmix_cr=True #--aug_level=5 
 #python main_SSDA.py --seed=1 --lr=0.01 --save_model=False --project=GTA_CS_rn50_tiny --expt_name=KL_pc_mem --size=tiny --net=deeplabv3_rn50_mem --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --pixel_contrast=True --pc_memory=True
 
 # FULL, bs=1

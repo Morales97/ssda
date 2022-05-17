@@ -173,7 +173,7 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
                 RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
                 transforms.RandomApply([
                     RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
-                ], p=0.8),
+                ], p=0.5),
                 transforms.RandomApply([
                     transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
                 ], p=0.8)
