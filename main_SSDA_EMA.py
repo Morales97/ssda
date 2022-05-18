@@ -51,8 +51,11 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
-    ema = deepcopy(model)
-    ema.cuda()
+    ema_model = deepcopy(model)
+    for param in ema_model.parameters():
+        param.detach_()
+    ema_model.cuda()
+    ema_model.train()
     alpha = 0.995
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
@@ -73,7 +76,7 @@ def main(args, wandb):
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            ema.load_state_dict(checkpoint['ema_state_dict'])
+            ema_model.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
@@ -162,6 +165,7 @@ def main(args, wandb):
 
         start_ts = time.time()
         model.train()
+        ema_model.train()
 
         # Forward pass
         outputs_s = model(images_s)
@@ -185,11 +189,11 @@ def main(args, wandb):
                 if args.teacher is not None:
                     out_w, out_strong = _forward_cr(args, model_teacher, ema_teacher, images_weak, images_strong)
                 else:
-                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
+                    out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
-                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema) 
+                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema_model) 
 
             time_cr = time.time() - start_ts_cr
             
@@ -248,8 +252,7 @@ def main(args, wandb):
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
-                with ema.average_parameters():
-                    outputs_t_ema = model(images_t)   
+                outputs_t_ema = ema_model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
@@ -288,7 +291,7 @@ def main(args, wandb):
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         #ema.update()
-        params, ema_params = model.parameters(), ema.parameters()
+        params, ema_params = model.parameters(), ema_model.parameters()
         with torch.no_grad():
             for param, ema_param in zip(params, ema_params):
                 ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
@@ -376,7 +379,7 @@ def main(args, wandb):
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -397,14 +400,14 @@ def main(args, wandb):
             
         if step >= job_step_limit or step >= args.steps:
             # Compute EMA teacher accuracy
-            _log_validation_ema(ema, val_loader, loss_fn, step, wandb)
+            _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb)
 
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -412,10 +415,10 @@ def main(args, wandb):
             break
 
 
-def _forward_cr(args, model, ema, images_weak, images_strong):
+def _forward_cr(args, model, ema_model, images_weak, images_strong):
     
     # Get psuedo-targets 'out_w'
-    outputs_w = ema(images_weak)     # (N, C, H, W)    
+    outputs_w = ema_model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
