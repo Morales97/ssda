@@ -292,7 +292,7 @@ def main(args, wandb):
         optimizer.step()
         #ema.update()
         params, ema_params = model.parameters(), ema_model.parameters()
-        _alpha = min(alpha, 1 - 1/(2*(step+1))) # adapt EMA faster in the first 200 steps
+        _alpha = min(alpha, (step + 1)/(step + 10)) # ramp up EMA
         with torch.no_grad():
             for param, ema_param in zip(params, ema_params):
                 ema_param.data = alpha * ema_param.data + (1-alpha) * param.data

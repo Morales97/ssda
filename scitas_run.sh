@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=r2noeval
+#SBATCH --job-name=emaramp2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -13,6 +13,7 @@
 
 
 #python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_EMA_rampup --cr=ce --pixel_contrast=True
+python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampup --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_CMcr_gaus_blur --cr=ce --pixel_contrast=True --aug_level=5 --cutmix_cr=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_CMsup --cr=ce --pixel_contrast=True --cutmix_sup=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
@@ -30,7 +31,7 @@
 
 # next round of ST
 #python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_noS --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_r2_noeval --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_40k_no_eval3 --aug_level=4 --cutmix_cr=False
+#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_r2_noeval --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_40k_no_eval3 --aug_level=4 --cutmix_cr=False
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_r3 --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_r23_test
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_r4 --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_r3_noPL3
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_r2_teacher2 --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test --teacher=model/pretrained/model_40k_KL_pc.tar

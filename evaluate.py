@@ -82,26 +82,17 @@ def evaluate(args):
     
     # --- Evaluate ---
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
+
+    # evaluate on student
     model.eval()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.eval_ema:
-                with ema.average_parameters():
-                    if args.dsbn:
-                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                    else:
-                        outputs = model(images_val)
-            else:
-                if args.dsbn:
-                    outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                else:
-                    outputs = model(images_val)
 
-            if type(outputs) == OrderedDict:
-                outputs = outputs['out']
+            outputs = model(images_val)
+            outputs = outputs['out']
 
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             pred = outputs.data.max(1)[1].cpu().numpy()
@@ -125,6 +116,38 @@ def evaluate(args):
     print(log_str)
     #wandb.log(rm_format(log_info))
 
+
+    # evaluate on EMA teacher
+    model.train()
+    with torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            with ema.average_parameters():
+                outputs = model(images_val)
+                outputs = outputs['out']
+
+            outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        #'Validation loss': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    #for k, v in class_iou.items():
+    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log')
+    print(log_str)
 
 
 if __name__ == '__main__':
