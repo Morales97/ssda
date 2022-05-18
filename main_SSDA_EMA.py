@@ -4,6 +4,7 @@ import shutil
 from collections import OrderedDict
 import time
 import copy
+from copy import deepcopy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -50,7 +51,7 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
-    ema = get_model(args)
+    ema = deepcopy(model)
     ema.cuda()
     alpha = 0.995
 
@@ -294,9 +295,9 @@ def main(args, wandb):
         optimizer.step()
         #ema.update()
         params, ema_params = model.parameters(), ema.parameters()
-        for param, ema_param in zip(params, ema_params):
-            pdb.set_trace()
-            ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
+        with torch.no_grad():
+            for param, ema_param in zip(params, ema_params):
+                ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
             
 
         time_update = time.time() - start_ts_update
@@ -418,8 +419,7 @@ def main(args, wandb):
 def _forward_cr(args, model, ema, images_weak, images_strong):
     
     # Get psuedo-targets 'out_w'
-    with ema.average_parameters():         # gradient will be stopped at p_w.detach()
-        outputs_w = model(images_weak)     # (N, C, H, W)    
+    outputs_w = ema(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
@@ -470,14 +470,14 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
     val_loss_meter = averageMeter()
-    
-    # NOTE DO NOT use model.eval() -> It seems to inhibit the ema.average_parameters() context 
-    with ema.average_parameters() and torch.no_grad():
+
+    ema.eval()    
+    with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            outputs = model(images_val)
+            outputs = ema(images_val)
             outputs = outputs['out']
 
             val_loss = loss_fn(input=outputs, target=labels_val)
