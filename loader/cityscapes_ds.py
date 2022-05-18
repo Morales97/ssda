@@ -235,7 +235,6 @@ class cityscapesDataset(data.Dataset):
     def generate_pseudolabels(self, model, ema, tau=0.9, ignore_index=250):
         assert self.unlabeled
 
-        model.eval()
         with ema.average_parameters() and torch.no_grad():
             for i, img_path in enumerate(self.files[self.split]):
                 

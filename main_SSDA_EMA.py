@@ -416,7 +416,7 @@ def main(args, wandb):
 def _forward_cr(args, model, ema_model, images_weak, images_strong):
     
     # Get psuedo-targets 'out_w'
-    ema_model.eval()
+    #ema_model.eval()
     outputs_w = ema_model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
