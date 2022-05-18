@@ -99,6 +99,8 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.num_classes= num_classes
         self.dim_embed = 256
+        self.pc_memory = pc_memory
+        self.alonso_contrast = alonso_contrast
         self.memory_size = 1000 #5000
         self.pixel_update_freq = 10
         self.ignore_label = 250
@@ -124,7 +126,7 @@ class ResNet(nn.Module):
                         nn.Conv2d(2048, self.dim_embed, 1, bias=False)
                     )
 
-        if pc_memory:
+        if self.pc_memory:
             # segment_queue is the "region" memory
             self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
             self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
@@ -135,7 +137,7 @@ class ResNet(nn.Module):
             self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
             self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
-        if alonso_contrast:
+        if self.alonso_contrast:
             # for Alonso's PC
             dim_in = 2048
             feat_dim = 256
@@ -214,18 +216,21 @@ class ResNet(nn.Module):
         x = self.layer5(features)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
 
-        proj = self.projection_head(features)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
-        pred = self.prediction_head(proj)
+        result["out"] = x
+        result["feat"] = features
 
+        # Projection for Pixel Contrast 
         proj_pc = self.projection_pc(features)
         proj_pc = F.normalize(proj_pc, p=2, dim=1)  
         proj_pc = F.interpolate(proj_pc, size=input_shape, mode="bilinear", align_corners=False)
-
-        result["out"] = x
-        result["feat"] = features
-        result["proj"] = proj
-        result["pred"] = pred
         result["proj_pc"] = proj_pc
+
+        # Projection for Alonso's PC 
+        if self.alonso_contrast:
+            proj = self.projection_head(features)        # proj and pred heads are not upsampled -> CL occurs in the lower resolution, they sample down the labels and images
+            pred = self.prediction_head(proj)
+            result["proj"] = proj
+            result["pred"] = pred
 
         return result
 
