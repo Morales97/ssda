@@ -441,6 +441,7 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
+    model.train()
 
     log_info = OrderedDict({
         'Train Step': step,
