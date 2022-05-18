@@ -82,7 +82,7 @@ def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
                                         n_augmentations=args.n_augmentations)
     
     # generate new folder for pseudolabels
-    pseudolabel_folder = args.expt_name + str(args.seed)
+    pseudolabel_folder = args.expt_name + '_s' + str(args.seed)
     psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder
     t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
     t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
