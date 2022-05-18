@@ -11,4 +11,4 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python generate_pseudolabels.py --seed=3 --expt_name=KL_40k_no_eval --resume=model/pretrained/model_40k_KL_pc.tar
+python generate_pseudolabels.py --seed=3 --expt_name=KL_40k_no_eval --resume=model/pretrained/model_40k_KL_pc.tar --alonso_contrast=True
