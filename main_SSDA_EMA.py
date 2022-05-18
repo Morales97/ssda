@@ -295,8 +295,6 @@ def main(args, wandb):
         with torch.no_grad():
             for param, ema_param in zip(params, ema_params):
                 ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
-                if step >= 20:
-                    pdb.set_trace()
             
 
         time_update = time.time() - start_ts_update
