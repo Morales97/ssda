@@ -74,7 +74,7 @@ def get_parser():
                         help='threshold for pseudolabels')
     parser.add_argument('--lmbda', type=float, default=1,
                         help='weight of consistency regularization loss')
-    parser.add_argument('--aug_level', type=int, default=4,
+    parser.add_argument('--aug_level', type=int, default=5,
                         help='Strong augmentations level')  
     parser.add_argument('--n_augmentations', type=int, default=1,
                         help='number of augmentations in CR')                       
@@ -104,7 +104,7 @@ def get_parser():
                         help='For evaluate.py. Evaluate on student or on EMA teacher')  
     parser.add_argument('--cutmix_sup', type=boolfromstr, default=False,
                         help='Mix S and T labeled data with CutMix')   
-    parser.add_argument('--cutmix_cr', type=boolfromstr, default=False,
+    parser.add_argument('--cutmix_cr', type=boolfromstr, default=True,
                         help='Mix T unlabeled data with CutMix')  
     parser.add_argument('--class_weight', type=boolfromstr, default=True,
                         help='Use class weighting in the loss function')      

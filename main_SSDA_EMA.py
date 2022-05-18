@@ -73,8 +73,7 @@ def main(args, wandb):
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
+            ema.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
@@ -88,17 +87,12 @@ def main(args, wandb):
     # Load EMA from previous round
     if args.teacher:
         if os.path.isfile(args.teacher):
-            # load teacher on another model
-            model_teacher = get_model(args)
-            model_teacher.cuda()
-            model_teacher.train()
-            ema_teacher = ExponentialMovingAverage(model_teacher.parameters(), decay=0.995)
+            ema_teacher = get_model(args)
             ema_teacher.to(torch.device('cuda'))
             checkpoint = torch.load(args.teacher)
-            if 'ema_state_dict' in checkpoint.keys():
-                ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
+            ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading EMA teacher from ', args.teacher)
-            score = _log_validation_ema(model_teacher, ema_teacher, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation_ema(ema_teacher, val_loader, loss_fn, start_step, wandb)
             print('EMA teacher\'s mIoU: ', str(score['mIoU']))
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -298,6 +292,8 @@ def main(args, wandb):
         with torch.no_grad():
             for param, ema_param in zip(params, ema_params):
                 ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
+                if step >= 20:
+                    pdb.set_trace()
             
 
         time_update = time.time() - start_ts_update
@@ -401,7 +397,7 @@ def main(args, wandb):
             
         if step >= job_step_limit or step >= args.steps:
             # Compute EMA teacher accuracy
-            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
+            _log_validation_ema(ema, val_loader, loss_fn, step, wandb)
 
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
@@ -467,17 +463,17 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     return score
 
-def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
+def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
     val_loss_meter = averageMeter()
 
-    ema.eval()    
+    ema_model.eval()    
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            outputs = ema(images_val)
+            outputs = ema_model(images_val)
             outputs = outputs['out']
 
             val_loss = loss_fn(input=outputs, target=labels_val)

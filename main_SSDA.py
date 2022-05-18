@@ -284,17 +284,11 @@ def main(args, wandb):
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
-        # dividing loss to not run out of memory
-        #loss, loss2 = 0, 0
-        #loss1 = loss_s + loss_t 
-        #loss2 = args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
 
         # Update
         start_ts_update = time.time()
         optimizer.zero_grad()
         loss.backward()
-        #loss1.backward()
-        #loss2.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema.update()
