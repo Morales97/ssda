@@ -105,6 +105,7 @@ def evaluate(args):
         #'Validation loss': val_loss_meter.avg
     })
     
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     score, class_iou = running_metrics_val.get_scores()
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
@@ -118,6 +119,7 @@ def evaluate(args):
     #wandb.log(rm_format(log_info))
 
     # evaluate on EMA teacher
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
@@ -151,6 +153,7 @@ def evaluate(args):
 
 
     # evaluate on EMA teacher
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     model.train()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
