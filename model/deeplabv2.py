@@ -94,7 +94,7 @@ class _ASPP(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes):
+    def __init__(self, block, layers, num_classes, pc_memory=False, alonso_contrast=None):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.num_classes= num_classes
@@ -124,50 +124,52 @@ class ResNet(nn.Module):
                         nn.Conv2d(2048, self.dim_embed, 1, bias=False)
                     )
 
-        # segment_queue is the "region" memory
-        self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
-        self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
-        self.register_buffer("segment_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
+        if pc_memory:
+            # segment_queue is the "region" memory
+            self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
+            self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
+            self.register_buffer("segment_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
-        # pixel_queue is the "pixel" memory
-        self.register_buffer("pixel_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
-        self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
-        self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
+            # pixel_queue is the "pixel" memory
+            self.register_buffer("pixel_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
+            self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
+            self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
-        # for Alonso's PC
-        dim_in = 2048
-        feat_dim = 256
-        self.projection_head = nn.Sequential(
-                                    nn.Conv2d(dim_in, feat_dim, 1, bias=False), # difference to original Alonso: nn.Linear(dim_in, feat_dim)
-                                    nn.BatchNorm2d(feat_dim),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
-                                )
-        self.prediction_head = nn.Sequential(
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
-                                    nn.BatchNorm2d(feat_dim),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
-                                )
-        
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
+        if alonso_contrast:
+            # for Alonso's PC
+            dim_in = 2048
+            feat_dim = 256
+            self.projection_head = nn.Sequential(
+                                        nn.Conv2d(dim_in, feat_dim, 1, bias=False), # difference to original Alonso: nn.Linear(dim_in, feat_dim)
+                                        nn.BatchNorm2d(feat_dim),
+                                        nn.ReLU(inplace=True),
+                                        nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                    )
+            self.prediction_head = nn.Sequential(
+                                        nn.Conv2d(feat_dim, feat_dim, 1, bias=False),
+                                        nn.BatchNorm2d(feat_dim),
+                                        nn.ReLU(inplace=True),
+                                        nn.Conv2d(feat_dim, feat_dim, 1, bias=False)
+                                    )
+            
+            for class_c in range(num_classes):
+                selector = nn.Sequential(
+                    nn.Linear(feat_dim, feat_dim),
+                    nn.BatchNorm1d(feat_dim),
+                    nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                    nn.Linear(feat_dim, 1)
+                )
+                self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
 
-        for class_c in range(num_classes):
-            selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
-            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
-        
+            for class_c in range(num_classes):
+                selector = nn.Sequential(
+                    nn.Linear(feat_dim, feat_dim),
+                    nn.BatchNorm1d(feat_dim),
+                    nn.LeakyReLU(negative_slope=0.2, inplace=True),
+                    nn.Linear(feat_dim, 1)
+                )
+                self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
+            
         print('Using custom DeepLabV2 model')
 
 
@@ -295,11 +297,11 @@ class ResNet(nn.Module):
         return [{'params': self.get_1x_lr_params(), 'lr': args.learning_rate}]
 
 
-def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, num_classes=19):
+def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_path=None, pc_memory=False, alonso_contrast=None, num_classes=19):
     if pretrained:
         raise Exception('pretrained DeepLabv2 + ResNet-101 is not available')
 
-    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes)
+    model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes, pc_memory, alonso_contrast)
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
