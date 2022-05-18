@@ -126,7 +126,7 @@ class ResNet(nn.Module):
                         nn.Conv2d(2048, self.dim_embed, 1, bias=False)
                     )
 
-        if self.pc_memory:
+        if True: #self.pc_memory:
             # segment_queue is the "region" memory
             self.register_buffer("segment_queue", torch.randn(num_classes, self.memory_size, self.dim_embed))
             self.segment_queue = nn.functional.normalize(self.segment_queue, p=2, dim=2)
@@ -137,7 +137,7 @@ class ResNet(nn.Module):
             self.pixel_queue = nn.functional.normalize(self.pixel_queue, p=2, dim=2)
             self.register_buffer("pixel_queue_ptr", torch.zeros(num_classes, dtype=torch.long))
 
-        if self.alonso_contrast:
+        if True: #self.alonso_contrast:
             # for Alonso's PC
             dim_in = 2048
             feat_dim = 256
