@@ -93,6 +93,7 @@ def main(args, wandb):
             ema_teacher = ExponentialMovingAverage(model_teacher.parameters(), decay=0.995)
             ema_teacher.to(torch.device('cuda'))
             checkpoint = torch.load(args.teacher)
+            model_teacher.load_state_dict(checkpoint['model_state_dict'])
             if 'ema_state_dict' in checkpoint.keys():
                 ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading EMA teacher from ', args.teacher)
