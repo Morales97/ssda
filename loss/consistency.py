@@ -243,10 +243,9 @@ def cr_KL_one_hot(p_w, p_s, tau=0.9, eps=1e-8):
     return loss_cr, percent_pl
 
 def cr_MSE(p_w, p_s):
-    l2_norm = torch.linalg.norm(p_w-p_s, dim=1).mean() 
-    mse = F.mse_loss(p_s, p_w)
-    pdb.set_trace()
-    return l2_norm, 100
+    delta = p_w - p_s   # (N·H·W, C)
+    mse = (delta * delta).sum(dim=1).mean()
+    return mse, 100
 
 def custom_kl_div(prediction, target):
     '''
