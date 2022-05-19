@@ -288,7 +288,6 @@ def main(args, wandb):
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
         ema_optimizer.update(step)
-            
 
         time_update = time.time() - start_ts_update
 

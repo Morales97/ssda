@@ -23,6 +23,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
+from utils.ema import OptimizerEMA
 
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
@@ -51,16 +52,18 @@ def main(args, wandb):
     model = get_model(args)
     model.cuda()
     model.train()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema_model = get_model(args)
+    ema_model.cuda()
+    ema_model.train()
+    for param in ema_model.parameters():
+        param.detach_()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
-                            weight_decay=args.wd, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd, nesterov=True)
+    ema_optimizer = OptimizerEMA(model, ema_model, alpha=args.alpha)
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
-        #class_weigth_s = get_class_weights(source_loader)
 
     # Custom loss function. Ignores index 250
     loss_fn = cross_entropy2d   
@@ -71,8 +74,7 @@ def main(args, wandb):
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
+            ema_model.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
@@ -81,18 +83,6 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
 
-    # To start next training round from the previous final model
-    if args.round_start:
-        if os.path.isfile(args.round_start):
-            checkpoint = torch.load(args.round_start)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
-            print('*** Loading model from ', args.round_start)
-            if args.wandb:
-                score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
-        else:
-            raise Exception('No file found at {}'.format(args.round_start))
 
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -152,7 +142,8 @@ def main(args, wandb):
         model.train()
 
         # Forward pass
-        out_s, outputs_s = _forward(args, model, images_s)
+        outputs_s = model(images_s)
+        out_s = outputs_s['out'] 
 
         # *** Cross Entropy ***
         loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
@@ -168,10 +159,7 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
                 # Forward pass for CR
-                if args.cutmix_cr:
-                    out_w, out_strong = _forward_cr_cutmix(args, model, ema, images_weak, images_strong)
-                else:
-                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
+                out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
 
             else:
@@ -273,20 +261,15 @@ def main(args, wandb):
 
         # Total Loss
         loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
-        # dividing loss to not run out of memory
-        #loss, loss2 = 0, 0
-        #loss1 = loss_s + loss_t 
-        #loss2 = args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
 
         # Update
         start_ts_update = time.time()
         optimizer.zero_grad()
         loss.backward()
-        #loss1.backward()
-        #loss2.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
-        ema.update()
+        ema_optimizer.update(step)
+
         time_update = time.time() - start_ts_update
 
         # Meters
@@ -367,7 +350,7 @@ def main(args, wandb):
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -388,79 +371,32 @@ def main(args, wandb):
             
         if step >= job_step_limit or step >= args.steps:
             # Compute EMA teacher accuracy
-            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
+            _log_validation_ema(model, ema_model, val_loader, loss_fn, step, wandb)
 
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
                 print('Checkpoint saved.')
             break
 
-
-def _forward(args, model, images_s):
-    if args.dsbn:
-        outputs_s = model(images_s, 0*torch.ones(images_s.shape[0], dtype=torch.long))
-    else:
-        outputs_s = model(images_s)
-
-        out_s = outputs_s['out'] 
-
-    return out_s, outputs_s
-
-
-
-def _forward_cr(args, model, ema, images_weak, images_strong):
-    if args.dsbn:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
-        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
-    else:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak)     # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
-        outputs_strong = model(images_strong)
-
-    out_w = outputs_w['out']
-    out_strong = outputs_strong['out']
-
-    return out_w, out_strong
-
-
-def _forward_cr_cutmix(args, model, ema, images_weak, images_strong):
+def _forward_cr(args, model, ema_model, images_weak, images_strong):
     # Get psuedo-targets 'out_w'
-    if args.dsbn:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))                   # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak, 1*torch.ones(images_weak.shape[0], dtype=torch.long))        # gradient will be stopped at p_w.detach()
-    else:
-        if args.cr_ema:
-            with ema.average_parameters():
-                outputs_w = model(images_weak)     # (N, C, H, W)
-        else:
-            outputs_w = model(images_weak)     # gradient will be stopped at p_w.detach()
+    outputs_w = ema_model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
-    # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
-    images_strong, out_w = _cutmix_output(args, images_strong, out_w)
-    if args.dsbn:
-        outputs_strong = model(images_strong, 1*torch.ones(images_strong.shape[0], dtype=torch.long))
-    else:
-        outputs_strong = model(images_strong)
+    if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
+        images_strong, out_w = _cutmix_output(args, images_strong, out_w)
+
+    outputs_strong = model(images_strong)
     out_strong = outputs_strong['out']
     return out_w, out_strong
+
 
 def _log_validation(model, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
@@ -504,22 +440,19 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     return score
 
-def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
+def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
     val_loss_meter = averageMeter()
-    model.eval()
-    with ema.average_parameters() and torch.no_grad():
+
+    ema_model.eval()    
+    with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            if args.dsbn:
-                outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-            else:
-                outputs = model(images_val)
-            
-            if type(outputs) == OrderedDict:
-                outputs = outputs['out']
+            outputs = ema_model(images_val)
+            outputs = outputs['out']
+
             val_loss = loss_fn(input=outputs, target=labels_val)
 
             pred = outputs.data.max(1)[1].cpu().numpy()
@@ -527,7 +460,8 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
-    
+    ema_model.train()
+
     score, class_iou = running_metrics_val.get_scores()
 
     log_info = OrderedDict({
@@ -540,6 +474,7 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')
     print(log_str)
     wandb.log(rm_format(log_info))
+    return score
 
 if __name__ == '__main__':
     args = parse_args()

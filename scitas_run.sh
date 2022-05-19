@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=ceramp
+#SBATCH --job-name=uda
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampupFIX --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
+#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampupFIX --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
 #python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_noEMA --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
 #python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_noEMA --cr=ce --pixel_contrast=True 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_CMcr_gaus_blur --cr=ce --pixel_contrast=True --aug_level=5 --cutmix_cr=True
@@ -39,4 +39,4 @@ python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job
 
 
 # UDA
-#python main_UDA.py --seed=3 --steps=40000 --save_interval=10000 --project=GTA_to_CS_small --expt_name=UDA_CE_alo --cr=ce --alonso_contrast=full
+python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE --cr=ce 
