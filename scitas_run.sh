@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=uda
+#SBATCH --job-name=ssce
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -39,4 +39,7 @@
 
 
 # UDA
-python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE --cr=ce 
+#python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE --cr=ce 
+
+# SSDA
+python main_SemiSupNEW.py --seed=3 --steps=40000 --project=GTA_to_CS_small --expt_name=SS_CE --cr=ce 
