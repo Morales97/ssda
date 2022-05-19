@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=udap2
+#SBATCH --job-name=sspcp2
 
 #
 #SBATCH --nodes=1
@@ -38,4 +38,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_full --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_memory=True --alonso_contrast=full --resume=expts/tmp_last/checkpoint_CE_full_3.pth.tar
 
 # UDA
-python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_p2 --cr=ce --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
+#python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_p2 --cr=ce --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
+
+# SSL
+python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_SS_CE_pc_3.pth.tar
