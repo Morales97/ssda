@@ -24,7 +24,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
-from ema import OptimizerEMA
+from utils.ema import OptimizerEMA
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
@@ -477,7 +477,7 @@ def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
     ema_model.train()
-    
+
     score, class_iou = running_metrics_val.get_scores()
 
     log_info = OrderedDict({
