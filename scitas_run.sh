@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=fullnoema
+#SBATCH --job-name=ceramp
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,9 +12,9 @@
 #SBATCH --time=12:00:00
 
 
-#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_EMA_rampup --cr=ce --pixel_contrast=True
+python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampupFIX --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
 #python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_noEMA --cr=ce --pixel_contrast=True --aug_level=4 --cutmix_cr=False
-python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_noEMA --cr=ce --pixel_contrast=True 
+#python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_noEMA --cr=ce --pixel_contrast=True 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_CMcr_gaus_blur --cr=ce --pixel_contrast=True --aug_level=5 --cutmix_cr=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_pc_cw_CMsup --cr=ce --pixel_contrast=True --cutmix_sup=True
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL --cr=kl --pixel_contrast=True --pseudolabel_folder=KL_pc_40k3_test

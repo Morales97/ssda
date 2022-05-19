@@ -24,7 +24,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
-
+from ema import OptimizerEMA
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
@@ -47,24 +47,22 @@ def main(args, wandb):
     else:
         source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
     
-    # Load model
+    # Init model and EMA
     model = get_model(args)
     model.cuda()
     model.train()
-    ema_model = deepcopy(model)
-    for param in ema_model.parameters():
-        param.detach_()
+    ema_model = get_model(args)
     ema_model.cuda()
     ema_model.train()
-    alpha = 0.995
+    for param in ema_model.parameters():
+        param.detach_()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
-                            weight_decay=args.wd, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd, nesterov=True)
+    ema_optimizer = OptimizerEMA(model, ema_model, alpha=args.alpha)
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
-        #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
     # Custom loss function. Ignores index 250
@@ -287,15 +285,9 @@ def main(args, wandb):
         start_ts_update = time.time()
         optimizer.zero_grad()
         loss.backward()
-
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
-        #ema.update()
-        params, ema_params = model.parameters(), ema_model.parameters()
-        _alpha = min(alpha, (step + 1)/(step + 10)) # ramp up EMA
-        with torch.no_grad():
-            for param, ema_param in zip(params, ema_params):
-                ema_param.data = alpha * ema_param.data + (1-alpha) * param.data
+        ema_optimizer.update(step)
             
 
         time_update = time.time() - start_ts_update
@@ -415,9 +407,7 @@ def main(args, wandb):
 
 
 def _forward_cr(args, model, ema_model, images_weak, images_strong):
-    
     # Get psuedo-targets 'out_w'
-    #ema_model.eval()
     outputs_w = ema_model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
@@ -486,6 +476,7 @@ def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
+    ema_model.train()
     
     score, class_iou = running_metrics_val.get_scores()
 

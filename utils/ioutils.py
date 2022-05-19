@@ -86,6 +86,8 @@ def get_parser():
                         help='Pixel contrast: use memory or not')   
     parser.add_argument('--gamma', type=float, default=0.1,
                         help='weight of pixel contrast loss')
+    parser.add_argument('--alpha', type=float, default=0.995,
+                        help='EMA coefficient')
     parser.add_argument('--warmup_steps', type=int, default=1000,
                         help='number of warm up steps before pixel contrast loss')    
     parser.add_argument('--size', type=str, default='small',
