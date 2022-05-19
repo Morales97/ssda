@@ -75,8 +75,8 @@ def main(args, wandb):
     if args.resume:
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            ema_model.load_state_dict(checkpoint['ema_state_dict'])
+            model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+            #ema_model.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
