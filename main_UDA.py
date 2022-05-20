@@ -294,14 +294,16 @@ def main(args, wandb):
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
         elif args.lr_decay == 'det':
+            '''
             if step == np.floor(args.steps * 0.5):
                 print('*** Learning rate set to %.6f ***' % (args.lr * 0.1))
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.2
+            '''
             if step == np.floor(args.steps * 0.75):
                 print('*** Learning rate set to %.6f ***' % (args.lr * 0.1))
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = param_group['lr'] * 0.2
+                    param_group['lr'] = param_group['lr'] * 0.1
 
         # Update class weights after 5% of total steps
         # NOTE: no noticable effect in performance. Maybe more useful in case of really scarce labels
