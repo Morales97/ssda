@@ -64,8 +64,6 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
     # generate new folder for pseudolabels
     pseudolabel_folder = args.expt_name + '_s' + str(args.seed)
     psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder
-    t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
-    t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
     os.makedirs(psuedolabel_path_cs, exist_ok=True)
 
     # Select randomly labelled samples 
@@ -85,6 +83,7 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
                                             sample_idxs=idxs_lbl)
         # save labels 
         print('Saving labels...')
+        t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
         t_lbl_dataset.save_gt_labels()    
                 
     t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
@@ -97,6 +96,7 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
                                         n_augmentations=args.n_augmentations)
     # save pseudolabels
     print('generating pseudolabels...')
+    t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
     t_unlbl_dataset.generate_pseudolabels(model, ema_model)                 
 
     return psuedolabel_path_cs
