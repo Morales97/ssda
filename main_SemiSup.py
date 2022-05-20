@@ -12,22 +12,21 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from model.model import get_model
-#from utils.eval import test
-from utils.ioutils import FormattedLogItem
-from utils.ioutils import gen_unique_name
-from utils.ioutils import get_log_str
-from utils.ioutils import parse_args
-from utils.ioutils import rm_format
+from utils.ioutils import gen_unique_name, get_log_str, parse_args, rm_format, FormattedLogItem
 from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
-from loader.loaders import get_loaders
+from loss.entropy_min import entropy_loss
+from loader.loaders import get_loaders, get_loaders_pseudolabels
 from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
+from utils.class_balance import get_class_weights, get_class_weights_estimation
+from utils.cutmix import _cutmix, _cutmix_output
+from utils.ema import OptimizerEMA
+
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
-from utils.class_balance import get_class_weights
 
 from torchvision.utils import save_image
 import pdb
@@ -43,21 +42,30 @@ def main(args, wandb):
     print('Seed: ', args.seed)
     
     # Load data
-    _, target_loader, target_loader_unl, val_loader, _, _ = get_loaders(args)
+    if args.pseudolabel_folder is None:
+        _, target_loader, target_loader_unl, val_loader = get_loaders(args)
+    else:
+        _, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
     
-    class_weigth_t = None
-    if args.class_weight:
-        class_weigth_t = get_class_weights(target_loader)
-
     # Load model
     model = get_model(args)
     model.cuda()
     model.train()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema_model = get_model(args)
+    ema_model.cuda()
+    ema_model.train()
+    for param in ema_model.parameters():
+        param.detach_()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
-                            weight_decay=args.wd, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd, nesterov=True)
+    ema_optimizer = OptimizerEMA(model, ema_model, alpha=args.alpha)
+
+    class_weigth_s, class_weigth_t = None, None
+    if args.class_weight:
+        class_weigth_t = get_class_weights(target_loader)
+
+    # Custom loss function. Ignores index 250
+    loss_fn = cross_entropy2d   
 
     # To resume from a checkpoint
     start_step = 0
@@ -66,27 +74,32 @@ def main(args, wandb):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
             if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
+                ema_model.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
-            print('Resuming from train step {}'.format(start_step))
+            print('*** Loading checkpoint from ', args.resume)
+            print('*** Resuming from train step {}'.format(start_step))
+            score = _log_validation(model, val_loader, loss_fn, start_step, wandb)
         else:
             raise Exception('No file found at {}'.format(args.resume))
+    step = start_step
 
-    # Custom loss function. Ignores index 250
-    loss_fn = cross_entropy2d   
+    # To split training in multiple consecutive jobs
+    if args.steps_job == 0:
+        job_step_limit = args.steps
+    else:
+        job_step_limit = start_step + args.steps_job    # set the maximum steps in this job
+
     if args.pixel_contrast:
         pixel_contrast = PixelContrastLoss()
     if args.alonso_contrast is not None:
         alonso_pc_learner = AlonsoContrastiveLearner(args.alonso_contrast, args.target_samples)
 
     # Set up metrics
-    running_metrics_val = runningScore(target_loader.dataset.n_classes)
     best_mIoU = 0 
-    step = start_step
     time_meter = averageMeter()
     time_meter_cr = averageMeter()
-    val_loss_meter = averageMeter()
+    time_meter_update = averageMeter()
     train_loss_meter = averageMeter()
     source_ce_loss_meter = averageMeter()
     target_ce_loss_meter = averageMeter()
@@ -95,6 +108,7 @@ def main(args, wandb):
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
     alonso_contrast_meter = averageMeter()
+    entropy_meter = averageMeter()
 
     data_iter_t = iter(target_loader)
     data_iter_t_unl = iter(target_loader_unl)
@@ -106,27 +120,35 @@ def main(args, wandb):
         if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
 
-        images_t, labels_t = next(data_iter_t)
-        images_t = images_t.cuda()
-        labels_t = labels_t.cuda()
-
-        if args.cr is not None or args.alonso_contrast:
+        if args.cr is not None or args.alonso_contrast or args.ent_min:
             if step % (len(target_loader_unl)-1) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
-            
             images_t_unl = next(data_iter_t_unl)
 
+        images_t, labels_t = next(data_iter_t)
+
+        images_t = images_t.cuda()
+        labels_t = labels_t.cuda()
+        
+        # CutMix
+        if args.cutmix_sup:
+            images_s, images_t, labels_s, labels_t = _cutmix(args, images_s, images_t, labels_s, labels_t)
+
+        # LAB colorspace transform
+        if args.lab_color:
+            images_s = lab_transform(images_s, images_t)
 
         start_ts = time.time()
         model.train()
 
         # Forward pass
-        optimizer.zero_grad()
-        out_t, outputs_t = _forward(args, model, images_t)
+        outputs_t = model(images_t)
+        out_t = outputs_t['out']  
 
         # *** Cross Entropy ***
-        loss_s = 0
+        loss_s = 0#loss_fn(out_s, labels_s, weight=class_weigth_s)
         loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
+
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0
@@ -137,24 +159,36 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
-                # Forward pass for CR
-                out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong, step)
+                out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
-                assert args.n_augmentations >= 1 and not args.dsbn
-                cr_multiple_augs(args, images_t_unl, model) # TODO EMA support
+                assert args.n_augmentations >= 1
+                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema_model) 
 
             time_cr = time.time() - start_ts_cr
             
         # *** Pixel Contrastive Learning (supervised) ***
         loss_cl_s, loss_cl_t = 0, 0
-        if args.pixel_contrast and step >= args.warmup_steps:
-            proj_t = outputs_t['proj_pc']
-            _, pred_t = torch.max(out_t, 1)
 
+        if args.pixel_contrast:
+            # fill memory. NOTE if not enough warmup steps, the memory is initialized with random values and the PC will be harmful until memory is full
+            ramp_up_steps = 500
+            queue = None
+            if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
+                proj_t = outputs_t['proj_pc']
+                key = proj_t.detach()
+                key_lbl = labels_t
 
-            loss_cl_s = 0 
-            loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t)
+                model._dequeue_and_enqueue(key, key_lbl)
+                queue = torch.cat((model.segment_queue, model.pixel_queue), dim=1)
+
+            # Pixel contrast
+            if step >= args.warmup_steps:
+                proj_t = outputs_t['proj_pc']
+                _, pred_t = torch.max(out_t, 1)
+
+                loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
+                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***
@@ -171,10 +205,7 @@ def main(args, wandb):
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
                 with ema.average_parameters():
-                    if args.dsbn:
-                        outputs_t_ema = model(images_t, 1*torch.ones(images_t.shape[0], dtype=torch.long))  
-                    else:
-                        outputs_t_ema = model(images_t)   
+                    outputs_t_ema = model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
@@ -182,31 +213,43 @@ def main(args, wandb):
             if step >= args.warmup_steps:
                 # ** Labeled CL **
                 # NOTE beware that it can compete with our PC!
-                loss_labeled = alonso_pc_learner.labeled_pc(None, outputs_t, None, labels_t, model)
+                loss_labeled = alonso_pc_learner.labeled_pc(outputs_s, outputs_t, labels_s, labels_t, model)
 
                 # ** Unlabeled CL **
                 images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-                if args.dsbn:
-                    outputs_tu = model(images_tu, 1*torch.ones(images_tu.shape[0], dtype=torch.long)) 
-                else:
-                    outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+                outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
                 loss_unlabeled = alonso_pc_learner.unlabeled_pc(outputs_tu, model)
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
 
 
+        # *** Entropy minimization ***
+        entropy = 0
+        if args.ent_min:
+            images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
+            outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
+            #out_cat = torch.cat((outputs_s['out'], outputs_t['out'], outputs_tu['out']), dim=0) # NOTE try if ent min on labeled data helps (uncomment this and comment line below)
+            out_cat = outputs_tu['out'] 
+
+            entropy = entropy_loss(out_cat)
+
         # Total Loss
-        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso
-        
+        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
+
         # Update
+        start_ts_update = time.time()
+        optimizer.zero_grad()
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
-        ema.update()
+        ema_optimizer.update(step)
+        
+        time_update = time.time() - start_ts_update
 
         # Meters
         time_meter.update(time.time() - start_ts)
         time_meter_cr.update(time_cr)
+        time_meter_update.update(time_update)
         train_loss_meter.update(loss)
         source_ce_loss_meter.update(loss_s)
         target_ce_loss_meter.update(loss_t)
@@ -215,6 +258,7 @@ def main(args, wandb):
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
         alonso_contrast_meter.update(loss_cl_alonso)
+        entropy_meter.update(0.1 * entropy)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
@@ -229,6 +273,11 @@ def main(args, wandb):
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
+        # Update class weights after 5% of total steps
+        # NOTE: no noticable effect in performance. Maybe more useful in case of really scarce labels
+        #if args.class_weight and step == np.floor(args.steps * 0.05):
+        #    class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
+
         step += 1
         # Log Training
         if step % args.log_interval == 0:
@@ -236,6 +285,7 @@ def main(args, wandb):
                 'Train Step': step,
                 'Time/Image [s]': round(time_meter.avg / args.batch_size_s, 3),
                 'Time CR/Image [s]': round(time_meter_cr.avg / args.batch_size_tu, 3),
+                'Time update/Image [s]': round(time_meter_update.avg / args.batch_size_tu, 3),
                 'CE Source Loss': FormattedLogItem(source_ce_loss_meter.avg, '{:.3f}'),
                 'CE Target Loss': FormattedLogItem(target_ce_loss_meter.avg, '{:.3f}'),
                 'CR Loss': FormattedLogItem(cr_loss_meter.avg, '{:.3f}'),
@@ -245,69 +295,36 @@ def main(args, wandb):
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
                 'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
                 'Alonso CL Loss': FormattedLogItem(alonso_contrast_meter.avg, '{:.3f}'),
+                'Entropy Loss': FormattedLogItem(entropy_meter.avg, '{:.3f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
             print(log_str)
             wandb.log(rm_format(log_info))
 
+            time_meter.reset()
+            time_meter_cr.reset()
+            time_meter_update.reset()
             source_ce_loss_meter.reset()
             target_ce_loss_meter.reset()
             cr_loss_meter.reset()
             constrast_s_loss_meter.reset()
             constrast_t_loss_meter.reset()
             alonso_contrast_meter.reset()
+            entropy_meter.reset()
             train_loss_meter.reset()
             
         # Log Validation
         if step % args.val_interval == 0:
-            model.eval()
-            with torch.no_grad():
-                for (images_val, labels_val) in val_loader:
-                    images_val = images_val.cuda()
-                    labels_val = labels_val.cuda()
-
-                    if args.dsbn:
-                        outputs = model(images_val, 1*torch.ones(images_val.shape[0], dtype=torch.long))
-                    else:
-                        outputs = model(images_val)
-                    
-                    if type(outputs) == OrderedDict:
-                        outputs = outputs['out']
-                    val_loss = loss_fn(input=outputs, target=labels_val)
-
-                    pred = outputs.data.max(1)[1].cpu().numpy()
-                    gt = labels_val.data.cpu().numpy()
-
-                    running_metrics_val.update(gt, pred)
-                    val_loss_meter.update(val_loss.item())
-
-            log_info = OrderedDict({
-                'Train Step': step,
-                'Validation loss': val_loss_meter.avg
-            })
-            
-            score, class_iou = running_metrics_val.get_scores()
-            for k, v in score.items():
-                log_info.update({k: FormattedLogItem(v, '{:.6f}')})
-
-            #for k, v in class_iou.items():
-            #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
-
-            log_str = get_log_str(args, log_info, title='Validation Log')
-            print(log_str)
-            wandb.log(rm_format(log_info))
-
-            val_loss_meter.reset()
-            running_metrics_val.reset()
+            score = _log_validation(model, val_loader, loss_fn, step, wandb)
         
         # Save checkpoint
         if step % args.save_interval == 0:
-            ckpt_name = 'checkpoint_' + args.expt_name + '.pth.tar'
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -326,45 +343,114 @@ def main(args, wandb):
                 best_mIoU = score['mIoU']
             
             
-        if step >= args.steps:
+        if step >= job_step_limit or step >= args.steps:
+            # Compute EMA teacher accuracy
+            _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb)
+
+            # Save checkpoint
+            ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
+            if args.save_model:
+                torch.save({
+                    'model_state_dict' : model.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
+                    'optimizer_state_dict' : optimizer.state_dict(),
+                    'step' : step,
+                }, os.path.join(args.save_dir, ckpt_name))
+                print('Checkpoint saved.')
             break
 
 
-def _forward(args, model, images_t):
-    outputs_t = model(images_t)
+def _forward_cr(args, model, ema_model, images_weak, images_strong):
+    # Get psuedo-targets 'out_w'
+    outputs_w = ema_model(images_weak)     # (N, C, H, W)    
+    out_w = outputs_w['out']
 
-    if type(outputs_t) == OrderedDict:
-        out_t = outputs_t['out']  
-    else:
-        out_t = outputs_t
+    if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
+        images_strong, out_w = _cutmix_output(args, images_strong, out_w)
 
-    return out_t, outputs_t
-
-
-def _forward_cr(args, model, ema, images_weak, images_strong, step):
-
-    if step >= args.warmup_steps:
-        with ema.average_parameters():
-            outputs_w = model(images_weak)     # (N, C, H, W)
-    else:
-        outputs_w = model(images_weak)
     outputs_strong = model(images_strong)
-
-    if type(outputs_w) == OrderedDict:
-        out_w = outputs_w['out']
-        out_strong = outputs_strong['out']
-    else:
-        out_w = outputs_w
-        out_strong = outputs_strong
-
+    out_strong = outputs_strong['out']
     return out_w, out_strong
 
+def _log_validation(model, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+    model.eval()
+    with torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            outputs = model(images_val)
+            outputs = outputs['out']
+
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    #for k, v in class_iou.items():
+    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log')
+    print(log_str)
+    wandb.log(rm_format(log_info))
+
+    return score
+
+def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    val_loss_meter = averageMeter()
+
+    ema_model.eval()    
+    with torch.no_grad():
+        for (images_val, labels_val) in val_loader:
+            images_val = images_val.cuda()
+            labels_val = labels_val.cuda()
+
+            outputs = ema_model(images_val)
+            outputs = outputs['out']
+
+            val_loss = loss_fn(input=outputs, target=labels_val)
+
+            pred = outputs.data.max(1)[1].cpu().numpy()
+            gt = labels_val.data.cpu().numpy()
+
+            running_metrics_val.update(gt, pred)
+            val_loss_meter.update(val_loss.item())
+    ema_model.train()
+
+    score, class_iou = running_metrics_val.get_scores()
+
+    log_info = OrderedDict({
+        'Train Step': step,
+        'Validation loss on EMA': val_loss_meter.avg,
+        'mIoU on EMA': score['mIoU'],
+        'Overall acc on EMA': score['Overall Acc'],
+    })
+
+    log_str = get_log_str(args, log_info, title='Validation Log on EMA')
+    print(log_str)
+    wandb.log(rm_format(log_info))
+    return score
 
 if __name__ == '__main__':
     args = parse_args()
     os.environ['WANDB_CACHE_DIR'] = '/scratch/izar/danmoral/.cache/wandb' # save artifacts in scratch workspace, deleted every 24h
 
-    print('\nSemi-Supervised semantic segmentation on Cityscapes\n')
+    print('\nSSDA for semantic segmentation. Source: GTA, Target: Cityscapes\n')
 
     if not args.expt_name:
         args.expt_name = gen_unique_name()
@@ -376,6 +462,17 @@ if __name__ == '__main__':
         wandb.finish()
     else:
         main(args, None)
-    
 
-# python main_SemiSup.py --net=deeplabv3_rn50 --wandb=False --class_weight=True --alonso_contrast=True --warmup_step=0
+
+
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --class_weight=True
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
+# python main_SSDA.py --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=js --cr_ema=False
+# python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 
+# python main_SSDA.py --net=deeplabv2_rn101 --wandb=False --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --warmup_steps=0
+# python main_SSDA.py --net=deeplabv2_rn101 --size=small --expt_name=test_pl --wandb=False --resume=model/pretrained/checkpoint_KLE1_p2.pth.tar
+
+# next round of ST
+#python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --net=deeplabv2_rn101 --batch_size_s=2 --batch_size_tl=2 --batch_size_tu=2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar
+
