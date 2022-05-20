@@ -187,7 +187,6 @@ def main(args, wandb):
                 proj_t = outputs_t['proj_pc']
                 _, pred_t = torch.max(out_t, 1)
 
-                loss_cl_s = 0 #pixel_contrast(proj_s, labels_s, pred_s)
                 loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
 
 

@@ -101,7 +101,7 @@ class ResNet(nn.Module):
         self.dim_embed = 256
         self.pc_memory = pc_memory
         self.alonso_contrast = alonso_contrast
-        self.memory_size = 1000 #5000
+        self.memory_size = 5000
         self.pixel_update_freq = 10
         self.ignore_label = 250
 
