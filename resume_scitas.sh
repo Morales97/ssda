@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=fullr2p2
+#SBATCH --job-name=udar2p2
 
 #
 #SBATCH --nodes=1
@@ -19,7 +19,7 @@
 #python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampupFIX_p2 --cr=ce --pixel_contrast=True --cutmix_cr=False --aug_level=4 --resume=expts/tmp_last/checkpoint_CE_EMA_rampupFIX_3.pth.tar
 #python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_noEMA_p2 --cr=ce --pixel_contrast=True --cutmix_cr=False --aug_level=4 --resume=expts/tmp_last/checkpoint_CE_noEMA_3.pth.tar
 #python main_SSDA_NOema.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_noEMA_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_noEMA_3.pth.tar
-python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r2_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_3.pth.tar
+#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r2_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_3.pth.tar
 
 # 2nd round
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_2_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_2_3.pth.tar --pseudolabel_folder=KL_pc_40k3_test
@@ -33,5 +33,6 @@ python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job
 
 # UDA
 #python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_p2 --cr=ce --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
+python main_SSDA_EMA.py --seed=3 --target_samples=0 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_r2_p2 --cr=ce --pseudolabel_folder=UDA_CE_s1 --resume=expts/tmp_last/checkpoint_UDA_CE_r2_3.pth.tar
 
 # SSL
