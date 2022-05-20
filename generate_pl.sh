@@ -11,7 +11,7 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-#python generate_pseudolabels.py --seed=3 --expt_name=KL_40k_no_eval --resume=model/pretrained/model_40k_KL_pc.tar --alonso_contrast=full
+python generate_pseudolabels.py --seed=3 --expt_name=UDA_CE --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
 
 # evaluate
-python evaluate.py --net=deeplabv2_rn101 --alonso_contrast=full --pc_memory=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_r3_noPL_3.pth.tar
+#python evaluate.py --net=deeplabv2_rn101 --alonso_contrast=full --pc_memory=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_r3_noPL_3.pth.tar
