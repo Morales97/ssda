@@ -37,3 +37,4 @@ python main_SSDA_EMA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job
 
 # SSL
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True
+#python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem_r2 --cr=ce --pixel_contrast=True --pc_memory=True --pseudolabel_folder=SS_CE_pc_mem_s3

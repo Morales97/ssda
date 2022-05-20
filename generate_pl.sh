@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 # SSDA
-python generate_pseudolabels.py --seed=3 --expt_name=full --resume=expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar
+python generate_pseudolabels.py --seed=3 --expt_name=SS_CE_pc_mem --resume=expts/tmp_last/checkpoint_SS_CE_pc_mem_3.pth.tar
 
 # UDA
 #python generate_pseudolabels.py --target_samples=0 --expt_name=UDA_CE --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
