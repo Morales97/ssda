@@ -232,10 +232,11 @@ class cityscapesDataset(data.Dataset):
 
         return img, lbl
 
-    def generate_pseudolabels(self, model, ema, tau=0.9, ignore_index=250):
+    def generate_pseudolabels(self, model, ema_model, tau=0.9, ignore_index=250):
         assert self.unlabeled
 
-        with ema.average_parameters() and torch.no_grad():
+        ema_model.eval()
+        with torch.no_grad():
             for i, img_path in enumerate(self.files[self.split]):
                 
                 if i % 100 == 0:
@@ -247,7 +248,7 @@ class cityscapesDataset(data.Dataset):
                 img = self.transforms(img)[0].unsqueeze(0).cuda()
 
                 # generate pseudolabel
-                pred = model(img)['out']
+                pred = ema_model(img)['out']
                 probs = F.softmax(pred, dim=1)
                 confidence, pseudo_lbl = torch.max(probs, dim=1)
                 pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)

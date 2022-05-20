@@ -27,26 +27,29 @@ def main(args):
     # Load model
     model = get_model(args)
     model.cuda()
-    model.train()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    #ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
+    #ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema_model = get_model(args)
+    ema_model.cuda()
+    ema_model.eval()
+    for param in ema_model.parameters():
+        param.detach_()
 
     # Load trained model
     if args.resume:
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
+            ema_model.load_state_dict(checkpoint['ema_state_dict'])
         else:
             raise Exception('No file found at {}'.format(args.resume))
     else:
         raise Exception('No model found to generate pseudolabels with')
 
-    pseudo_lbl_path = _generate_pseudolabels(args, model, ema)
+    pseudo_lbl_path = _generate_pseudolabels(args, model, ema_model)
 
 
-def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
+def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
     n_lbl_samples = args.target_samples
     size = args.size
     assert size in ['tiny', 'small']
@@ -94,7 +97,7 @@ def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
                                         n_augmentations=args.n_augmentations)
     # save pseudolabels
     print('generating pseudolabels...')
-    t_unlbl_dataset.generate_pseudolabels(model, ema)                 
+    t_unlbl_dataset.generate_pseudolabels(model, ema_model)                 
 
     return psuedolabel_path_cs
 
