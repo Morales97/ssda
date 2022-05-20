@@ -58,6 +58,13 @@ def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
     label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
 
+    # generate new folder for pseudolabels
+    pseudolabel_folder = args.expt_name + '_s' + str(args.seed)
+    psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder
+    t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
+    t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
+    os.makedirs(psuedolabel_path_cs, exist_ok=True)
+
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
         idxs = np.arange(num_t_samples)
@@ -66,12 +73,17 @@ def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
         idxs_unlbl = idxs[n_lbl_samples:]
 
     # *** Target loader(s)
-    t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
-                                        label_path=label_path_cs, 
-                                        size=size, 
-                                        split='train', 
-                                        sample_idxs=idxs_lbl)
-                                        
+
+    if n_lbl_samples > 0: # if no labeled samples (UDA), skip
+        t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                            label_path=label_path_cs, 
+                                            size=size, 
+                                            split='train', 
+                                            sample_idxs=idxs_lbl)
+        # save labels 
+        print('Saving labels...')
+        t_lbl_dataset.save_gt_labels()    
+                
     t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
                                         label_path=label_path_cs, 
                                         size=size, 
@@ -80,18 +92,6 @@ def _generate_pseudolabels(args, model, ema, num_t_samples=2975):
                                         unlabeled=True, 
                                         strong_aug_level=args.aug_level, 
                                         n_augmentations=args.n_augmentations)
-    
-    # generate new folder for pseudolabels
-    pseudolabel_folder = args.expt_name + '_s' + str(args.seed)
-    psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder
-    t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
-    t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
-    os.makedirs(psuedolabel_path_cs, exist_ok=True)
-
-    # save labels 
-    print('Saving labels...')
-    t_lbl_dataset.save_gt_labels()
-
     # save pseudolabels
     print('generating pseudolabels...')
     t_unlbl_dataset.generate_pseudolabels(model, ema)                 
