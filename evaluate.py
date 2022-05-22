@@ -218,7 +218,6 @@ def test_ensemble(args, path_1, path_2):
 
             prob_ens = (prob_1 + prob_2)/2 # ensemble by combining probabilities
 
-
             pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
@@ -249,10 +248,12 @@ if __name__ == '__main__':
     evaluate(args, path_to_model)
     print('** Round 3 **')
     '''
+
+    path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
     path_to_model_r2='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
     path_to_model_r3='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     
-    test_ensemble(args, path_to_model_r2, path_to_model_r3)
+    test_ensemble(args, path_to_model_r1, path_to_model_r2)
 
 
 # python evaluate.py 
