@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=ssr2
+#SBATCH --job-name=s1r3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
