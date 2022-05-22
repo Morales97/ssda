@@ -202,6 +202,7 @@ def test_ensemble(args, path_1, path_2):
 
     for p1, p2, param in zip(ema_model_1.parameters(), ema_model_2.parameters(), ensemble_model.parameters()):
         param = (p1 + p2)/2
+        pdb.set_trace()
 
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
     ensemble_model.eval()
