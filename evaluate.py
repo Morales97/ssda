@@ -153,10 +153,10 @@ def evaluate(args, path_to_model):
 if __name__ == '__main__':
     args = parse_args()
 
-    path_to_model='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
-    #path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
+    #path_to_model='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
+    path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     evaluate(args, path_to_model)
     
-    print('** Round 2 **')
+    print('** Round 3 **')
 
 # python evaluate.py 
