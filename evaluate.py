@@ -148,7 +148,7 @@ def evaluate(args, path_to_model):
     #wandb.log(rm_format(log_info))
 
 
-def test_ensemble(args, path_1, path_2):
+def ensemble(args, path_1, path_2, path_3=None):
     # set random seed
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -196,6 +196,18 @@ def test_ensemble(args, path_1, path_2):
     else:
         raise Exception('No file found at {}'.format(path_2))
     
+    if path_3 is not None_
+        ema_model_3 = get_model(args)
+        ema_model_3.cuda()   
+
+        if os.path.isfile(path_3):
+                checkpoint = torch.load(path_3)
+                ema_model_3.load_state_dict(checkpoint['ema_state_dict'])
+                step = checkpoint['step']
+                print('Loading model trained until step {}'.format(step))
+            else:
+                raise Exception('No file found at {}'.format(path_3))
+
     # -- MERGE models predictions--
 
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
@@ -216,7 +228,14 @@ def test_ensemble(args, path_1, path_2):
             outputs_2 = F.interpolate(outputs_2, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             prob_2 = F.softmax(outputs_2, dim=1)
 
-            prob_ens = (prob_1 + prob_2)/2 # ensemble by combining probabilities
+            if path_3 is None:
+                prob_ens = (prob_1 + prob_2)/2 # ensemble by combining probabilities
+            else:
+                outputs_3 = ema_model_3(images_val)
+                outputs_3 = outputs_3['out']
+                outputs_3 = F.interpolate(outputs_3, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
+                prob_3 = F.softmax(outputs_3, dim=1)
+                prob_ens = (prob_1 + prob_2 + prob_3)/3 # ensemble by combining probabilities
 
             pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
@@ -242,7 +261,7 @@ def test_ensemble(args, path_1, path_2):
 
 if __name__ == '__main__':
     args = parse_args()
-    
+    '''
     path_to_model='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
     #path_to_model='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
     #path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
@@ -254,7 +273,7 @@ if __name__ == '__main__':
     path_to_model_r2='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
     path_to_model_r3='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     
-    test_ensemble(args, path_to_model_r1, path_to_model_r2)
-    '''
+    ensemble(args, path_to_model_r1, path_to_model_r2, path_to_model_r3)
+
 
 # python evaluate.py 
