@@ -242,9 +242,10 @@ def test_ensemble(args, path_1, path_2):
 
 if __name__ == '__main__':
     args = parse_args()
-    '''
+    
+    path_to_model='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
     #path_to_model='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
-    path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
+    #path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     evaluate(args, path_to_model)
     print('** Round 3 **')
     '''
@@ -254,6 +255,6 @@ if __name__ == '__main__':
     path_to_model_r3='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     
     test_ensemble(args, path_to_model_r1, path_to_model_r2)
-
+    '''
 
 # python evaluate.py 
