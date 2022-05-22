@@ -99,7 +99,6 @@ def evaluate(args, path_to_model):
         #'Validation loss': val_loss_meter.avg
     })
     
-    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     score, class_iou = running_metrics_val.get_scores()
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
@@ -114,6 +113,7 @@ def evaluate(args, path_to_model):
 
 
     # evaluate on teacher
+    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     ema_model.eval()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
@@ -135,7 +135,6 @@ def evaluate(args, path_to_model):
         #'Validation loss': val_loss_meter.avg
     })
     
-    running_metrics_val = runningScore(val_loader.dataset.n_classes)
     score, class_iou = running_metrics_val.get_scores()
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
