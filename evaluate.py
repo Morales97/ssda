@@ -196,27 +196,29 @@ def test_ensemble(args, path_1, path_2):
     else:
         raise Exception('No file found at {}'.format(path_2))
     
-    # -- MERGE models --
-    ensemble_model = get_model(args)
-    ensemble_model.cuda()
-
-    for p1, p2, param in zip(ema_model_1.parameters(), ema_model_2.parameters(), ensemble_model.parameters()):
-        param = (p1 + p2)/2
-        pdb.set_trace()
+    # -- MERGE models predictions--
 
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
-    ensemble_model.eval()
+    ema_model_1.eval()
+    ema_model_2.eval()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
+            outputs_1 = ema_model_1(images_val)
+            outputs_1 = outputs_1['out']
+            outputs_1 = F.interpolate(outputs_1, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
+            prob_1 = F.softmax(outputs_1, dim=1)
 
-            outputs = ensemble_model(images_val)
-            outputs = outputs['out']
+            outputs_2 = ema_model_1(images_val)
+            outputs_2 = outputs_1['out']
+            outputs_2 = F.interpolate(outputs_1, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
+            prob_2 = F.softmax(outputs_2, dim=1)
 
-            outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
-            pred = outputs.data.max(1)[1].cpu().numpy()
+            prob_ens = (prob_1 + prob_2)/2 # ensemble by combining probabilities
+
+            pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
             running_metrics_val.update(gt, pred)
