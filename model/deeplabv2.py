@@ -310,8 +310,8 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
-        maskContrast_pretrained = torch.load(custom_pretrain_path)
-        sd = maskContrast_pretrained['model']
+        ckpt = torch.load(custom_pretrain_path)
+        sd = ckpt['model_state_dict']
 
         # Create a new state_dict
         new_state_dict = copy.deepcopy(model.state_dict())
