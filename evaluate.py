@@ -196,7 +196,7 @@ def ensemble(args, path_1, path_2, path_3=None):
     else:
         raise Exception('No file found at {}'.format(path_2))
     
-    if path_3 is not None_
+    if path_3 is not None:
         ema_model_3 = get_model(args)
         ema_model_3.cuda()   
 
