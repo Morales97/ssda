@@ -247,7 +247,7 @@ if __name__ == '__main__':
     #path_to_model='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
     #path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
     evaluate(args, path_to_model)
-    print('** Round 3 **')
+    print('** Round 1 **')
     '''
 
     path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
