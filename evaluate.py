@@ -211,8 +211,8 @@ def test_ensemble(args, path_1, path_2):
             outputs_1 = F.interpolate(outputs_1, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             prob_1 = F.softmax(outputs_1, dim=1)
 
-            outputs_2 = ema_model_1(images_val)
-            outputs_2 = outputs_1['out']
+            outputs_2 = ema_model_2(images_val)
+            outputs_2 = outputs_2['out']
             outputs_2 = F.interpolate(outputs_1, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             prob_2 = F.softmax(outputs_2, dim=1)
 
