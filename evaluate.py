@@ -200,7 +200,7 @@ def test_ensemble(args, path_1, path_2):
     ensemble_model = get_model(args)
     ensemble_model.cuda()
 
-    for p1, p2, param in zip(ema_model_1, ema_model_2, ensemble_model):
+    for p1, p2, param in zip(ema_model_1.parameters(), ema_model_2.parameters(), ensemble_model.parameters()):
         param = (p1 + p2)/2
 
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
