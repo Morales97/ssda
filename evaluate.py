@@ -205,8 +205,8 @@ def ensemble(args, path_1, path_2, path_3=None):
                 ema_model_3.load_state_dict(checkpoint['ema_state_dict'])
                 step = checkpoint['step']
                 print('Loading model trained until step {}'.format(step))
-            else:
-                raise Exception('No file found at {}'.format(path_3))
+        else:
+            raise Exception('No file found at {}'.format(path_3))
 
     # -- MERGE models predictions--
 
