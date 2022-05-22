@@ -213,10 +213,11 @@ def test_ensemble(args, path_1, path_2):
 
             outputs_2 = ema_model_2(images_val)
             outputs_2 = outputs_2['out']
-            outputs_2 = F.interpolate(outputs_1, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
+            outputs_2 = F.interpolate(outputs_2, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             prob_2 = F.softmax(outputs_2, dim=1)
 
             prob_ens = (prob_1 + prob_2)/2 # ensemble by combining probabilities
+
 
             pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
