@@ -32,7 +32,7 @@ import pdb
 # 2. Evaluate
 
 
-def evaluate(args):
+def evaluate(args, path_to_model):
 
     # set random seed
     torch.manual_seed(args.seed)
@@ -62,23 +62,17 @@ def evaluate(args):
     # --- Model ---
     model = get_model(args)
     model.cuda()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema_model = get_model(args)
+    ema_model.cuda()
 
-    if os.path.isfile(args.resume):
-        checkpoint = torch.load(args.resume)
+    if os.path.isfile(path_to_model):
+        checkpoint = torch.load(path_to_model)
         model.load_state_dict(checkpoint['model_state_dict'])
-
-        #sd_model = checkpoint['model_state_dict']
-        #sd_ema = checkpoint['ema_state_dict']
-        #pdb.set_trace()
-        if args.eval_ema and 'ema_state_dict' in checkpoint.keys():
-            print('Loading EMA teacher')
-            ema.load_state_dict(checkpoint['ema_state_dict'])
+        ema_model.load_state_dict(checkpoint['ema_state_dict'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
-        raise Exception('No file found at {}'.format(args.resume))
+        raise Exception('No file found at {}'.format(path_to_model))
     
     # --- Evaluate ---
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
@@ -118,16 +112,17 @@ def evaluate(args):
     print(log_str)
     #wandb.log(rm_format(log_info))
 
-    # evaluate on EMA teacher
-    running_metrics_val = runningScore(val_loader.dataset.n_classes)
+
+    # evaluate on teacher
+    ema_model.eval()
     with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            with ema.average_parameters():
-                outputs = model(images_val)
-                outputs = outputs['out']
+
+            outputs = ema_model(images_val)
+            outputs = outputs['out']
 
             outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
             pred = outputs.data.max(1)[1].cpu().numpy()
@@ -140,41 +135,7 @@ def evaluate(args):
         #'Validation loss': val_loss_meter.avg
     })
     
-    score, class_iou = running_metrics_val.get_scores()
-    for k, v in score.items():
-        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
-
-    #for k, v in class_iou.items():
-    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
-
-    log_str = get_log_str(args, log_info, title='Validation Log')
-    print('EMA on model.eval')
-    print(log_str)
-
-
-    # evaluate on EMA teacher
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
-    model.train()
-    with torch.no_grad():
-        for (images_val, labels_val) in val_loader:
-            images_val = images_val.cuda()
-            labels_val = labels_val.cuda()
-
-            with ema.average_parameters():
-                outputs = model(images_val)
-                outputs = outputs['out']
-
-            outputs = F.interpolate(outputs, size=(labels_val.shape[1], labels_val.shape[2]), mode="bilinear", align_corners=True)
-            pred = outputs.data.max(1)[1].cpu().numpy()
-            gt = labels_val.data.cpu().numpy()
-
-            running_metrics_val.update(gt, pred)
-
-    log_info = OrderedDict({
-        'Train Step': step,
-        #'Validation loss': val_loss_meter.avg
-    })
-    
     score, class_iou = running_metrics_val.get_scores()
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
@@ -183,26 +144,17 @@ def evaluate(args):
     #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
 
     log_str = get_log_str(args, log_info, title='Validation Log')
-    print('EMA on model.train')
+    print('model on model.eval()')
     print(log_str)
+    #wandb.log(rm_format(log_info))
 
 
     
 
 if __name__ == '__main__':
-
-    # W&B logging setup
-    #wandb = WandbWrapper(debug=~args.use_wandb)
-    #wandb.init(name=args.expt_name, dir=args.save_dir, config=args, reinit=True, project=args.project, entity=args.entity)
-    #wandb=None
-    #os.makedirs(args.save_dir, exist_ok=True)
-
     args = parse_args()
 
-    evaluate(args)
-    #wandb.finish()
+    path_to_model='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar'
+    evaluate(args, path_to_model)
 
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_15k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv3_rn50 --resume=model/pretrained/ckpt_30k_FS_small.tar --size=small
-# python evaluate.py --net=deeplabv2_rn101_old --resume=model/pretrained/SS_kle_40k.tar --size=small --eval_ema=True
-# python evaluate.py --net=deeplabv2_rn101_old --resume=model/pretrained/KLE_PC_LAB_40k.tar --size=small --eval_ema=True --pixel_contrast=True
+# python evaluate.py 
