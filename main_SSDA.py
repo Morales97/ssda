@@ -4,6 +4,7 @@ import shutil
 from collections import OrderedDict
 import time
 import copy
+from copy import deepcopy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -23,7 +24,7 @@ from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
 from utils.class_balance import get_class_weights, get_class_weights_estimation
 from utils.cutmix import _cutmix, _cutmix_output
-
+from utils.ema import OptimizerEMA
 import wandb
 from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 
@@ -46,20 +47,22 @@ def main(args, wandb):
     else:
         source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
     
-    # Load model
+    # Init model and EMA
     model = get_model(args)
     model.cuda()
     model.train()
-    ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
+    ema_model = get_model(args)
+    ema_model.cuda()
+    ema_model.train()
+    for param in ema_model.parameters():
+        param.detach_()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
-                            weight_decay=args.wd, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd, nesterov=True)
+    ema_optimizer = OptimizerEMA(model, ema_model, alpha=args.alpha)
 
     class_weigth_s, class_weigth_t = None, None
     if args.class_weight:
         class_weigth_s = get_class_weights(None, precomputed='gta', size=args.size)
-        #class_weigth_s = get_class_weights(source_loader)
         class_weigth_t = get_class_weights(target_loader)
 
     # Custom loss function. Ignores index 250
@@ -71,8 +74,7 @@ def main(args, wandb):
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema.load_state_dict(checkpoint['ema_state_dict'])
+            ema_model.load_state_dict(checkpoint['ema_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             start_step = checkpoint['step']
             print('*** Loading checkpoint from ', args.resume)
@@ -86,18 +88,12 @@ def main(args, wandb):
     # Load EMA from previous round
     if args.teacher:
         if os.path.isfile(args.teacher):
-            # load teacher on another model
-            model_teacher = get_model(args)
-            model_teacher.cuda()
-            model_teacher.train()
-            ema_teacher = ExponentialMovingAverage(model_teacher.parameters(), decay=0.995)
+            ema_teacher = get_model(args)
             ema_teacher.to(torch.device('cuda'))
             checkpoint = torch.load(args.teacher)
-            model_teacher.load_state_dict(checkpoint['model_state_dict'])
-            if 'ema_state_dict' in checkpoint.keys():
-                ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
+            ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading EMA teacher from ', args.teacher)
-            score = _log_validation_ema(model_teacher, ema_teacher, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation_ema(ema_teacher, val_loader, loss_fn, start_step, wandb)
             print('EMA teacher\'s mIoU: ', str(score['mIoU']))
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -167,6 +163,7 @@ def main(args, wandb):
 
         start_ts = time.time()
         model.train()
+        ema_model.train()
 
         # Forward pass
         outputs_s = model(images_s)
@@ -190,11 +187,11 @@ def main(args, wandb):
                 if args.teacher is not None:
                     out_w, out_strong = _forward_cr(args, model_teacher, ema_teacher, images_weak, images_strong)
                 else:
-                    out_w, out_strong = _forward_cr(args, model, ema, images_weak, images_strong)
+                    out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
-                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema) 
+                loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema_model) 
 
             time_cr = time.time() - start_ts_cr
             
@@ -253,8 +250,7 @@ def main(args, wandb):
 
             # Build feature memory bank, start 'ramp_up_steps' before
             if step >= args.warmup_steps - ramp_up_steps:
-                with ema.average_parameters():
-                    outputs_t_ema = model(images_t)   
+                outputs_t_ema = ema_model(images_t)   
 
                 alonso_pc_learner.add_features_to_memory(outputs_t_ema, labels_t, model)
 
@@ -291,7 +287,8 @@ def main(args, wandb):
         loss.backward()
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_norm)
         optimizer.step()
-        ema.update()
+        ema_optimizer.update(step)
+
         time_update = time.time() - start_ts_update
 
         # Meters
@@ -372,7 +369,7 @@ def main(args, wandb):
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -393,14 +390,14 @@ def main(args, wandb):
             
         if step >= job_step_limit or step >= args.steps:
             # Compute EMA teacher accuracy
-            _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb)
+            _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb)
 
             # Save checkpoint
             ckpt_name = 'checkpoint_' + args.expt_name + '_' + str(args.seed) + '.pth.tar'
             if args.save_model:
                 torch.save({
                     'model_state_dict' : model.state_dict(),
-                    'ema_state_dict' : ema.state_dict(),
+                    'ema_state_dict' : ema_model.state_dict(),
                     'optimizer_state_dict' : optimizer.state_dict(),
                     'step' : step,
                 }, os.path.join(args.save_dir, ckpt_name))
@@ -408,11 +405,9 @@ def main(args, wandb):
             break
 
 
-def _forward_cr(args, model, ema, images_weak, images_strong):
-    
+def _forward_cr(args, model, ema_model, images_weak, images_strong):
     # Get psuedo-targets 'out_w'
-    with ema.average_parameters():         # gradient will be stopped at p_w.detach()
-        outputs_w = model(images_weak)     # (N, C, H, W)    
+    outputs_w = ema_model(images_weak)     # (N, C, H, W)    
     out_w = outputs_w['out']
 
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
@@ -441,7 +436,6 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
-    model.train()
 
     log_info = OrderedDict({
         'Train Step': step,
@@ -461,17 +455,17 @@ def _log_validation(model, val_loader, loss_fn, step, wandb):
 
     return score
 
-def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
+def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
     val_loss_meter = averageMeter()
-    
-    # NOTE DO NOT use model.eval() -> It seems to inhibit the ema.average_parameters() context 
-    with ema.average_parameters() and torch.no_grad():
+
+    ema_model.eval()    
+    with torch.no_grad():
         for (images_val, labels_val) in val_loader:
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
-            outputs = model(images_val)
+            outputs = ema_model(images_val)
             outputs = outputs['out']
 
             val_loss = loss_fn(input=outputs, target=labels_val)
@@ -481,7 +475,8 @@ def _log_validation_ema(model, ema, val_loader, loss_fn, step, wandb):
 
             running_metrics_val.update(gt, pred)
             val_loss_meter.update(val_loss.item())
-    
+    ema_model.train()
+
     score, class_iou = running_metrics_val.get_scores()
 
     log_info = OrderedDict({
@@ -514,14 +509,7 @@ if __name__ == '__main__':
         main(args, None)
 
 
-
-# python main_SSDA.py --size=tiny --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --pixel_contrast=True --pc_memory=True --pc_mixed=True --warmup_steps=0
-# python main_SSDA.py --size=tiny --net=deeplabv3_rn50 --wandb=False --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --cutmix_sup=True
-# python main_SSDA.py --size=tiny --net=deeplabv3_rn50 --wandb=False --log_interval=1 --val_interval=1 --save_interval=1
-# python main_SSDA.py --size=tiny --net=deeplabv3_rn50 --wandb=False --alonso_contrast=full --warmup_steps=0 --cr=js --cr_ema=False
-# python main_SSDA.py --wandb=False --alonso_contrast=full --pixel_contrast=True --warmup_steps=0 
-# python main_SSDA.py --wandb=False --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_mixed=True --alonso_contrast=full --warmup_steps=0
-# python main_SSDA.py --wandb=False --teacher=expts/tmp_last/checkpoint_KL_pc_cw_r3_3.pth.tar
+# python main_SSDA_EMA.py --wandb=False 
 
 # next round of ST
 #python main_SSDA.py --seed=1 --wandb=False --size=small --expt_name=KL_pc_round2 --cr=kl --pixel_contrast=True --pc_mixed=True --warmup_steps=0 --pseudolabel_folder=test_pl1_test --round_start=model/pretrained/checkpoint_KLE1_p2.pth.tar
