@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=taus3
+#SBATCH --job-name=taus2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.9 --cr=ce_th --tau=0.9 --pixel_contrast=True 
+python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.9 --cr=ce_th --tau=0.9 --pixel_contrast=True 
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full --cr=ce --pixel_contrast=True 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=MSE --cr=mse --pixel_contrast=True 
 
