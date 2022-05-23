@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=r2PL
+#SBATCH --job-name=SSnPLp2
 
 #
 #SBATCH --nodes=1
@@ -25,7 +25,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_2_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_2_3.pth.tar --pseudolabel_folder=KL_pc_40k3_test
 #python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_noS_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_noS_3.pth.tar --pseudolabel_folder=KL_pc_40k3_test
 #python main_SSDA_EMA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r3_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r3_2.pth.tar
-python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_p2_PL --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_3.pth.tar --pseudolabel_folder=full_s3
+#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_p2_PL --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_3.pth.tar --pseudolabel_folder=full_s3
 
 # 3rd round
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_r3_noPL --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_r3_20k_3.pth.tar #--pseudolabel_folder=KL_pc_r23_test
@@ -38,3 +38,4 @@ python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job
 #python main_SSDA_EMA.py --seed=3 --target_samples=0 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_r2_p2 --cr=ce --pseudolabel_folder=UDA_CE_s1 --resume=expts/tmp_last/checkpoint_UDA_CE_r2_3.pth.tar
 
 # SSL
+python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --steps_job=10000 --project=clean_runs --expt_name=SemiSup_r2_testNoPL_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_testNoPL_3.pth.tar
