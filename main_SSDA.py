@@ -90,6 +90,7 @@ def main(args, wandb):
         if os.path.isfile(args.prev_teacher):
             ema_prev = get_model(args)
             ema_prev.to(torch.device('cuda'))
+            ema_prev.train()
             checkpoint = torch.load(args.prev_teacher)
             ema_prev.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading EMA teacher from ', args.prev_teacher)
