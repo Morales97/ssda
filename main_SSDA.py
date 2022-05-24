@@ -93,7 +93,7 @@ def main(args, wandb):
             checkpoint = torch.load(args.prev_teacher)
             ema_prev.load_state_dict(checkpoint['ema_state_dict'])
             print('*** Loading EMA teacher from ', args.prev_teacher)
-            score = _log_validation_ema(ema_prev, val_loader, loss_fn, start_step, wandb)
+            score = _log_validation_ema(ema_prev, val_loader, loss_fn, start_step, wandb=None)
             print('EMA teacher\'s mIoU: ', str(score['mIoU']))
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -489,7 +489,8 @@ def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
 
     log_str = get_log_str(args, log_info, title='Validation Log on EMA')
     print(log_str)
-    wandb.log(rm_format(log_info))
+    if wandb is not None:
+        wandb.log(rm_format(log_info))
     return score
 
 if __name__ == '__main__':
