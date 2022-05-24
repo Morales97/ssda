@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cycs3
+#SBATCH --job-name=SSr3s1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
