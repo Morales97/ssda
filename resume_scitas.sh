@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSs2p2
+#SBATCH --job-name=SSs1p2
 
 #
 #SBATCH --nodes=1
@@ -39,4 +39,4 @@
 #python main_SSDA_EMA.py --seed=3 --target_samples=0 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_r2_p2 --cr=ce --pseudolabel_folder=UDA_CE_s1 --resume=expts/tmp_last/checkpoint_UDA_CE_r2_3.pth.tar
 
 # SSL
-python main_SemiSup.py --seed=2 --steps=30000 --save_interval=30000 --steps_job=10000 --project=GTA_to_CS_small --expt_name=SemiSup_r2_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_2.pth.tar
+python main_SemiSup.py --seed=1 --steps=30000 --save_interval=30000 --steps_job=10000 --project=GTA_to_CS_small --expt_name=SemiSup_r2_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_1.pth.tar
