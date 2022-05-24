@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=s2p2KP
+#SBATCH --job-name=s3p2KP
 
 #
 #SBATCH --nodes=1
@@ -23,7 +23,7 @@
 #python main_SSDA_EMA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_1.pth.tar
 
 # 2nd round
-python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA_p2_keep --cr=ce --pixel_contrast=True --prev_teacher=expts/tmp_last/checkpoint_full_p2_2.pth.tar --resume=expts/tmp_last/checkpoint_full_r2_prevEMA_2.pth.tar
+python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA_p2_keep --cr=ce --pixel_contrast=True --prev_teacher=expts/tmp_last/checkpoint_full_p2_3.pth.tar --resume=expts/tmp_last/checkpoint_full_r2_prevEMA_3.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_2_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_2_3.pth.tar --pseudolabel_folder=KL_pc_40k3_test
 #python main_SemiSupNEW.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=KL_pc_cw_PL_noS_p2 --cr=kl --pixel_contrast=True --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_noS_3.pth.tar --pseudolabel_folder=KL_pc_40k3_test
 #python main_SSDA_EMA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r3_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r3_2.pth.tar
