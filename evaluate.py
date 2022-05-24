@@ -269,11 +269,11 @@ if __name__ == '__main__':
     print('** Round 1 **')
     '''
 
-    path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
-    path_to_model_r2='expts/tmp_last/checkpoint_full_r2_p2_3.pth.tar'  # round 2
-    path_to_model_r3='expts/tmp_last/checkpoint_full_r3_p2_3.pth.tar' # round 3
+    #path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
+    path_to_model_r2='expts/tmp_last/checkpoint_full_r2_p2_1.pth.tar'  # round 2
+    path_to_model_r3='expts/tmp_last/checkpoint_full_r3_p2_1.pth.tar' # round 3
     
-    ensemble(args, path_to_model_r1, path_to_model_r2, path_to_model_r3)
+    ensemble(args, path_to_model_r2, path_to_model_r3)
 
 
 # python evaluate.py 
