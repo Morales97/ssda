@@ -86,14 +86,14 @@ def main(args, wandb):
     step = start_step
 
     # Load EMA from previous round
-    if args.teacher:
-        if os.path.isfile(args.teacher):
-            ema_teacher = get_model(args)
-            ema_teacher.to(torch.device('cuda'))
-            checkpoint = torch.load(args.teacher)
-            ema_teacher.load_state_dict(checkpoint['ema_state_dict'])
-            print('*** Loading EMA teacher from ', args.teacher)
-            score = _log_validation_ema(ema_teacher, val_loader, loss_fn, start_step, wandb)
+    if args.prev_teacher:
+        if os.path.isfile(args.prev_teacher):
+            ema_prev = get_model(args)
+            ema_prev.to(torch.device('cuda'))
+            checkpoint = torch.load(args.prev_teacher)
+            ema_prev.load_state_dict(checkpoint['ema_state_dict'])
+            print('*** Loading EMA teacher from ', args.prev_teacher)
+            score = _log_validation_ema(ema_prev, val_loader, loss_fn, start_step, wandb)
             print('EMA teacher\'s mIoU: ', str(score['mIoU']))
         else:
             raise Exception('No file found at {}'.format(args.resume))
@@ -184,8 +184,8 @@ def main(args, wandb):
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
 
-                if args.teacher is not None:
-                    out_w, out_strong = _forward_cr(args, model_teacher, ema_teacher, images_weak, images_strong)
+                if args.prev_teacher is not None:
+                    out_w, out_strong = _forward_cr(args, model, ema_prev, images_weak, images_strong)
                 else:
                     out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)

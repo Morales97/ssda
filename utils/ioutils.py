@@ -112,7 +112,7 @@ def get_parser():
                         help='Use class weighting in the loss function')      
     parser.add_argument('--pseudolabel_folder', type=str, default=None,
                         help='path to folder with pseudolabels')     
-    parser.add_argument('--teacher', type=str, default=None,
+    parser.add_argument('--prev_teacher', type=str, default=None,
                         help='path to teacher model')  
     parser.add_argument('--dropPL_step', type=int, default=-1,
                         help='step when to drop pseudolabels')    
