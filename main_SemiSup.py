@@ -272,10 +272,12 @@ def main(args, wandb):
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 0.1
 
-        # Update class weights after 5% of total steps
-        # NOTE: no noticable effect in performance. Maybe more useful in case of really scarce labels
-        #if args.class_weight and step == np.floor(args.steps * 0.05):
-        #    class_weigth_t = get_class_weights_estimation(target_loader, target_loader_unl, model, ema)
+
+        # Drop pseudo-labels
+        if args.dropPL_step == step:
+            _, target_loader, target_loader_unl, val_loader = get_loaders(args)
+            data_iter_t = iter(target_loader)
+            data_iter_t_unl = iter(target_loader_unl)
 
         step += 1
         # Log Training
@@ -437,6 +439,7 @@ def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
         'Train Step': step,
         'Validation loss on EMA': val_loss_meter.avg,
         'mIoU on EMA': score['mIoU'],
+        'mIoU_100 on EMA': score['mIoU_100'],
         'Overall acc on EMA': score['Overall Acc'],
     })
 

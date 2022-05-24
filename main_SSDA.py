@@ -483,6 +483,7 @@ def _log_validation_ema(ema_model, val_loader, loss_fn, step, wandb):
         'Train Step': step,
         'Validation loss on EMA': val_loss_meter.avg,
         'mIoU on EMA': score['mIoU'],
+        'mIoU_100 on EMA': score['mIoU_100'],
         'Overall acc on EMA': score['Overall Acc'],
     })
 

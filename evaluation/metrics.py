@@ -63,6 +63,7 @@ class runningScore(object):
                 "Mean Acc": acc_cls,
                 "FreqW Acc": fwavacc,
                 "mIoU": mean_iu,
+                "mIoU_100": mean_iu * 100,
             },
             cls_iu,
         )
