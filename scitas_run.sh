@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=prevs2
+#SBATCH --job-name=prevs3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -24,7 +24,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_full --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_memory=True --alonso_contrast=full 
 
 # next round of ST
-python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA --cr=ce --pixel_contrast=True --pseudolabel_folder=full_s2 --prev_teacher=expts/tmp_last/checkpoint_full_p2_2.pth.tar
+python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA --cr=ce --pixel_contrast=True --pseudolabel_folder=full_s3 --prev_teacher=expts/tmp_last/checkpoint_full_p2_3.pth.tar
 #python main_SSDA_EMA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r3 --cr=ce --pixel_contrast=True --pseudolabel_folder=full_r2_s2
 
 # UDA
