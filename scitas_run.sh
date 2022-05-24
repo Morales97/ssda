@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=prevs3
+#SBATCH --job-name=cycs1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -13,7 +13,7 @@
 
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.5 --cr=ce_th --tau=0.5 --pixel_contrast=True 
-#python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full --cr=ce --pixel_contrast=True 
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_cycada --cr=ce --pixel_contrast=True 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=MSE --cr=mse --pixel_contrast=True 
 
 # SIZE TINY
@@ -24,7 +24,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_full --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_memory=True --alonso_contrast=full 
 
 # next round of ST
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA --cr=ce --pixel_contrast=True --pseudolabel_folder=full_s3 --prev_teacher=expts/tmp_last/checkpoint_full_p2_3.pth.tar
+#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA --cr=ce --pixel_contrast=True --pseudolabel_folder=full_s3 --prev_teacher=expts/tmp_last/checkpoint_full_p2_3.pth.tar
 #python main_SSDA_EMA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r3 --cr=ce --pixel_contrast=True --pseudolabel_folder=full_r2_s2
 
 # UDA
