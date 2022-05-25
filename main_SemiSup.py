@@ -43,9 +43,9 @@ def main(args, wandb):
     
     # Load data
     if args.pseudolabel_folder is None:
-        _, target_loader, target_loader_unl, val_loader = get_loaders(args)
+        _, target_loader, target_loader_unl, val_loader, idxs = get_loaders(args)
     else:
-        _, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+        _, target_loader, target_loader_unl, val_loader, idxs = get_loaders_pseudolabels(args)
     
     # Load model
     model = get_model(args)
@@ -275,7 +275,7 @@ def main(args, wandb):
 
         # Drop pseudo-labels
         if args.dropPL_step == step:
-            _, target_loader, target_loader_unl, val_loader = get_loaders(args)
+            _, target_loader, target_loader_unl, val_loader, _ = get_loaders(args, idxs)
             data_iter_t = iter(target_loader)
             data_iter_t_unl = iter(target_loader_unl)
 

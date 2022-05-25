@@ -43,9 +43,9 @@ def main(args, wandb):
     
     # Load data
     if args.pseudolabel_folder is None:
-        source_loader, target_loader, target_loader_unl, val_loader = get_loaders(args)
+        source_loader, target_loader, target_loader_unl, val_loader, _ = get_loaders(args)
     else:
-        source_loader, target_loader, target_loader_unl, val_loader = get_loaders_pseudolabels(args)
+        source_loader, target_loader, target_loader_unl, val_loader, _ = get_loaders_pseudolabels(args)
     
     # Init model and EMA
     model = get_model(args)

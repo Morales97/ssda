@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 import os
 
-def get_loaders(args, num_t_samples=2975):
+def get_loaders(args, idxs=None, num_t_samples=2975):
     
     n_lbl_samples = args.target_samples
     size = args.size
@@ -28,8 +28,9 @@ def get_loaders(args, num_t_samples=2975):
 
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
-        idxs = np.arange(num_t_samples)
-        idxs = np.random.permutation(idxs)
+        if idxs is None:
+            idxs = np.arange(num_t_samples)
+            idxs = np.random.permutation(idxs)
         idxs_lbl = idxs[:n_lbl_samples]
         idxs_unlbl = idxs[n_lbl_samples:]
 
@@ -119,11 +120,11 @@ def get_loaders(args, num_t_samples=2975):
     )    
     
 
-    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader #, idxs, idxs_lbl, idxs_unlbl
+    return s_loader, t_lbl_loader, t_unlbl_loader, val_loader, idxs #, idxs_lbl, idxs_unlbl
     
 
 
-def get_loaders_pseudolabels(args, num_t_samples=2975):
+def get_loaders_pseudolabels(args, idxs=None, num_t_samples=2975):
     '''
     Returns
         - Source labeled loader
@@ -152,8 +153,9 @@ def get_loaders_pseudolabels(args, num_t_samples=2975):
 
     # Select randomly labelled samples 
     if n_lbl_samples != -1:
-        idxs = np.arange(num_t_samples)
-        idxs = np.random.permutation(idxs)
+        if idxs is None:
+            idxs = np.arange(num_t_samples)
+            idxs = np.random.permutation(idxs)
         idxs_lbl = idxs[:n_lbl_samples]
         idxs_unlbl = idxs[n_lbl_samples:]
 
@@ -208,7 +210,7 @@ def get_loaders_pseudolabels(args, num_t_samples=2975):
         shuffle=False,
     )    
     
-    return s_loader, t_pseudo_loader, t_unlbl_loader, val_loader #, idxs, idxs_lbl, idxs_unlbl
+    return s_loader, t_pseudo_loader, t_unlbl_loader, val_loader, idxs #, idxs_lbl, idxs_unlbl
 
 
     
