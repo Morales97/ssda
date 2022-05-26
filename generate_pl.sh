@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 # SSDA
-#python generate_pseudolabels.py --seed=1 --expt_name=SS --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_1.pth.tar
+#python generate_pseudolabels.py --seed=1 --expt_name=SS --resume=expts/tmp_last/checkpoint_SemiSup_1.pth.tar
 
 # SS
 #python generate_pseudolabels.py --seed=3 --expt_name=SS_r2 --resume=expts/tmp_last/checkpoint_SemiSup_r2_p2_3.pth.tar --pc_memory=True
@@ -22,3 +22,6 @@
 
 # evaluate
 python evaluate.py 
+
+# evaluate for SSL
+python evaluate.py --pc_memory=True
