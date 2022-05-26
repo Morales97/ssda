@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=d100
+#SBATCH --job-name=d100s1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -13,7 +13,7 @@
 
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.5 --cr=ce_th --tau=0.5 --pixel_contrast=True 
-python main_SSDA_noEMA.py --save_model=False --seed=2 --steps=40000 --save_interval=40000 --project=clean_runs --expt_name=abl_d100 
+python main_SSDA_noEMA.py --save_model=False --seed=1 --steps=40000 --save_interval=40000 --project=clean_runs --expt_name=abl_d100 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=MSE --cr=mse --pixel_contrast=True 
 
 # SIZE TINY
