@@ -232,7 +232,7 @@ class AlonsoContrastiveLearner:
     def labeled_pc(self, outputs_s, outputs_t, labels_s, labels_t, model):
         loss_labeled = 0
 
-        use_s = False
+        use_s = True
         if use_s:
 
             pred_s = outputs_s['pred']
