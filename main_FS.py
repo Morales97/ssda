@@ -91,7 +91,6 @@ def main(args, wandb):
     entropy_meter = averageMeter()
 
     data_iter_t = iter(target_loader)
-    data_iter_t_unl = iter(target_loader_unl)
 
     # Training loop
     while step <= args.steps:
@@ -99,11 +98,6 @@ def main(args, wandb):
         # This condition checks that the iterator has reached its end. len(loader) returns the number of batches
         if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
-
-        if args.cr is not None or args.alonso_contrast or args.ent_min:
-            if step % (len(target_loader_unl)-1) == 0:
-                data_iter_t_unl = iter(target_loader_unl)
-            images_t_unl = next(data_iter_t_unl)
 
         images_t, labels_t = next(data_iter_t)
         images_t = images_t.cuda()
