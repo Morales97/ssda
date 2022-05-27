@@ -311,7 +311,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
     if custom_pretrain_path is not None:
         print('Loading model from %s' % custom_pretrain_path)
         ckpt = torch.load(custom_pretrain_path)
-        sd = ckpt['model_state_dict']
+        sd = ckpt['model']
 
         # Create a new state_dict
         new_state_dict = copy.deepcopy(model.state_dict())
@@ -319,6 +319,7 @@ def deeplabv2_rn101(pretrained=False, pretrained_backbone=True, custom_pretrain_
             if 'model_q.' in key:
                 if 'backbone' in key:
                     new_state_dict[key[17:]] = param  # remove the 'module.model_q.' part
+                    print(key)
                 # NOTE do not load classification head: v2 decoder is 2048 -> C, and C changes to num_classes. cannot reuse
 
         model.load_state_dict(new_state_dict)
