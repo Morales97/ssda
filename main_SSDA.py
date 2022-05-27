@@ -203,16 +203,14 @@ def main(args, wandb):
             # fill memory. NOTE if not enough warmup steps, the memory is initialized with random values and the PC will be harmful until memory is full
             ramp_up_steps = 500
             queue = None
-            if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
-                proj_s = outputs_s['proj_pc']
-                proj_t = outputs_t['proj_pc']
 
-                if not args.pc_mixed:
-                    key = proj_t.detach()
-                    key_lbl = labels_t
-                else:
-                    key = torch.cat([proj_s, proj_t], dim=0).detach()
-                    key_lbl = torch.cat([labels_s, labels_t], dim=0)
+            if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
+                # add to memory only features from T and obtained with EMA
+                outputs_t_ema = ema_model(images_t)
+                proj_t = outputs_t_ema['proj_pc']
+
+                key = proj_t.detach()
+                key_lbl = labels_t
 
                 model._dequeue_and_enqueue(key, key_lbl)
                 queue = torch.cat((model.segment_queue, model.pixel_queue), dim=1)
