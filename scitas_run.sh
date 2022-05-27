@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=labs3
+#SBATCH --job-name=masks2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_maskC --cr=ce --pixel_contrast=True --custom_pretrain=model/pretrained/ckpt_mask_v2.tar
+python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_maskC --cr=ce --pixel_contrast=True --custom_pretrain=model/pretrained/ckpt_mask_v2.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_LAB --cr=ce --pixel_contrast=True --lab_color=True
 #python main_SSDA_noEMA.py --save_model=False --seed=1 --steps=40000 --save_interval=40000 --project=clean_runs --expt_name=abl_d100 
 #python main_FS.py --save_model=False --seed=3 --steps=40000 --project=clean_runs --expt_name=FS
