@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=evals3
+#SBATCH --job-name=genSSs1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -21,7 +21,7 @@
 #python generate_pseudolabels.py --target_samples=0 --expt_name=UDA_CE --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
 
 # evaluate
-python evaluate.py 
+#python evaluate.py 
 
 # evaluate for SSL
 python evaluate.py --pc_memory=True
