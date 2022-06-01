@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSNs3
+#SBATCH --job-name=PCs1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -26,8 +26,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_full --batch_size_s=1 --batch_size_tl=1 --batch_size_tu=1 --cr=ce --pixel_contrast=True --pc_memory=True --alonso_contrast=full 
 
 # next round of ST
-#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA --cr=ce --pixel_contrast=True --pseudolabel_folder=full_s3 --prev_teacher=expts/tmp_last/checkpoint_full_p2_3.pth.tar
-#python main_SSDA_EMA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_r3 --cr=ce --pixel_contrast=True --pseudolabel_folder=full_r2_s2
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --pseudolabel_folder=abl_noPCmix_s1
 
 # UDA
 #python main_UDA.py --seed=3 --steps=40000 --save_interval=40000 --project=GTA_to_CS_small --expt_name=UDA_CE --cr=ce 
@@ -35,7 +34,7 @@
 #python main_SSDA_EMA.py --seed=3 --target_samples=0 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_r2 --cr=ce --pseudolabel_folder=UDA_CE_s1
 
 # SSL
-python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99
+#python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k --cr=ce --pixel_contrast=True --pc_memory=True --pseudolabel_folder=SS_s3
 
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True

@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSNs3p2
-
+#SBATCH --job-name=PCs1p2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -22,6 +21,8 @@
 #python main_SSDA_EMA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_1.pth.tar
 
 # 2nd round
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_noPCmix_r2_1.pth.tar
+
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA_p2_rm --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_prevEMA_1.pth.tar
 #python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r3_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r3_2.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_p2_PL --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_3.pth.tar --pseudolabel_folder=full_s3
@@ -38,5 +39,5 @@
 
 # SSL
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_40k_3.pth.tar
-python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSupNEW_3.pth.tar
+#python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSupNEW_3.pth.tar
 

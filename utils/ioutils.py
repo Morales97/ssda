@@ -90,7 +90,7 @@ def get_parser():
                         help='weight of pixel contrast loss')
     parser.add_argument('--alpha', type=float, default=0.995,
                         help='EMA coefficient')
-    parser.add_argument('--warmup_steps', type=int, default=2000,
+    parser.add_argument('--warmup_steps', type=int, default=1000,
                         help='number of warm up steps before pixel contrast loss')    
     parser.add_argument('--size', type=str, default='small',
                         help='size of the dataset (tiny/small)')     
