@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSs1p2
+#SBATCH --job-name=SSs2p2
 
 #
 #SBATCH --nodes=1
@@ -38,5 +38,5 @@
 
 # SSL
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_40k_3.pth.tar
-python main_SemiSup.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_1.pth.tar
+python main_SemiSup.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_2.pth.tar
 
