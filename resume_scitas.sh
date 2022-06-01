@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSs1p2
+#SBATCH --job-name=SSNs1p2
 
 #
 #SBATCH --nodes=1
