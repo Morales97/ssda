@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=gens2
+#SBATCH --job-name=gens3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 # SSDA
-python generate_pseudolabels.py --seed=2 --expt_name=abl_noPCmix --resume=expts/tmp_last/checkpoint_abl_noPCmix_p2_2.pth.tar
+python generate_pseudolabels.py --seed=3 --expt_name=abl_noPCmix --resume=expts/tmp_last/checkpoint_abl_noPCmix_p2_3.pth.tar
 
 # SS
 #python generate_pseudolabels.py --seed=3 --expt_name=SS_r2 --resume=expts/tmp_last/checkpoint_SemiSup_r2_p2_3.pth.tar --pc_memory=True
