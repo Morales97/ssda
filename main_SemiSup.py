@@ -175,7 +175,11 @@ def main(args, wandb):
             ramp_up_steps = 500
             queue = None
             if args.pc_memory and step >= args.warmup_steps - ramp_up_steps:
-                proj_t = outputs_t['proj_pc']
+                if not args.pc_ema:
+                    proj_t = outputs_t['proj_pc']
+                else:
+                    outputs_t_ema = ema_model(images_t)
+                    proj_t = outputs_t_ema['proj_pc']
                 key = proj_t.detach()
                 key_lbl = labels_t
 

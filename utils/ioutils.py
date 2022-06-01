@@ -84,6 +84,8 @@ def get_parser():
                         help='Pixel contrast: mix S and T samples or not')   
     parser.add_argument('--pc_memory', type=boolfromstr, default=False,
                         help='Pixel contrast: use memory or not')   
+    parser.add_argument('--pc_ema', type=boolfromstr, default=False,
+                        help='Pixel contrast: use EMA teacher to generate anchor features or not')   
     parser.add_argument('--gamma', type=float, default=0.1,
                         help='weight of pixel contrast loss')
     parser.add_argument('--alpha', type=float, default=0.995,
