@@ -17,7 +17,6 @@ from loss.cross_entropy import cross_entropy2d
 from loss.pixel_contrast import PixelContrastLoss
 from loss.pixel_contrast_unsup import AlonsoContrastiveLearner
 from loss.consistency import consistency_reg, cr_multiple_augs
-from loss.entropy_min import entropy_loss
 from loader.loaders import get_loaders, get_loaders_pseudolabels
 from evaluation.metrics import averageMeter, runningScore
 from utils.lab_color import lab_transform
@@ -108,7 +107,6 @@ def main(args, wandb):
     constrast_t_loss_meter = averageMeter()
     pseudo_lbl_meter = averageMeter()
     alonso_contrast_meter = averageMeter()
-    entropy_meter = averageMeter()
 
     data_iter_t = iter(target_loader)
     data_iter_t_unl = iter(target_loader_unl)
@@ -251,7 +249,6 @@ def main(args, wandb):
         constrast_t_loss_meter.update(args.gamma * loss_cl_t)
         pseudo_lbl_meter.update(percent_pl)
         alonso_contrast_meter.update(loss_cl_alonso)
-        entropy_meter.update(0.1 * entropy)
 
         # Decrease lr
         if args.lr_decay == 'poly' and step % args.log_interval == 0:
@@ -290,7 +287,6 @@ def main(args, wandb):
                 'Pseudo lbl %': FormattedLogItem(pseudo_lbl_meter.avg, '{:.2f}'),
                 'Norm in last update': FormattedLogItem(norm, '{:.4f}'),
                 'Alonso CL Loss': FormattedLogItem(alonso_contrast_meter.avg, '{:.3f}'),
-                'Entropy Loss': FormattedLogItem(entropy_meter.avg, '{:.3f}'),
             })
 
             log_str = get_log_str(args, log_info, title='Training Log')
@@ -306,7 +302,6 @@ def main(args, wandb):
             constrast_s_loss_meter.reset()
             constrast_t_loss_meter.reset()
             alonso_contrast_meter.reset()
-            entropy_meter.reset()
             train_loss_meter.reset()
             
         # Log Validation
