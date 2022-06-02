@@ -37,7 +37,7 @@
 #python main_SSDA_EMA.py --seed=3 --target_samples=0 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=UDA_CE_r2 --cr=ce --pseudolabel_folder=UDA_CE_s1
 
 # SSL
-python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW_500 --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 
+python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW_500_augs --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --aug_level=6
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k --cr=ce --pixel_contrast=True --pc_memory=True --pseudolabel_folder=SS_s3
 
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True
