@@ -84,7 +84,7 @@ class gtaDataset(data.Dataset):
         else:
             raise Exception('size not valid')
         if self.rot:
-            self.transforms = get_transforms(crop_size=min(self.crop_size), split='train', aug_level=1)
+            self.transforms = get_transforms(crop_size=min(self.crop_size), aug_level=1)
             print('Images with random square crops of size ', str(min(self.crop_size)))
         else:
             self.transforms = get_transforms(crop_size=self.crop_size, aug_level=0)

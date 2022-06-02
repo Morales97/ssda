@@ -74,6 +74,8 @@ def get_parser():
                         help='threshold for pseudolabels')
     parser.add_argument('--lmbda', type=float, default=1,
                         help='weight of consistency regularization loss')
+    parser.add_argument('--gamma', type=float, default=0.1,
+                        help='weight of pixel contrast loss')
     parser.add_argument('--aug_level', type=int, default=5,
                         help='Strong augmentations level')  
     parser.add_argument('--n_augmentations', type=int, default=1,
@@ -86,8 +88,6 @@ def get_parser():
                         help='Pixel contrast: use memory or not')   
     parser.add_argument('--pc_ema', type=boolfromstr, default=False,
                         help='Pixel contrast: use EMA teacher to generate anchor features or not')   
-    parser.add_argument('--gamma', type=float, default=0.1,
-                        help='weight of pixel contrast loss')
     parser.add_argument('--alpha', type=float, default=0.995,
                         help='EMA coefficient')
     parser.add_argument('--warmup_steps', type=int, default=1000,
@@ -118,32 +118,6 @@ def get_parser():
                         help='path to teacher model')  
     parser.add_argument('--dropPL_step', type=int, default=-1,
                         help='step when to drop pseudolabels')    
-    '''
-    parser.add_argument('--net', type=str, default='resnet34',
-                        choices=['alexnet', 'vgg', 'resnet34'],
-                        help='which network to use')
-    parser.add_argument('--source', type=str, default='real',
-                        help='source domain')
-    parser.add_argument('--target', type=str, default='sketch',
-                        help='target domain')
-    parser.add_argument('--dataset', type=str, default='multi',
-                        choices=['multi', 'office', 'office_home', 'visda17'],
-                        help='the name of dataset')
-    parser.add_argument('--num', type=int, default=3,
-                        help='number of labeled examples in the target')
-
-    parser.add_argument('--aug_level', type=int, default=3,
-                        help='Level of augmentation to apply to data. Currently:'
-                             '0 : Resize, randomcrop, random flip'
-                             '1 : 0 + color jitter '
-                             '2 : 0 + Randaugment'
-                             '3 : Randaugment + Color jittering'
-                             '4 : 3 with lower rotation and sheer')
-
-    parser.add_argument('--fs_ss', action='store_true', default=False,
-                        help='Whether to use file_system as '
-                             'torch.mutiprocessing sharing strategy')
-    '''
     return parser
 
 

@@ -152,82 +152,74 @@ class WeakStrongAug2:
         img3 = self.base_transform2(x)
         return [img1, img2, img3]
 
-def get_transforms(crop_size=256, split='train', aug_level=0):
+def get_transforms(crop_size=256, aug_level=0):
 
     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
-    if split == 'test': # NOTE delete this? we never use split test
+    if aug_level == 0:
+        # Do nothing
+        transform_list = []
+    elif aug_level == 1:
+        # Mellow transform used for rotation pretrain
         transform_list = [
-            transforms.CenterCrop(crop_size),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(crop_size),
         ]
-    elif split == 'train':
-        if aug_level == 0:
-            # Do nothing
-            transform_list = []
-        elif aug_level == 1:
-            # Mellow transform used for rotation pretrain
-            transform_list = [
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(crop_size),
-            ]
-        elif aug_level == 2:
-            # Only crop
-            transform_list = [
-                transforms.RandomCrop(crop_size),
-            ]
-        elif aug_level == 3:
-            # Strong augmentation for CR: Color Jitter + RandAugment
-            transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-            ]
-        elif aug_level == 4:
-            # Strong augmentation for CR: Color Jitter + RandAugment + Blur
-            transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
-                transforms.RandomApply([
-                    RandAugmentBlur(blur_augment_pool()),
-                ], p=0.8),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-                
-            ]
-        elif aug_level == 5:
-            transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
-                transforms.RandomApply([
-                    RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
-                ], p=0.5),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-                
-            ]
-        elif aug_level == 6:
-            transform_list = [
-                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool2()), # more augmentations
-                transforms.RandomApply([
-                    RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
-                ], p=0.5),
-                transforms.RandomApply([
-                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
-                ], p=0.8)
-                
-            ]
-        elif aug_level == 7:
-            transform_list = [
-                Blur(blur_type='horizontal', kernel_size=(7,7)),
-                Blur(blur_type='diagonal', kernel_size=(7,7)),
-            ]
+    elif aug_level == 2:
+        # Only crop
+        transform_list = [
+            transforms.RandomCrop(crop_size),
+        ]
+    elif aug_level == 3:
+        # Strong augmentation for CR: Color Jitter + RandAugment
+        transform_list = [
+            RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8)
+        ]
+    elif aug_level == 4:
+        # Strong augmentation for CR: Color Jitter + RandAugment + Blur
+        transform_list = [
+            RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
+            transforms.RandomApply([
+                RandAugmentBlur(blur_augment_pool()),
+            ], p=0.8),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8)
+            
+        ]
+    elif aug_level == 5:
+        transform_list = [
+            RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
+            transforms.RandomApply([
+                RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
+            ], p=0.5),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8)
+            
+        ]
+    elif aug_level == 6:
+        transform_list = [
+            RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool2()), # more augmentations
+            transforms.RandomApply([
+                RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
+            ], p=0.5),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8)
+            
+        ]
+    elif aug_level == 7:
+        transform_list = [
+            Blur(blur_type='horizontal', kernel_size=(7,7)),
+            Blur(blur_type='diagonal', kernel_size=(7,7)),
+        ]
 
-        # NOTE see https://github.com/venkatesh-saligrama/PAC for more possible augmentations
-        else:
-            raise Exception('get_transforms : augmentation not recognized')
     else:
-        raise Exception('get_transforms: split not recognized')
+        raise Exception('get_transforms : augmentation not recognized')
 
 
     transform_list.append(transforms.ToTensor())

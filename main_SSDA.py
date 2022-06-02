@@ -138,7 +138,7 @@ def main(args, wandb):
         if step % (len(target_loader)-1) == 0:
             data_iter_t = iter(target_loader)
 
-        if args.cr is not None or args.alonso_contrast or args.ent_min:
+        if args.cr is not None or args.alonso_contrast:
             if step % (len(target_loader_unl)-1) == 0:
                 data_iter_t_unl = iter(target_loader_unl)
             images_t_unl = next(data_iter_t_unl)
@@ -266,19 +266,8 @@ def main(args, wandb):
 
                 loss_cl_alonso = loss_labeled + loss_unlabeled
 
-
-        # *** Entropy minimization ***
-        entropy = 0
-        if args.ent_min:
-            images_tu = images_t_unl[0].cuda() # TODO change loader? rn unlabeled loader returns [weak, strong], for CR
-            outputs_tu = model(images_tu)      # TODO merge this with forward in CR (this is the same forward pass)
-            #out_cat = torch.cat((outputs_s['out'], outputs_t['out'], outputs_tu['out']), dim=0) # NOTE try if ent min on labeled data helps (uncomment this and comment line below)
-            out_cat = outputs_tu['out'] 
-
-            entropy = entropy_loss(out_cat)
-
         # Total Loss
-        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso + 0.1 * entropy 
+        loss = loss_s + loss_t + args.lmbda * loss_cr + args.gamma * (loss_cl_s + loss_cl_t) + loss_cl_alonso
 
         # Update
         start_ts_update = time.time()
