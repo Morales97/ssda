@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=PCs3p2
+#SBATCH --job-name=full1p2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,8 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=noPCmix_mem --cr=ce --pixel_contrast=True --pc_memory=True --pc_mixed=False --alpha=0.99 --resume=expts/tmp_last/checkpoint_noPCmix_mem_3.pth.tar
+#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=noPCmix_mem --cr=ce --pixel_contrast=True --pc_memory=True --pc_mixed=False --alpha=0.99 --resume=expts/tmp_last/checkpoint_noPCmix_mem_3.pth.tar
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_new --cr=ce --pixel_contrast=True --alpha=0.99 --resume=expts/tmp_last/checkpoint_full_new_1.pth.tar
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.5_p2 --cr=ce_th --tau=0.5 --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_tau0.5_3.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_newPC --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_full_newPC_3.pth.tar
