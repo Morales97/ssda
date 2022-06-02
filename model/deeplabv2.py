@@ -101,7 +101,7 @@ class ResNet(nn.Module):
         self.dim_embed = 256
         self.pc_memory = pc_memory
         self.alonso_contrast = alonso_contrast
-        self.memory_size = 500  # the segment queue stores 1 region embedding per batch and per class. if 10/19 classes are present in the batch, 10*50 is 500. If queue was larger, we would keep old and new embeddings for the same regino simultaneously 
+        self.memory_size = 5000  # the segment queue stores 1 region embedding per batch and per class. if 10/19 classes are present in the batch, 10*50 is 500. If queue was larger, we would keep old and new embeddings for the same regino simultaneously 
         self.pixel_update_freq = 10
         self.ignore_label = 250
 
