@@ -19,30 +19,39 @@ import torch
 import torch.nn.functional as F
 from utils.blur import Blur
 
+
+def AutoContrast(img, **kwarg):
+    return PIL.ImageOps.autocontrast(img)
+
 def Brightness(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
     return PIL.ImageEnhance.Brightness(img).enhance(v)
-
 
 def Color(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
     return PIL.ImageEnhance.Color(img).enhance(v)
 
-
 def Contrast(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
     return PIL.ImageEnhance.Contrast(img).enhance(v)
 
+def Equalize(img, **kwarg):
+    return PIL.ImageOps.equalize(img)
+
+def Identity(img, **kwarg):
+    return img
+
+def Posterize(img, v, max_v, bias=0):
+    v = _int_parameter(v, max_v) + bias
+    return PIL.ImageOps.posterize(img, v)
 
 def Sharpness(img, v, max_v, bias=0):
     v = _float_parameter(v, max_v) + bias
     return PIL.ImageEnhance.Sharpness(img).enhance(v)
 
-
 def Solarize(img, v, max_v, bias=0):
     v = _int_parameter(v, max_v) + bias
     return PIL.ImageOps.solarize(img, 256 - v)
-
 
 
 def color_augment_pool():
@@ -53,6 +62,24 @@ def color_augment_pool():
             #(Equalize, None, None),
             #(Identity, None, None),
             #(Posterize, 4, 4),
+            #(Rotate, 5, 0),
+            (Sharpness, 0.9, 0.05),
+            #(ShearX, 0.05, 0),
+            #(ShearY, 0.05, 0),
+            (Solarize, 256, 0),
+            #(TranslateX, 0.05, 0),
+            #(TranslateY, 0.05, 0)
+            ]
+    return augs
+
+def color_augment_pool2():
+    augs = [(AutoContrast, None, None),
+            (Brightness, 0.9, 0.05),
+            (Color, 0.9, 0.05),
+            (Contrast, 0.9, 0.05),
+            (Equalize, None, None),
+            (Identity, None, None),
+            (Posterize, 4, 4),
             #(Rotate, 5, 0),
             (Sharpness, 0.9, 0.05),
             #(ShearX, 0.05, 0),
@@ -180,6 +207,17 @@ def get_transforms(crop_size=256, split='train', aug_level=0):
                 
             ]
         elif aug_level == 6:
+            transform_list = [
+                RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool2()), # more augmentations
+                transforms.RandomApply([
+                    RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
+                ], p=0.5),
+                transforms.RandomApply([
+                    transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+                ], p=0.8)
+                
+            ]
+        elif aug_level == 7:
             transform_list = [
                 Blur(blur_type='horizontal', kernel_size=(7,7)),
                 Blur(blur_type='diagonal', kernel_size=(7,7)),
