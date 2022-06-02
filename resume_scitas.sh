@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=PCs3p2
+#SBATCH --job-name=PCs1p2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -11,17 +11,14 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-#python main_SSDA.py --seed=1 --steps=200 --steps_job=100 --val_interval=100 --project=GTA_CS_rn50_tiny --expt_name=test_launch2 --net=deeplabv3_rn50 --batch_size_s=4 --batch_size_tl=4 --batch_size_tu=4 --cr=kl --resume=expts/tmp_last/checkpoint_test_launch2_1.pth.tar
+
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=noPCmix_mem --cr=ce --pixel_contrast=True --pc_memory=True --pc_mixed=False --alpha=0.99 --resume=expts/tmp_last/checkpoint_noPCmix_mem_1.pth.tar
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.5_p2 --cr=ce_th --tau=0.5 --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_tau0.5_3.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_newPC --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_full_newPC_3.pth.tar
-#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=full_rampupFIX_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_rampupFIX_3.pth.tar
-#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampup_p2 --cr=ce --pixel_contrast=True --cutmix_cr=False --aug_level=4 --resume=expts/tmp_last/checkpoint_CE_EMA_rampup_3.pth.tar
-#python main_SSDA_EMA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=GTA_to_CS_small --expt_name=CE_EMA_rampupFIX_p2 --cr=ce --pixel_contrast=True --cutmix_cr=False --aug_level=4 --resume=expts/tmp_last/checkpoint_CE_EMA_rampupFIX_3.pth.tar
-#python main_SSDA_EMA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_1.pth.tar
 
 # 2nd round
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_noPCmix_r2_3.pth.tar
+#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_noPCmix_r2_3.pth.tar
 
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA_p2_rm --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_prevEMA_1.pth.tar
 #python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r3_p2 --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r3_2.pth.tar
