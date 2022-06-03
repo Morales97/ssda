@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSs1
+#SBATCH --job-name=SSs2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -39,7 +39,7 @@
 
 # SSL
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW_500_r2 --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --pseudolabel_folder=SSnew500_s3
-python main_SemiSup.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem_p2 --cr=ce --pixel_contrast=True --pc_memory=False --pseudolabel_folder=SSnomem_s1
+python main_SemiSup.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem_p2 --cr=ce --pixel_contrast=True --pc_memory=False --pseudolabel_folder=SSnomem_s2
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k --cr=ce --pixel_contrast=True --pc_memory=True --pseudolabel_folder=SS_s3
 
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True
