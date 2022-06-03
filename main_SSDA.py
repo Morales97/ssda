@@ -182,7 +182,6 @@ def main(args, wandb):
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
-
                 if args.prev_teacher is not None:
                     out_w, out_strong = _forward_cr(args, model, ema_prev, images_weak, images_strong)
                 else:
@@ -394,9 +393,10 @@ def _forward_cr(args, model, ema_model, images_weak, images_strong):
     out_w = outputs_w['out']
 
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
-        images_strong, out_w = _cutmix_output(args, images_strong, out_w)
+        images_strong_cut, out_w = _cutmix_output(args, images_strong, out_w)
 
-    outputs_strong = model(images_strong)
+    pdb.set_trace()
+    outputs_strong = model(images_strong_cut)
     out_strong = outputs_strong['out']
     return out_w, out_strong
 
