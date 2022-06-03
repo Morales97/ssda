@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=nomems1
+#SBATCH --job-name=nomems2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -39,6 +39,6 @@
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k_p2 --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_SemiSup_r2_40k_3.pth.tar
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSupNEW_3.pth.tar
 #python main_SemiSup.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW_r2 --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSupNEW_r2_1.pth.tar
-python main_SemiSup.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem --cr=ce --pixel_contrast=True --pc_memory=False --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSup_nomem_1.pth.tar
+python main_SemiSup.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem --cr=ce --pixel_contrast=True --pc_memory=False --alpha=0.99 --resume=expts/tmp_last/checkpoint_SemiSup_nomem_2.pth.tar
 
 
