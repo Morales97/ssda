@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=nomems3
+#SBATCH --job-name=abls1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -16,6 +16,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=noPCmix_mem --cr=ce --pixel_contrast=True --pc_memory=True --pc_mixed=False --alpha=0.99
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_new --cr=ce --pixel_contrast=True --alpha=0.99
 
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --pc_mixed=False --pseudolabel_folder=abl_noPCmix_s1
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_LAB --cr=ce --pixel_contrast=True --lab_color=True
 #python main_SSDA_noEMA.py --save_model=False --seed=1 --steps=40000 --save_interval=40000 --project=clean_runs --expt_name=abl_d100 
 #python main_FS.py --save_model=False --seed=3 --steps=40000 --project=clean_runs --expt_name=FS
@@ -38,7 +39,7 @@
 
 # SSL
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSupNEW_500_r2 --cr=ce --pixel_contrast=True --pc_memory=True --pc_ema=True --alpha=0.99 --pseudolabel_folder=SSnew500_s3
-python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem --cr=ce --pixel_contrast=True --pc_memory=False --alpha=0.99 
+#python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_nomem --cr=ce --pixel_contrast=True --pc_memory=False --alpha=0.99 
 #python main_SemiSup.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_40k --cr=ce --pixel_contrast=True --pc_memory=True --pseudolabel_folder=SS_s3
 
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True
