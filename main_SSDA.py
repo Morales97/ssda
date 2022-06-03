@@ -395,7 +395,6 @@ def _forward_cr(args, model, ema_model, images_weak, images_strong):
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
         images_strong_cut, out_w = _cutmix_output(args, images_strong, out_w)
 
-    pdb.set_trace()
     outputs_strong = model(images_strong_cut)
     out_strong = outputs_strong['out']
     return out_w, out_strong
