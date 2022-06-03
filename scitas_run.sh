@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=abls2
+#SBATCH --job-name=abls3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -16,7 +16,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=noPCmix_mem --cr=ce --pixel_contrast=True --pc_memory=True --pc_mixed=False --alpha=0.99
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_new --cr=ce --pixel_contrast=True --alpha=0.99
 
-python main_SSDA.py --seed=2 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --pc_mixed=False --pseudolabel_folder=abl_noPCmix_s2
+python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r2 --cr=ce --pixel_contrast=True --pc_mixed=False --pseudolabel_folder=abl_noPCmix_s3
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_LAB --cr=ce --pixel_contrast=True --lab_color=True
 #python main_SSDA_noEMA.py --save_model=False --seed=1 --steps=40000 --save_interval=40000 --project=clean_runs --expt_name=abl_d100 
 #python main_FS.py --save_model=False --seed=3 --steps=40000 --project=clean_runs --expt_name=FS
