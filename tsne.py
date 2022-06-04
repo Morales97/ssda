@@ -58,7 +58,6 @@ def main(args):
             raise Exception('No file found at {}'.format(args.resume))
 
     model.eval()
-    ema_model.eval()
 
     for image, label in val_loader:
         out = model(image)
