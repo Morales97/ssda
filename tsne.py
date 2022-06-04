@@ -60,8 +60,9 @@ def main(args):
     model.eval()
 
     with torch.no_grad():
-        X = np.zeros((19, 100, 2048))
-        Y = np.zeros((19, 100))
+        num_samples = 3
+        X = np.zeros((19, num_samples, 2048))
+        Y = np.zeros((19, num_samples))
         class_ptr = np.zeros((19)).astype(int)
         class_count = 0
 
@@ -80,7 +81,7 @@ def main(args):
 
             # select one pixel from every class present in the image. repeat until all pixel classes are filled
             for c in range(19):
-                if class_ptr[c] == 100 or (c not in img_classes):
+                if class_ptr[c] == num_samples or (c not in img_classes):
                     pass
                 else:
                     idxs = np.where(label == c)
@@ -88,11 +89,11 @@ def main(args):
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
                     class_ptr[c] += 1
                     
-                    if class_ptr[c] == 100:
+                    if class_ptr[c] == num_samples:
                         class_count += 1
+                        print('Class count: ', class_count)
                         if class_count == 19:
                             break   # todo save np as txt
-            pdb.set_trace()
 
 
 if __name__ == '__main__':
