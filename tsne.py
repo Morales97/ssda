@@ -60,11 +60,13 @@ def main(args):
     model.eval()
 
     with torch.no_grad():
-        num_samples = 3
+        n_class = 19
+        num_samples = 10
         dim_emb = 2048
-        X = np.zeros((19, num_samples, dim_emb))
-        Y = np.zeros((19, num_samples))
-        class_ptr = np.zeros((19)).astype(int)
+
+        X = np.zeros((n_class, num_samples, dim_emb))
+        Y = np.zeros((n_class, num_samples))
+        class_ptr = np.zeros((n_class)).astype(int)
         class_count = 0
 
         for image, label in val_loader:
@@ -86,19 +88,22 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    X[c, class_ptr[c]] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
+                    sample_id = np.random.randint(len(idxs[0])))
+
+                    X[c, class_ptr[c]] = feat[sample_id, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
                     class_ptr[c] += 1
                     
                     if class_ptr[c] == num_samples:
                         class_count += 1
                         print('Class count: ', class_count)
-                        if class_count == 19:
-                            pdb.set_trace()
+                        if class_count == n_class:
                             X = X.reshape(-1, dim_emb)
                             Y = Y.reshape(-1)
-
-                            break   # todo save np as txt
+                            np.savetxt('X_cityscapes.txt', X)
+                            np.savetxt('Y_cityscapes.txt', Y)
+                            print('txt files saved')
+                            return
 
 
 if __name__ == '__main__':
