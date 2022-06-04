@@ -72,6 +72,9 @@ def main(args):
             feat = out['feat']
             feat = F.interpolate(feat, size=input_shape, mode="bilinear", align_corners=False)
 
+            feat = feat.cpu().numpy()
+            label = label.cpu().numpy()
+            
             # select one pixel from every class present in the image. repeat until all pixel classes are filled
             for c in range(19):
                 if class_ptr[c] >= 100:
