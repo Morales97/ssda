@@ -81,7 +81,7 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    X[c, class_ptr] = feat[0, :, idxs[1][0], idxs[2][0]]
+                    X[c, class_ptr] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr] = c     # we dont need Y at all
                         
             pdb.set_trace()
