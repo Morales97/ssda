@@ -90,7 +90,7 @@ def main(args):
                     idxs = np.where(label == c)
                     sample_id = np.random.randint(len(idxs[0]))
 
-                    X[c, class_ptr[c]] = feat[sample_id, :, int(idxs[1][0]), int(idxs[2][0])]
+                    X[c, class_ptr[c]] = feat[0, :, int(idxs[1][sample_id]), int(idxs[2][sample_id])]
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
                     class_ptr[c] += 1
                     
