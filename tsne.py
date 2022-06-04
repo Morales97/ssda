@@ -62,7 +62,7 @@ def main(args):
     with torch.no_grad():
         X = np.zeros((19, 100, 2048))
         Y = np.zeros((19, 100))
-        class_ptr = np.zeros((19))
+        class_ptr = np.zeros((19)).astype(int)
         class_count = 0
 
         for image, label in val_loader:
@@ -83,9 +83,8 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    pdb.set_trace()
-                    X[c, class_ptr] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
-                    Y[c, class_ptr] = c     # we dont need Y at all
+                    X[c, class_ptr[c]] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
+                    Y[c, class_ptr[c]] = c     # we dont need Y at all
                     class_ptr[c] += 1
                     
                     if class_ptr[c] == 100:
