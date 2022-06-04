@@ -61,7 +61,7 @@ def main(args):
 
     with torch.no_grad():
         n_class = 19
-        num_samples = 10
+        num_samples = 100
         dim_emb = 2048
 
         X = np.zeros((n_class, num_samples, dim_emb))
@@ -88,11 +88,13 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    sample_id = np.random.randint(len(idxs[0]))
 
-                    X[c, class_ptr[c]] = feat[0, :, int(idxs[1][sample_id]), int(idxs[2][sample_id])]
-                    Y[c, class_ptr[c]] = c     # we dont need Y at all
-                    class_ptr[c] += 1
+                    n_samples = min(10, num_samples - class_ptr[c])
+                    sample_ids = np.random.choice(len(idxs[0]), n_samples) 
+                    for sample_id in sample_ids:
+                        X[c, class_ptr[c]] = feat[0, :, int(idxs[1][sample_id]), int(idxs[2][sample_id])]
+                        Y[c, class_ptr[c]] = c     # we dont need Y at all
+                        class_ptr[c] += 1
                     
                     if class_ptr[c] == num_samples:
                         class_count += 1
