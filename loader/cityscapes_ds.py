@@ -235,7 +235,7 @@ class cityscapesDataset(data.Dataset):
     def generate_pseudolabels(self, model, ema_model, tau=0.9, ignore_index=250):
         assert self.unlabeled
 
-        ema_model.eval()
+        model.eval()
         with torch.no_grad():
             for i, img_path in enumerate(self.files[self.split]):
                 
@@ -248,7 +248,7 @@ class cityscapesDataset(data.Dataset):
                 img = self.transforms(img)[0].unsqueeze(0).cuda()
 
                 # generate pseudolabel
-                pred = ema_model(img)['out']
+                pred = model(img)['out']
                 probs = F.softmax(pred, dim=1)
                 confidence, pseudo_lbl = torch.max(probs, dim=1)
                 pseudo_lbl = torch.where(confidence > tau, pseudo_lbl, ignore_index)
@@ -286,8 +286,6 @@ class cityscapesDataset(data.Dataset):
                 print(lbl_path_org)
                 pdb.set_trace()
                 '''
-
-        # TODO copy the 100 labels into the same folder, so a new dataloader can be created seamlessly
 
     def save_gt_labels(self):
         '''

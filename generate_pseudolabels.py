@@ -10,7 +10,6 @@ import torch
 from utils.ioutils import parse_args
 from model.model import get_model
 from loader.cityscapes_ds import cityscapesDataset
-from torch_ema import ExponentialMovingAverage # https://github.com/fadel/pytorch_ema 
 import pdb
 
 
@@ -27,8 +26,6 @@ def main(args):
     # Load model
     model = get_model(args)
     model.cuda()
-    #ema = ExponentialMovingAverage(model.parameters(), decay=0.995)
-    #ema.to(torch.device('cuda:' +  str(torch.cuda.current_device())))
     ema_model = get_model(args)
     ema_model.cuda()
     ema_model.eval()
@@ -58,12 +55,11 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
         image_path_cs = 'data/cityscapes/leftImg8bit_tiny'
     elif size == 'small':
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
-    label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
 
     # generate new folder for pseudolabels
     pseudolabel_folder = args.expt_name + '_s' + str(args.seed)
-    psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder
+    psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder     # NOTE change to your local folder structure
     os.makedirs(psuedolabel_path_cs, exist_ok=True)
 
     # Select randomly labelled samples 
@@ -73,8 +69,7 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
         idxs_lbl = idxs[:n_lbl_samples]
         idxs_unlbl = idxs[n_lbl_samples:]
 
-    # *** Target loader(s)
-
+    # Save the few labeled samples
     if n_lbl_samples > 0: # if no labeled samples (UDA), skip
         t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
                                             label_path=label_path_cs, 
@@ -85,7 +80,8 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
         print('Saving labels...')
         t_lbl_dataset.pseudolabel_folder = pseudolabel_folder
         t_lbl_dataset.save_gt_labels()    
-                
+
+    # Generate and save psuedolabels
     t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
                                         label_path=label_path_cs, 
                                         size=size, 
@@ -107,4 +103,3 @@ if __name__ == '__main__':
     args = parse_args()
     main(args)
 
-# python generate_pseudolabels.py --seed=3 --size=small --expt_name=KL_pc_r2 --net=deeplabv2_rn101 --resume=expts/tmp_last/checkpoint_KL_pc_cw_PL_3.pth.tar
