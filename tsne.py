@@ -61,7 +61,8 @@ def main(args):
 
     with torch.no_grad():
         num_samples = 3
-        X = np.zeros((19, num_samples, 2048))
+        dim_emb = 2048
+        X = np.zeros((19, num_samples, dim_emb))
         Y = np.zeros((19, num_samples))
         class_ptr = np.zeros((19)).astype(int)
         class_count = 0
@@ -93,6 +94,10 @@ def main(args):
                         class_count += 1
                         print('Class count: ', class_count)
                         if class_count == 19:
+                            pdb.set_trace()
+                            X = X.reshape(-1, dim_emb)
+                            Y = Y.reshape(-1)
+
                             break   # todo save np as txt
 
 
