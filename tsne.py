@@ -74,13 +74,14 @@ def main(args):
 
             feat = feat.cpu().numpy()
             label = label.cpu().numpy()
-            
+
             # select one pixel from every class present in the image. repeat until all pixel classes are filled
             for c in range(19):
                 if class_ptr[c] >= 100:
                     pass
                 else:
                     idxs = np.where(label == c)
+                    pdb.set_trace()
                     X[c, class_ptr] = feat[0, :, idxs[1], idxs[:2]]
                     Y[c, class_ptr] = c     # we dont need Y at all
                         
