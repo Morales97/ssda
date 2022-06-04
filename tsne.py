@@ -63,6 +63,8 @@ def main(args):
         X = np.zeros((19, 100, 2048))
         Y = np.zeros((19, 100))
         class_ptr = np.zeros((19))
+        class_count = 0
+
         for image, label in val_loader:
             image = image.cuda()
             label = label.cuda()
@@ -77,13 +79,19 @@ def main(args):
 
             # select one pixel from every class present in the image. repeat until all pixel classes are filled
             for c in range(19):
-                if class_ptr[c] >= 100:
+                if class_ptr[c] == 100:
                     pass
                 else:
                     idxs = np.where(label == c)
+                    pdb.set_trace()
                     X[c, class_ptr] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr] = c     # we dont need Y at all
-                        
+                    class_ptr[c] += 1
+                    
+                    if class_ptr[c] == 100:
+                        class_count += 1
+                        if class_count == 19:
+                            break   # todo save np as txt
             pdb.set_trace()
 
 
