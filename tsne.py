@@ -60,6 +60,9 @@ def main(args):
     model.eval()
 
     for image, label in val_loader:
+        image = image.cuda()
+        label = label.cuda()
+        
         out = model(image)
         feat = out['feat']
         pdb.set_trace()
