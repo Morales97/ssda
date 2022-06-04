@@ -88,7 +88,7 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    sample_id = np.random.randint(len(idxs[0])))
+                    sample_id = np.random.randint(len(idxs[0]))
 
                     X[c, class_ptr[c]] = feat[sample_id, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
