@@ -83,6 +83,9 @@ def main(args):
                     pass
                 else:
                     idxs = np.where(label == c)
+                    print(len(idxs))
+                    if len(idxs) == 0:
+                        continue
                     pdb.set_trace()
                     X[c, class_ptr[c]] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
