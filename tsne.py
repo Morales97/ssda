@@ -76,16 +76,14 @@ def main(args):
 
             feat = feat.cpu().numpy()
             label = label.cpu().numpy()
+            img_classes = np.unique(label)
 
             # select one pixel from every class present in the image. repeat until all pixel classes are filled
             for c in range(19):
-                if class_ptr[c] == 100:
+                if class_ptr[c] == 100 or (c not in img_classes):
                     pass
                 else:
                     idxs = np.where(label == c)
-                    print(len(idxs))
-                    if len(idxs) == 0:
-                        continue
                     pdb.set_trace()
                     X[c, class_ptr[c]] = feat[0, :, int(idxs[1][0]), int(idxs[2][0])]
                     Y[c, class_ptr[c]] = c     # we dont need Y at all
