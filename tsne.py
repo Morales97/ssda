@@ -71,3 +71,4 @@ if __name__ == '__main__':
     args = parse_args()
     main(args)
 
+# python tsne.py --resume=expts/tmp_last/checkpoint_abl_noPCmix_p2_3.pth.tar
