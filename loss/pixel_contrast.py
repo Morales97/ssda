@@ -77,6 +77,47 @@ class PixelContrastLoss(nn.Module):
 
         return X_, y_
 
+    def _random_anchor_sampling(self, X, y_hat):
+        # DM: Choose samples randomly, instead of half "hard" and half "easy"
+        batch_size, feat_dim = X.shape[0], X.shape[-1]
+
+        classes = []
+        total_classes = 0
+        for ii in range(batch_size):
+            this_y = y_hat[ii]
+            this_classes = torch.unique(this_y)
+            this_classes = [x for x in this_classes if x != self.ignore_label]
+            this_classes = [x for x in this_classes if (this_y == x).nonzero().shape[0] > self.max_views]
+
+            classes.append(this_classes)
+            total_classes += len(this_classes)
+
+        if total_classes == 0:
+            return None, None
+
+        n_view = self.max_samples // total_classes
+        n_view = min(n_view, self.max_views)
+
+        X_ = torch.zeros((total_classes, n_view, feat_dim), dtype=torch.float).cuda()
+        y_ = torch.zeros(total_classes, dtype=torch.float).cuda()
+
+        X_ptr = 0
+        for ii in range(batch_size):
+            this_classes = classes[ii]
+
+            for cls_id in this_classes:
+                indices = (this_y_hat == cls_id).nonzero()
+                n_indices = indices.shape[0]
+
+                perm = torch.randperm(n_indices)
+                indices = indices[perm[:n_view]]
+
+                X_[X_ptr, :, :] = X[ii, indices, :].squeeze(1)
+                y_[X_ptr] = cls_id
+                X_ptr += 1
+
+        return X_, y_
+
     def _sample_negative(self, Q):
         class_num, cache_size, feat_size = Q.shape
 
@@ -146,7 +187,7 @@ class PixelContrastLoss(nn.Module):
 
         return loss
 
-    def forward(self, feats, labels=None, predict=None, weight=None, queue=None):
+    def forward(self, feats, labels=None, predict=None, weight=None, queue=None, hard_anchor=True):
         '''
         feats: projected feature embeddings
         labels: ground truth
@@ -164,7 +205,10 @@ class PixelContrastLoss(nn.Module):
         feats = feats.permute(0, 2, 3, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
 
-        feats_, labels_ = self._hard_anchor_sampling(feats, labels, predict)
+        if hard_anchor:
+            feats_, labels_ = self._hard_anchor_sampling(feats, labels, predict)
+        else:
+            feats_, labels_ = self._random_anchor_sampling(feats, labels)
 
         loss = self._contrastive(feats_, labels_, weight, queue)
         return loss

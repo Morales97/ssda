@@ -189,7 +189,7 @@ def main(args, wandb):
                 proj_t = outputs_t['proj_pc']
                 _, pred_t = torch.max(out_t, 1)
 
-                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue)
+                loss_cl_t = pixel_contrast(proj_t, labels_t, pred_t, queue=queue, hard_anchor=args.hard_anchor)
 
 
         # *** Pixel Contrastive Learning (sup and unsupervised, Alonso et al) ***

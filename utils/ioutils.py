@@ -88,6 +88,8 @@ def get_parser():
                         help='Pixel contrast: use memory or not')   
     parser.add_argument('--pc_ema', type=boolfromstr, default=False,
                         help='Pixel contrast: use EMA teacher to generate anchor features or not')   
+    parser.add_argument('--hard_anchor', type=boolfromstr, default=True,
+                        help='Pixel contrast: use hard anchor sampling or random anchor sampling') 
     parser.add_argument('--alpha', type=float, default=0.995,
                         help='EMA coefficient')
     parser.add_argument('--warmup_steps', type=int, default=1000,
