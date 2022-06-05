@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=ablp2s1
+#SBATCH --job-name=ohp2s1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -20,8 +20,8 @@
 
 # 2nd round
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r3 --cr=ce --pixel_contrast=True --pc_mixed=False --resume=expts/tmp_last/checkpoint_abl_noPCmix_r3_1.pth.tar
-python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_PC_nomix --pixel_contrast=True --pc_mixed=False --resume=expts/tmp_last/checkpoint_abl_PC_nomix_1.pth.tar
-#python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH --cr= ce_oh --pixel_contrast=True --pc_mixed=False 
+#python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_PC_nomix --pixel_contrast=True --pc_mixed=False --resume=expts/tmp_last/checkpoint_abl_PC_nomix_1.pth.tar
+python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH --cr=ce_oh --pixel_contrast=True --pc_mixed=False --resume=expts/tmp_last/checkpoint_abl_OH_1.pth.tar
 
 
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_r2_prevEMA_p2_rm --cr=ce --pixel_contrast=True --resume=expts/tmp_last/checkpoint_full_r2_prevEMA_1.pth.tar
