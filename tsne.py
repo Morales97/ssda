@@ -69,7 +69,8 @@ def main(args):
         class_ptr = np.zeros((n_class)).astype(int)
         class_count = 0
 
-        for image, label in val_loader:
+        #for image, label in val_loader:
+        for image, label in source_loader:
             image = image.cuda()
             label = label.cuda()
             input_shape = label.shape[1:]
@@ -102,8 +103,10 @@ def main(args):
                         if class_count == n_class:
                             X = X.reshape(-1, dim_emb)
                             Y = Y.reshape(-1)
-                            np.savetxt('X_cityscapes.txt', X)
-                            np.savetxt('Y_cityscapes.txt', Y)
+                            #np.savetxt('X_cityscapes.txt', X)
+                            #np.savetxt('Y_cityscapes.txt', Y)
+                            np.savetxt('X_gta.txt', X)
+                            np.savetxt('Y_gta.txt', Y)
                             print('txt files saved')
                             return
 
