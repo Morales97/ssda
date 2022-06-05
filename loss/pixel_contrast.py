@@ -104,6 +104,7 @@ class PixelContrastLoss(nn.Module):
         X_ptr = 0
         for ii in range(batch_size):
             this_classes = classes[ii]
+            this_y_hat = y_hat[ii]
 
             for cls_id in this_classes:
                 indices = (this_y_hat == cls_id).nonzero()
