@@ -21,7 +21,7 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
     elif cr_type == 'ce_th':
         return cr_CE_th(p_w, out_s, tau)
     elif cr_type == 'ce_oh':
-        return cr_CR_one_hot(p_w, out_s, tau)
+        return cr_CE_one_hot(p_w, out_s, tau)
     elif cr_type == 'js':
         return cr_JS(p_w, p_s)
     elif cr_type == 'js_th':
