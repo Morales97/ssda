@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=evalEMA
+#SBATCH --job-name=eval
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
