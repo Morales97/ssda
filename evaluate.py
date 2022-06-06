@@ -276,7 +276,19 @@ if __name__ == '__main__':
     path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_nomem_r2_1.pth.tar'  # round 2
     path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_nomem_r3_1.pth.tar' # round 3
     
+    print('seed 1')
     ensemble(args, path_to_model_r2, path_to_model_r3)
 
+    path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_nomem_r2_2.pth.tar'  # round 2
+    path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_nomem_r3_2.pth.tar' # round 3
+    
+    print('seed 2')
+    ensemble(args, path_to_model_r2, path_to_model_r3)
+
+    path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_nomem_r2_3.pth.tar'  # round 2
+    path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_nomem_r3_3.pth.tar' # round 3
+    
+    print('seed 3')
+    ensemble(args, path_to_model_r2, path_to_model_r3)
 
 # python evaluate.py 
