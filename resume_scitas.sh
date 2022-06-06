@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=OHp2s3
+#SBATCH --job-name=cycs1p2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -17,8 +17,10 @@
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_tau0.5_p2 --cr=ce_th --tau=0.5 --pixel_contrast=True --resume=expts/tmp_last/checkpoint_abl_tau0.5_3.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_newPC --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_full_newPC_3.pth.tar
+#python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH_tau0 --cr=ce_oh --pixel_contrast=True --pc_mixed=False --tau=0 --resume=expts/tmp_last/checkpoint_abl_OH_tau0_3.pth.tar
 
-python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH_tau0 --cr=ce_oh --pixel_contrast=True --pc_mixed=False --tau=0 --resume=expts/tmp_last/checkpoint_abl_OH_tau0_3.pth.tar
+python main_SSDA.py --seed=1 --steps_job=20000 --project=clean_runs --expt_name=abl_PC_cycada --pixel_contrast=True --pc_mixed=False --gta_cycada=True --resume=expts/tmp_last/checkpoint_abl_PC_cycada_1.pth.tar
+
 
 # 2nd round
 #python main_SSDA.py --seed=1 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r3 --cr=ce --pixel_contrast=True --pc_mixed=False --resume=expts/tmp_last/checkpoint_abl_noPCmix_r3_1.pth.tar

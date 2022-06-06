@@ -11,7 +11,7 @@ def get_parser():
     parser = argparse.ArgumentParser(description='SSDA Classification')
     parser.add_argument('--expt_name', type=str, default='',
                         help='Name of the experiment for wandb')
-    parser.add_argument('--steps', type=int, default=5000, metavar='N',
+    parser.add_argument('--steps', type=int, default=40000, metavar='N',
                         help='maximum number of iterations to train')
     parser.add_argument('--steps_job', type=int, default=0,
                         help='maximum number of iterations in one slurm job')
@@ -54,7 +54,7 @@ def get_parser():
                              'training status')
     parser.add_argument('--val_interval', type=int, default=250, metavar='N',
                         help='how many batches to wait before validation')
-    parser.add_argument('--save_interval', type=int, default=1000, metavar='N',
+    parser.add_argument('--save_interval', type=int, default=40000, metavar='N',
                         help='how many batches to wait before saving a model')
     parser.add_argument('--resume', type=str, default='',
                         help='Checkpoint path to resume from')
@@ -102,6 +102,8 @@ def get_parser():
                         help='Use or not Alonso et al pixel contrastive learning')    
     parser.add_argument('--lab_color', type=boolfromstr, default=False,
                         help='Transform source images into targets LAB color space') 
+    parser.add_argument('--gta_cycada', type=boolfromstr, default=False,
+                        help='Use GTA stylized as Cityscapes with CyCADA')  
     parser.add_argument('--wandb', type=boolfromstr, default=True,
                         help='whether or not to use wandb')    
     parser.add_argument('--ent_min', type=boolfromstr, default=False,
