@@ -13,7 +13,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from model.model import get_model
-from loader.loaders import get_loaders, get_loaders_pseudolabels
+from loader.loaders import get_loaders, get_loaders_pseudolabels, get_source_test_loader
 from utils.ioutils import parse_args
 import pdb
 
@@ -28,12 +28,15 @@ def main(args):
     
 
     args.batch_size_tl = 1
+    '''
     # Load data
     if args.pseudolabel_folder is None:
         source_loader, target_loader, target_loader_unl, val_loader, _ = get_loaders(args)
     else:
         source_loader, target_loader, target_loader_unl, val_loader, _ = get_loaders_pseudolabels(args)
-    
+    '''
+    source_test_loader = get_source_test_loader(args)
+
     # Init model and EMA
     model = get_model(args)
     model.cuda()
@@ -70,7 +73,7 @@ def main(args):
         class_count = 0
 
         #for image, label in val_loader:
-        for image, label in source_loader:
+        for image, label in source_test_loader:
             image = image.cuda()
             label = label.cuda()
             input_shape = label.shape[1:]

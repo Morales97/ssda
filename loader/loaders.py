@@ -213,5 +213,33 @@ def get_loaders_pseudolabels(args, idxs=None, num_t_samples=2975):
     return s_loader, t_pseudo_loader, t_unlbl_loader, val_loader, idxs #, idxs_lbl, idxs_unlbl
 
 
+
+def get_source_test_loader(args):
+    '''
+    same as train but no crop and hflip
+    '''
     
-     
+    size = args.size
+    assert size in ['tiny', 'small']
+
+    if size == 'tiny':
+        image_path_gta = 'data/gta5/images_tiny'
+        #image_path_gta = 'data/gta5/gta5cycada/images_tiny'
+        #print('*** GTA5 stylized as CS with CyCada ***')
+    elif size == 'small':
+        image_path_gta = 'data/gta5/images_small'
+        #image_path_gta = 'data/gta5/gta5cycada/images_small'
+        #print('*** GTA5 stylized as CS with CyCada ***')
+    label_path_gta = 'data/gta5/labels'
+
+
+    # Get Source loader
+    s_dataset = gtaDataset(image_path=image_path_gta, label_path=label_path_gta, size=size, split="all_gta", do_crop=False, hflip=False)
+    s_loader = DataLoader(
+        s_dataset,
+        batch_size=args.batch_size_s,
+        num_workers=args.num_workers,
+        shuffle=True,
+    )
+    print('Loading %d source domain images, labelled, from %s' % (len(s_dataset), image_path_gta))
+    return s_loader
