@@ -183,7 +183,7 @@ def ensemble(args, path_1, path_2, path_3=None):
     if os.path.isfile(path_1):
         checkpoint = torch.load(path_1)
         #ema_model_1.load_state_dict(checkpoint['ema_state_dict'])
-        ema_model_1.load_state_dict(checkpoint['model_state_dict'])
+        ema_model_1.load_state_dict(checkpoint['model_state_dict'])     # NOTE better using student than teacher
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
@@ -273,8 +273,8 @@ if __name__ == '__main__':
     '''
 
     #path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
-    path_to_model_r2='expts/tmp_last/checkpoint_abl_noPCmix_r2_3.pth.tar'  # round 2
-    path_to_model_r3='expts/tmp_last/checkpoint_abl_noPCmix_r3_3.pth.tar' # round 3
+    path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_nomem_r2_1.pth.tar'  # round 2
+    path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_nomem_r3_1.pth.tar' # round 3
     
     ensemble(args, path_to_model_r2, path_to_model_r3)
 
