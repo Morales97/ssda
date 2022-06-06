@@ -83,21 +83,7 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
     step = start_step
-
-    # Load EMA from previous round
-    if args.prev_teacher:
-        if os.path.isfile(args.prev_teacher):
-            ema_prev = get_model(args)
-            ema_prev.to(torch.device('cuda'))
-            ema_prev.train()
-            checkpoint = torch.load(args.prev_teacher)
-            ema_prev.load_state_dict(checkpoint['ema_state_dict'])
-            print('*** Loading EMA teacher from ', args.prev_teacher)
-            score = _log_validation_ema(ema_prev, val_loader, loss_fn, start_step, wandb=None)
-            print('EMA teacher\'s mIoU: ', str(score['mIoU']))
-        else:
-            raise Exception('No file found at {}'.format(args.resume))
-
+    
     # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -182,10 +168,7 @@ def main(args, wandb):
             if args.n_augmentations == 1:
                 images_weak = images_t_unl[0].cuda()
                 images_strong = images_t_unl[1].cuda()
-                if args.prev_teacher is not None:
-                    out_w, out_strong = _forward_cr(args, model, ema_prev, images_weak, images_strong)
-                else:
-                    out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
+                out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
                 loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
             else:
                 assert args.n_augmentations >= 1
