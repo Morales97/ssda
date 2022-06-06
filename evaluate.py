@@ -182,7 +182,8 @@ def ensemble(args, path_1, path_2, path_3=None):
 
     if os.path.isfile(path_1):
         checkpoint = torch.load(path_1)
-        ema_model_1.load_state_dict(checkpoint['ema_state_dict'])
+        #ema_model_1.load_state_dict(checkpoint['ema_state_dict'])
+        ema_model_1.load_state_dict(checkpoint['model_state_dict'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
@@ -190,7 +191,8 @@ def ensemble(args, path_1, path_2, path_3=None):
     
     if os.path.isfile(path_2):
         checkpoint = torch.load(path_2)
-        ema_model_2.load_state_dict(checkpoint['ema_state_dict'])
+        #ema_model_2.load_state_dict(checkpoint['ema_state_dict'])
+        ema_model_2.load_state_dict(checkpoint['model_state_dict'])
         step = checkpoint['step']
         print('Loading model trained until step {}'.format(step))
     else:
