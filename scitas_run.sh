@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cols2
+#SBATCH --job-name=cols3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 
-python main_SSDA.py --seed=2 --steps_job=20000 --project=clean_runs --expt_name=abl_colorblur --cr=ce --aug_level=7 --cutmix_cr=False
+python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_colorblur --cr=ce --aug_level=7 --cutmix_cr=False
 
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_noPCmix_r3 --cr=ce --pixel_contrast=True --pc_mixed=False --pseudolabel_folder=abl_noPCmix_r2_s3
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_LAB --cr=ce --pixel_contrast=True --lab_color=True
