@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SSces1
+#SBATCH --job-name=SSces2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -42,4 +42,4 @@
 #python main_SemiSup.py --seed=3 --steps=30000 --save_interval=30000 --project=GTA_to_CS_small --expt_name=SS_CE_pc_mem --cr=ce --pixel_contrast=True --pc_memory=True
 #python main_SemiSup.py --seed=2 --steps=30000 --save_interval=30000 --project=clean_runs --expt_name=SemiSup --cr=ce --pixel_contrast=True --pc_memory=True
 
-python main_SemiSup.py --seed=1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_abl_CE --cr=ce 
+python main_SemiSup.py --seed=2 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_abl_CE --cr=ce 
