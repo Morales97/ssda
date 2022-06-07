@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=colp2s1
+#SBATCH --job-name=colp2s2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,8 +19,7 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=full_newPC --cr=ce --pixel_contrast=True --pc_memory=True --resume=expts/tmp_last/checkpoint_full_newPC_3.pth.tar
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH_tau0 --cr=ce_oh --pixel_contrast=True --pc_mixed=False --tau=0 --resume=expts/tmp_last/checkpoint_abl_OH_tau0_3.pth.tar
 
-#python main_SSDA.py --seed=1 --steps_job=20000 --project=clean_runs --expt_name=abl_PC_LAB --pixel_contrast=True --pc_mixed=False --lab_color=True --resume=expts/tmp_last/checkpoint_abl_PC_LAB_1.pth.tar
-python main_SSDA.py --seed=1 --steps_job=20000 --project=clean_runs --expt_name=abl_colorblur --cr=ce --aug_level=7 --cutmix_cr=False --resume=expts/tmp_last/checkpoint_abl_colorblur_1.pth.tar
+python main_SSDA.py --seed=2 --steps_job=20000 --project=clean_runs --expt_name=abl_colorblur --cr=ce --aug_level=7 --cutmix_cr=False --resume=expts/tmp_last/checkpoint_abl_colorblur_2.pth.tar
 
 
 # 2nd round
