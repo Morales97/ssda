@@ -82,7 +82,7 @@ def get_parser():
                         help='number of augmentations in CR')                       
     parser.add_argument('--pixel_contrast', type=boolfromstr, default=False,
                         help='Use pixel contrast regularization')
-    parser.add_argument('--pc_mixed', type=boolfromstr, default=True,
+    parser.add_argument('--pc_mixed', type=boolfromstr, default=False,
                         help='Pixel contrast: mix S and T samples or not')   
     parser.add_argument('--pc_memory', type=boolfromstr, default=False,
                         help='Pixel contrast: use memory or not')   

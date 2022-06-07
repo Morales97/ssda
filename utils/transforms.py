@@ -170,16 +170,14 @@ def get_transforms(crop_size=256, aug_level=0):
         transform_list = [
             transforms.RandomCrop(crop_size),
         ]
-    elif aug_level == 3:
-        # Strong augmentation for CR: Color Jitter + RandAugment
+    elif aug_level == 3:    # RandAumgent + color jitter
         transform_list = [
             RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
             transforms.RandomApply([
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
             ], p=0.8)
         ]
-    elif aug_level == 4:
-        # Strong augmentation for CR: Color Jitter + RandAugment + Blur
+    elif aug_level == 4:    # RandAumgent + color jitter + blur pool
         transform_list = [
             RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
             transforms.RandomApply([
@@ -188,9 +186,8 @@ def get_transforms(crop_size=256, aug_level=0):
             transforms.RandomApply([
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
             ], p=0.8)
-            
         ]
-    elif aug_level == 5:
+    elif aug_level == 5:    # RandAumgent + color jitter + gauss blur
         transform_list = [
             RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
             transforms.RandomApply([
@@ -199,9 +196,8 @@ def get_transforms(crop_size=256, aug_level=0):
             transforms.RandomApply([
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
             ], p=0.8)
-            
         ]
-    elif aug_level == 6:
+    elif aug_level == 6:    # RandAumgent2 + color jitter + gauss blur
         transform_list = [
             RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool2()), # more augmentations
             transforms.RandomApply([
@@ -210,9 +206,21 @@ def get_transforms(crop_size=256, aug_level=0):
             transforms.RandomApply([
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
             ], p=0.8)
-            
         ]
-    elif aug_level == 7:
+    elif aug_level == 7:    # only color jitter + gauss blur
+        transform_list = [
+            transforms.RandomApply([
+                RandAugmentBlur(augment_pool=['gaussian'], kernel_sizes=[(5,5), (7,7), (9,9)]),
+            ], p=0.5),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8)
+        ]
+    elif aug_level == 8:    # only RandAugment
+        transform_list = [
+            RandAugmentMC(n=2, m=10, augment_pool=color_augment_pool()),
+        ]
+    elif aug_level == 9:
         transform_list = [
             Blur(blur_type='horizontal', kernel_size=(7,7)),
             Blur(blur_type='diagonal', kernel_size=(7,7)),
