@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=cmp2s3
+#SBATCH --job-name=ablp2s1
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -20,7 +20,9 @@
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_OH_tau0 --cr=ce_oh --pixel_contrast=True --pc_mixed=False --tau=0 --resume=expts/tmp_last/checkpoint_abl_OH_tau0_3.pth.tar
 
 #python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_randaug --cr=ce --aug_level=8 --cutmix_cr=False --resume=expts/tmp_last/checkpoint_abl_randaug_3.pth.tar
-python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_cutmix --cr=ce --aug_level=0 --resume=expts/tmp_last/checkpoint_abl_cutmix_3.pth.tar
+#python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_cutmix --cr=ce --aug_level=0 --resume=expts/tmp_last/checkpoint_abl_cutmix_3.pth.tar
+
+python main_SSDA.py --seed=1 --steps_job=20000 --project=clean_runs --expt_name=abl_r2_dropPL --cr=ce --pixel_contrast=True --pseudolabel_folder=abl_noPCmix_s1 --resume=expts/tmp_last/checkpoint_abl_r2_dropPL_1.pth.tar
 
 
 # 2nd round
