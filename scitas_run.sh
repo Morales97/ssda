@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=abls1
+#SBATCH --job-name=abls2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -15,7 +15,7 @@
 #python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_randaug --cr=ce --aug_level=8 --cutmix_cr=False
 #python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_cutmix --cr=ce --aug_level=0
 
-python main_SSDA.py --seed=1 --steps_job=20000 --project=clean_runs --expt_name=abl_r2_dropPL --cr=ce --pixel_contrast=True --pseudolabel_folder=abl_noPCmix_s1
+python main_SSDA.py --seed=2 --steps_job=20000 --project=clean_runs --expt_name=abl_r2_dropPL --cr=ce --pixel_contrast=True --pseudolabel_folder=abl_noPCmix_s2
 #python main_SSDA.py --seed=3 --steps=40000 --save_interval=40000 --steps_job=20000 --project=clean_runs --expt_name=abl_LAB --cr=ce --pixel_contrast=True --lab_color=True
 #python main_FS.py --save_model=False --seed=3 --steps=40000 --project=clean_runs --expt_name=FS
 
