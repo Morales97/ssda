@@ -83,7 +83,7 @@ def main(args, wandb):
         else:
             raise Exception('No file found at {}'.format(args.resume))
     step = start_step
-    
+
     # To split training in multiple consecutive jobs
     if args.steps_job == 0:
         job_step_limit = args.steps
@@ -376,9 +376,9 @@ def _forward_cr(args, model, ema_model, images_weak, images_strong):
     out_w = outputs_w['out']
 
     if args.cutmix_cr:                     # Apply CutMix to strongly augmented images (between them) and to their pseudo-targets
-        images_strong_cut, out_w = _cutmix_output(args, images_strong, out_w)
+        images_strong, out_w = _cutmix_output(args, images_strong, out_w)
 
-    outputs_strong = model(images_strong_cut)
+    outputs_strong = model(images_strong)
     out_strong = outputs_strong['out']
     return out_w, out_strong
 
