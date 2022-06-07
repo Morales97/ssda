@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=SScep2s2
+#SBATCH --job-name=SScep2s3
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -24,7 +24,7 @@
 
 #python main_SSDA.py --seed=3 --steps_job=20000 --project=clean_runs --expt_name=abl_r2_dropPL --cr=ce --pixel_contrast=True --pseudolabel_folder=abl_noPCmix_s3 --resume=expts/tmp_last/checkpoint_abl_r2_dropPL_3.pth.tar
 
-python main_SemiSup.py --seed=2 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_abl_CE --cr=ce --resume=expts/tmp_last/checkpoint_SemiSup_abl_CE_2.pth.tar
+python main_SemiSup.py --seed=3 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_abl_CE --cr=ce --resume=expts/tmp_last/checkpoint_SemiSup_abl_CE_3.pth.tar
 
 
 # 2nd round
