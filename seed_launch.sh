@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=full200
+#SBATCH --job-name=full500
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -11,4 +11,4 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=full_200 --target_samples=200 --cr=ce --pixel_contrast=True
+python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=full_500 --target_samples=500 --cr=ce --pixel_contrast=True
