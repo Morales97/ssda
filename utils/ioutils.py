@@ -65,7 +65,7 @@ def get_parser():
     parser.add_argument('--net', type=str, default='deeplabv2_rn101',
                         help='choose model architecture')
     parser.add_argument('--target_samples', type=int, default=100,
-                        help='how many target domain samples to use. Default -1: use all samples')
+                        help='how many target domain samples to use. -1: use all samples')
     parser.add_argument('--custom_pretrain', type=str, default=None,
                         help='pretraining. Either denseCL, pixpro, or a custom path')
     parser.add_argument('--cr', type=str, default=None,
