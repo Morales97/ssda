@@ -25,7 +25,7 @@ def get_loaders(args, idxs=None, num_t_samples=2975):
         if args.gta_cycada:
             image_path_gta = 'data/gta5/gta5cycada/images_small'
             print('*** GTA5 stylized as CS with CyCada ***')
-            
+
     label_path_gta = 'data/gta5/labels'
     label_path_cs = 'data/cityscapes/gtFine'
 
@@ -81,8 +81,8 @@ def get_loaders(args, idxs=None, num_t_samples=2975):
         print('Not loading any target labeled images')
         print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))
 
-    # Semi-supervised
-    else:                       
+    # Semi-supervised / SSDA
+    elif n_lbl_samples < num_t_samples:
         t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
                                           label_path=label_path_cs, 
                                           size=size, 
@@ -112,6 +112,34 @@ def get_loaders(args, idxs=None, num_t_samples=2975):
         print('Loading %d target domain images, labelled, from %s' % (len(t_lbl_dataset), image_path_cs))
         print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))
 
+    # SSL / SSDA with all labels (but still using CR)
+    else:
+        t_lbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                          label_path=label_path_cs, 
+                                          size=size, 
+                                          split='train')
+                                          
+        t_unlbl_dataset = cityscapesDataset(image_path=image_path_cs, 
+                                            label_path=label_path_cs, 
+                                            size=size, 
+                                            split='train', 
+                                            unlabeled=True, 
+                                            strong_aug_level=args.aug_level, 
+                                            n_augmentations=args.n_augmentations)
+        t_lbl_loader = DataLoader(
+            t_lbl_dataset,
+            batch_size=args.batch_size_tl,
+            num_workers=args.num_workers,
+            shuffle=True,
+        ) 
+        t_unlbl_loader = DataLoader(
+            t_unlbl_dataset,
+            batch_size=args.batch_size_tu,
+            num_workers=args.num_workers,
+            shuffle=True,
+        ) 
+        print('Loading %d target domain images, labelled, from %s' % (len(t_lbl_dataset), image_path_cs))
+        print('Loading %d target domain images, unlabelled, from %s' % (len(t_unlbl_dataset), image_path_cs))      
 
     # Get validation loader
     val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', hflip=False)
