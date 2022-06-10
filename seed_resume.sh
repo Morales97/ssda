@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name372r2p2
+#SBATCH --job-name=372r2p2
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
