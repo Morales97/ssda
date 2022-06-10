@@ -5,7 +5,7 @@ from collections import OrderedDict
 from torchvision.utils import save_image
 
 
-def consistency_reg(cr_type, out_w, out_s, tau=0.9):
+def consistency_reg(cr_type, out_w, out_s, tau=0.9, weight=None):
     # Weak augmentations
     out_w = out_w.permute(0, 2, 3, 1)         # (N, H, W, C)
     out_w = torch.flatten(out_w, end_dim=2)   # (N·H·W, C)
@@ -18,6 +18,8 @@ def consistency_reg(cr_type, out_w, out_s, tau=0.9):
 
     if cr_type == 'ce':
         return cr_CE(p_w, out_s)
+    if cr_type == 'ce_cw':
+        return cr_CE(p_w, out_s, weight)
     elif cr_type == 'ce_th':
         return cr_CE_th(p_w, out_s, tau)
     elif cr_type == 'ce_oh':
@@ -109,6 +111,15 @@ def cr_CE(p_w, out_s):
     loss_cr = F.cross_entropy(out_s, p_w)
     percent_pl = 100
     return loss_cr, percent_pl
+
+def cr_CE_weighted(p_w, out_s, weight=None):
+    '''
+    Consistency regularization with pseudo-labels as a probability distribution
+    '''
+    loss_cr = F.cross_entropy(out_s, p_w, weight=weight)
+    percent_pl = 100
+    return loss_cr, percent_pl
+
 
 def cr_CE_th(p_w, out_s, tau):
     '''

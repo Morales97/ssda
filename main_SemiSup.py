@@ -158,7 +158,7 @@ def main(args, wandb):
                 images_strong = images_t_unl[1].cuda()
 
                 out_w, out_strong = _forward_cr(args, model, ema_model, images_weak, images_strong)
-                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau)
+                loss_cr, percent_pl = consistency_reg(args.cr, out_w, out_strong, args.tau, class_weigth_t)
             else:
                 assert args.n_augmentations >= 1
                 loss_cr, percent_pl = cr_multiple_augs(args, images_t_unl, model, ema_model) 
