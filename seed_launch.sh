@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=500cs
+#SBATCH --job-name=d200
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -17,5 +17,5 @@
 
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_2975 --target_samples=2975 --cr=ce --pixel_contrast=True
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_noPL --cr=ce --pixel_contrast=True --pseudolabel_folder=SSnomem_s$1
-python main_SemiSup.py --seed=$1 --project=clean_runs --expt_name=abl_200cs --pixel_contrast=False --target_samples=500
+python main_SSDA.py --seed=$1 --project=clean_runs --expt_name=abl_d200 --pixel_contrast=False --target_samples=200
 
