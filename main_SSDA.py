@@ -157,8 +157,16 @@ def main(args, wandb):
         out_t = outputs_t['out']  
 
         # *** Cross Entropy ***
-        loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
-        loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
+        if args.mixed_batch:
+            loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
+            loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
+        else:
+            if steps % 2 == 0:
+                loss_s = loss_fn(out_s, labels_s, weight=class_weigth_s)
+                loss_t = 0
+            else:
+                loss_s = 0
+                loss_t = loss_fn(out_t, labels_t, weight=class_weigth_t)
 
         # *** Consistency Regularization ***
         loss_cr, percent_pl, time_cr = 0, 0, 0

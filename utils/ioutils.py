@@ -122,7 +122,10 @@ def get_parser():
                         help='path to teacher model')  
     parser.add_argument('--dropPL_step', type=int, default=-1,
                         help='step when to drop pseudolabels')    
+    parser.add_argument('--mixed_batch', type=boolfromstr, default=True,
+                        help='Mix S and T data in mini-batch')   
     return parser
+    
 
 
 def parse_args():
