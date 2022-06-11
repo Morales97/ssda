@@ -313,7 +313,7 @@ class cityscapesDataset(data.Dataset):
         
         print('Saved %d target labels in pseudolabels folder.' % len(self.files[self.split]))
 
-        
+
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
