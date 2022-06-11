@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=gen200
+#SBATCH --job-name=gen500
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 # SSDA
-python generate_pseudolabels.py --seed=$1 --expt_name=full_200_r2 --target_samples=200 --resume=expts/tmp_last/checkpoint_full_200_r2_$1.pth.tar
+python generate_pseudolabels.py --seed=$1 --expt_name=full_500_r2 --target_samples=500 --resume=expts/tmp_last/checkpoint_full_500_r2_$1.pth.tar
 #python generate_pseudolabels.py --seed=$1 --expt_name=SS_372_r2 --target_samples=372 --resume=expts/tmp_last/checkpoint_SemiSup_372_r2_$1.pth.tar
 
 # SS
