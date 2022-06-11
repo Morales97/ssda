@@ -13,7 +13,7 @@
 
 # SSDA
 #python generate_pseudolabels.py --seed=$1 --expt_name=full_200 --target_samples=200 --resume=expts/tmp_last/checkpoint_full_200_$1.pth.tar
-python generate_pseudolabels.py --seed=$1 --expt_name=SS_744 --target_samples=744 --resume=expts/tmp_last/checkpoint_SemiSup_744_$1.pth.tar
+python generate_pseudolabels.py --seed=$1 --expt_name=SS_744_r2 --target_samples=744 --resume=expts/tmp_last/checkpoint_SemiSup_744_r2_$1.pth.tar
 
 # SS
 #python generate_pseudolabels.py --seed=3 --expt_name=SSnomem_r2 --resume=expts/tmp_last/checkpoint_SemiSup_nomem_p2_3.pth.tar
