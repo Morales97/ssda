@@ -275,8 +275,8 @@ if __name__ == '__main__':
     #path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
 
     for seed in [1,2,3]:
-        path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_372_r2_' + str(seed) + '.pth.tar'  # round 2
-        path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_372_r3_' + str(seed) + '.pth.tar'  # round 3
+        path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_744_r2_' + str(seed) + '.pth.tar'  # round 2
+        path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_744_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
         ensemble(args, path_to_model_r2, path_to_model_r3)
