@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=eval500
+#SBATCH --job-name=eval372
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
