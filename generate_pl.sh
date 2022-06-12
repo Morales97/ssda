@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=gen500
+#SBATCH --job-name=eval
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 #SBATCH --time=12:00:00
 
 # SSDA
-python generate_pseudolabels.py --seed=$1 --expt_name=full_500_r2 --target_samples=500 --resume=expts/tmp_last/checkpoint_full_500_r2_$1.pth.tar
+#python generate_pseudolabels.py --seed=$1 --expt_name=full_500_r2 --target_samples=500 --resume=expts/tmp_last/checkpoint_full_500_r2_$1.pth.tar
 #python generate_pseudolabels.py --seed=$1 --expt_name=SS_372_r2 --target_samples=372 --resume=expts/tmp_last/checkpoint_SemiSup_372_r2_$1.pth.tar
 
 # SS
@@ -22,7 +22,7 @@ python generate_pseudolabels.py --seed=$1 --expt_name=full_500_r2 --target_sampl
 #python generate_pseudolabels.py --target_samples=0 --expt_name=UDA_CE --resume=expts/tmp_last/checkpoint_UDA_CE_3.pth.tar
 
 # evaluate
-#python evaluate.py 
+python evaluate.py 
 
 # evaluate for SSL
 #python evaluate.py --pc_memory=True
