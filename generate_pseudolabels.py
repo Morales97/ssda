@@ -23,30 +23,27 @@ def main(args):
     random.seed(args.seed)
     print('Seed: ', args.seed)
 
-    # Load model
+    # Load trained model
     model = get_model(args)
     model.cuda()
-    ema_model = get_model(args)
-    ema_model.cuda()
-    ema_model.eval()
-    for param in ema_model.parameters():
-        param.detach_()
-
-    # Load trained model
     if args.resume:
         if os.path.isfile(args.resume):
             checkpoint = torch.load(args.resume)
             model.load_state_dict(checkpoint['model_state_dict'])
-            ema_model.load_state_dict(checkpoint['ema_state_dict'])
         else:
             raise Exception('No file found at {}'.format(args.resume))
     else:
         raise Exception('No model found to generate pseudolabels with')
 
-    pseudo_lbl_path = _generate_pseudolabels(args, model, ema_model)
+    pseudo_lbl_path = _generate_pseudolabels(args, model)
 
 
-def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
+def _generate_pseudolabels(args, model, num_t_samples=2975):
+    '''
+    Creates a new folder augmented target labeled dataset. Contains:
+        - Ground-truth for the few labeled samples
+        - Pseudolabels for the unlabeled samples (generated with tau=0.9)
+    '''
     n_lbl_samples = args.target_samples
     size = args.size
     assert size in ['tiny', 'small']
@@ -62,7 +59,7 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
     psuedolabel_path_cs = 'data/cityscapes/pseudo_labels/' + pseudolabel_folder     # NOTE change to your local folder structure
     os.makedirs(psuedolabel_path_cs, exist_ok=True)
 
-    # Select randomly labelled samples 
+    # Select labeled samples 
     if n_lbl_samples != -1:
         idxs = np.arange(num_t_samples)
         idxs = np.random.permutation(idxs)
@@ -93,7 +90,7 @@ def _generate_pseudolabels(args, model, ema_model, num_t_samples=2975):
     # save pseudolabels
     print('generating pseudolabels...')
     t_unlbl_dataset.pseudolabel_folder = pseudolabel_folder
-    t_unlbl_dataset.generate_pseudolabels(model, ema_model)                 
+    t_unlbl_dataset.generate_pseudolabels(model)                 
 
     return psuedolabel_path_cs
 

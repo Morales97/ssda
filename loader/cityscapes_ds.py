@@ -232,7 +232,7 @@ class cityscapesDataset(data.Dataset):
 
         return img, lbl
 
-    def generate_pseudolabels(self, model, ema_model, tau=0.9, ignore_index=250):
+    def generate_pseudolabels(self, model, tau=0.9, ignore_index=250):
         assert self.unlabeled
 
         model.eval()
@@ -265,14 +265,11 @@ class cityscapesDataset(data.Dataset):
                 pseudo_lbl_im.save(lbl_path)
 
                 # How to load the pseudolabel
-                '''
                 lbl = pil_loader(lbl_path, 1024, 512, is_segmentation=True) 
                 lbl = np.array(lbl, dtype=np.uint8)
                 lbl = self.encode_segmap(lbl)
-                '''
 
                 # How to viz the pseudolabel
-                '''
                 lbl_col = self.decode_segmap(lbl)
                 path2 = lbl_path[:-4] + 'color.png'
                 lbl_im = Image.fromarray((lbl_col*255).astype('uint8'), 'RGB')
@@ -285,7 +282,7 @@ class cityscapesDataset(data.Dataset):
                 print(path2)
                 print(lbl_path_org)
                 pdb.set_trace()
-                '''
+
 
     def save_gt_labels(self):
         '''
@@ -357,9 +354,10 @@ class cityscapesDataset(data.Dataset):
             mask[mask == _validc] = self.class_map[_validc]
         return mask
 
+
 if __name__ == '__main__':
     '''
-    For the purpose of debugging
+    For debugging purposes
     '''
     t_unl_loader = cityscapeDataset(image_path='../data/cityscapes/leftImg8bit_tiny', label_path='../data/cityscapes/gtFine', size="tiny", unlabeled=True, n_samples=0)
     
@@ -389,7 +387,6 @@ if __name__ == '__main__':
         num_workers=args.num_workers,
         shuffle=False, 
     )
-
 
     for (images, labels) in loader:
         pdb.set_trace()
