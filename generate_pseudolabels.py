@@ -100,3 +100,4 @@ if __name__ == '__main__':
     args = parse_args()
     main(args)
 
+# python generate_pseudolabels.py --seed=3 --expt_name=full_r1 --resume=expts/tmp_last/checkpoint_abl_noPCmix_3.pth.tar

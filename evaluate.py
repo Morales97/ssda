@@ -148,7 +148,7 @@ def evaluate(args, path_to_model):
     #wandb.log(rm_format(log_info))
 
 
-def ensemble(args, path_1, path_2, path_3=None):
+def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     # set random seed
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -163,6 +163,8 @@ def ensemble(args, path_1, path_2, path_3=None):
     elif size == 'small':
         image_path_cs = 'data/cityscapes/leftImg8bit_small'
     label_path_cs = 'data/cityscapes/gtFine'
+
+
 
     # NOTE downsampling or not the ground truth is found to make very little difference on the accuracy reported
     # However, it is x4 slower if downsample_gt = False
@@ -242,6 +244,10 @@ def ensemble(args, path_1, path_2, path_3=None):
             pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
+            if viz_prediction:
+                val_loader.save_pred_viz(pred, img_name='test', img=images_val)
+                pdb.set_trace()
+
             running_metrics_val.update(gt, pred)
 
     log_info = OrderedDict({
@@ -274,12 +280,12 @@ if __name__ == '__main__':
 
     #path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
 
-    for seed in [1,2,3]:
-        path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_744_r2_' + str(seed) + '.pth.tar'  # round 2
-        path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_744_r3_' + str(seed) + '.pth.tar'  # round 3
+    for seed in [3]: #[1,2,3]:
+        path_to_model_r2='expts/tmp_last/checkpoint_abl_noPCmix_r2_' + str(seed) + '.pth.tar'  # round 2
+        path_to_model_r3='expts/tmp_last/checkpoint_abl_noPCmix_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
-        ensemble(args, path_to_model_r2, path_to_model_r3)
+        ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=True)
 
 
 # python evaluate.py 

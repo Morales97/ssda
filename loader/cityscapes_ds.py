@@ -310,6 +310,17 @@ class cityscapesDataset(data.Dataset):
         
         print('Saved %d target labels in pseudolabels folder.' % len(self.files[self.split]))
 
+    def save_pred_viz(self, pred, img_name, img):
+        '''
+        Save a vizualization of the prediction
+        '''
+        pred = np.array(pred, dtype=np.uint8)
+        pred = self.encode_from_trainid_to_id(pred)
+        pred = self.encode_segmap(pred)
+        pred = self.decode_segmap(pred)
+        pred_im = Image.fromarray((pred*255).astype('uint8'), 'RGB')
+        pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
+        img.save('./data/cityscapes/predictions/' + img_name + '_orig.png')
 
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
