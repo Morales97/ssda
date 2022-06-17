@@ -167,13 +167,13 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
 
     batch_size = 8
     if viz_prediction: batch_size = 1
-    
+
     # NOTE downsampling or not the ground truth is found to make very little difference on the accuracy reported
     # However, it is x4 slower if downsample_gt = False
     val_dataset = cityscapesDataset(image_path=image_path_cs, label_path=label_path_cs, size=size, split='val', downsample_gt=True, hflip=False)
     val_loader = DataLoader(
         val_dataset,
-        batch_size=8,
+        batch_size=batch_size,
         num_workers=1,
         shuffle=False,
     )    
