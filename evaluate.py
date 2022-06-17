@@ -245,7 +245,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
             gt = labels_val.data.cpu().numpy()
 
             if viz_prediction:
-                val_loader.save_pred_viz(pred, img_name='test', img=images_val)
+                val_dataset.save_pred_viz(pred, img_name='test', img=images_val)
                 pdb.set_trace()
 
             running_metrics_val.update(gt, pred)
