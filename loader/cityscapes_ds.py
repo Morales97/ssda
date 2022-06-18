@@ -325,6 +325,7 @@ class cityscapesDataset(data.Dataset):
         pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
         from torchvision.utils import save_image
         save_image(img, './data/cityscapes/predictions/' + img_name + '_orig.png')
+        pdb.set_trace()
         save_image(lbl.long(), './data/cityscapes/predictions/' + img_name + 'groundtruth.png')
 
     def viz_cr_augment(self, index):
@@ -341,6 +342,9 @@ class cityscapesDataset(data.Dataset):
             raise Exception('to be used in unlabeled mode')
 
     def decode_segmap(self, temp):
+        '''
+        From segmentation map (label, classes 0-18) to color
+        '''
         r = temp.copy()
         g = temp.copy()
         b = temp.copy()
