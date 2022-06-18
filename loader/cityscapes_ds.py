@@ -310,7 +310,7 @@ class cityscapesDataset(data.Dataset):
         
         print('Saved %d target labels in pseudolabels folder.' % len(self.files[self.split]))
 
-    def save_pred_viz(self, pred, img_name, img, lbl):
+    def save_pred_viz(self, pred, index, img_name, img, lbl):
         '''
         Save a vizualization of the prediction
         '''
