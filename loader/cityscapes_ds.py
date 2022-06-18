@@ -323,7 +323,8 @@ class cityscapesDataset(data.Dataset):
         pred = self.decode_segmap(pred)
         pred_im = Image.fromarray((pred*255).astype('uint8'), 'RGB')
         pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
-        img.save('./data/cityscapes/predictions/' + img_name + '_orig.png')
+        from torchvision.utils import save_image
+        save_image(img, './data/cityscapes/predictions/' + img_name + '_orig.png')
 
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
