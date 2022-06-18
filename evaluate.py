@@ -166,7 +166,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
 
 
     batch_size = 8
-    #if viz_prediction: batch_size = 1
+    if viz_prediction: batch_size = 1
 
     # NOTE downsampling or not the ground truth is found to make very little difference on the accuracy reported
     # However, it is x4 slower if downsample_gt = False
@@ -220,7 +220,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     ema_model_1.eval()
     ema_model_2.eval()
     with torch.no_grad():
-        for (images_val, labels_val) in val_loader:
+        for i, (images_val, labels_val) in enumerate(val_loader):
             images_val = images_val.cuda()
             labels_val = labels_val.cuda()
 
@@ -247,7 +247,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
             gt = labels_val.data.cpu().numpy()
 
             if viz_prediction:
-                val_dataset.save_pred_viz(pred, img_name='test', img=images_val, lbl=labels_val)
+                val_dataset.save_pred_viz(pred, img_name='val_' + str(i), img=images_val, lbl=labels_val)
                 pdb.set_trace()
 
             running_metrics_val.update(gt, pred)
