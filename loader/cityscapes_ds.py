@@ -325,7 +325,7 @@ class cityscapesDataset(data.Dataset):
         pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
         from torchvision.utils import save_image
         save_image(img, './data/cityscapes/predictions/' + img_name + '_orig.png')
-        save_image(lbl, './data/cityscapes/predictions/' + img_name + 'groundtruth.png')
+        save_image(lbl.astype('unit8'), './data/cityscapes/predictions/' + img_name + 'groundtruth.png')
 
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
