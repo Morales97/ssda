@@ -317,7 +317,7 @@ class cityscapesDataset(data.Dataset):
         pred = np.array(pred, dtype=np.uint8)
         pred = self.encode_from_trainid_to_id(pred)
         pred = Image.fromarray(pred.squeeze(0), mode='L')   
-i       pred = pred.resize(_build_size(_img, width, height), Image.NEAREST)
+        pred = pred.resize(_build_size(_img, width, height), Image.NEAREST)
         pred = self.encode_segmap(pred)
         pred = self.decode_segmap(pred)
         pred_im = Image.fromarray((pred*255).astype('uint8'), 'RGB')
