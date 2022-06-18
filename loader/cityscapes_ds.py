@@ -329,10 +329,10 @@ class cityscapesDataset(data.Dataset):
         pred = self.encode_segmap(pred)
         pred = self.decode_segmap(pred)
         pred_im = Image.fromarray((pred*255).astype('uint8'), 'RGB')
-        pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
+        pred_im.save('./data/cityscapes/predictions2/' + img_name + '_pred.png')
         import shutil
-        shutil.copy(img_path, './data/cityscapes/predictions/' + img_name + '_orig.png')
-        shutil.copy(lbl_path, './data/cityscapes/predictions/' + img_name + '_groundtruth.png')
+        shutil.copy(img_path, './data/cityscapes/predictions2/' + img_name + '_orig.png')
+        shutil.copy(lbl_path, './data/cityscapes/predictions2/' + img_name + '_groundtruth.png')
 
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()

@@ -175,7 +175,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
         val_dataset,
         batch_size=batch_size,
         num_workers=1,
-        shuffle=False,
+        shuffle=True,
     )    
     
     # --- Model ---
