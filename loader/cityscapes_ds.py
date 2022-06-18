@@ -318,7 +318,7 @@ class cityscapesDataset(data.Dataset):
         lbl_path = os.path.join(
             self.annotations_base,
             img_path.split(os.sep)[-2],
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
+            os.path.basename(img_path)[:-15] + "gtFine_color.png",
         )
 
         pred = np.array(pred, dtype=np.uint8)
@@ -332,13 +332,8 @@ class cityscapesDataset(data.Dataset):
         pred_im.save('./data/cityscapes/predictions/' + img_name + '_pred.png')
         import shutil
         shutil.copy(img_path, './data/cityscapes/predictions/' + img_name + '_orig.png')
-        shutil.copy(lbl_path, './data/cityscapes/predictions/' + img_name + 'groundtruth.png')
-        '''
-        from torchvision.utils import save_image
-        save_image(img, './data/cityscapes/predictions/' + img_name + '_orig.png')
-        pdb.set_trace()
-        save_image(lbl.long(), './data/cityscapes/predictions/' + img_name + 'groundtruth.png')
-        '''
+        shutil.copy(lbl_path, './data/cityscapes/predictions/' + img_name + '_groundtruth.png')
+
     def viz_cr_augment(self, index):
         img_path = self.files[self.split][index].rstrip()
         img = pil_loader(img_path, self.img_size[0], self.img_size[1])
