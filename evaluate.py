@@ -217,6 +217,8 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     # -- MERGE models predictions--
 
     running_metrics_val = runningScore(val_loader.dataset.n_classes)
+    running_metrics_val_1 = runningScore(val_loader.dataset.n_classes)
+    running_metrics_val_2 = runningScore(val_loader.dataset.n_classes)
     ema_model_1.eval()
     ema_model_2.eval()
     with torch.no_grad():
@@ -244,13 +246,18 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
                 prob_ens = (prob_1 + prob_2 + prob_3)/3 # ensemble by combining probabilities
 
             pred = prob_ens.data.max(1)[1].cpu().numpy()
+            pred_1 = prob_1.data.max(1)[1].cpu().numpy()
+            pred_2 = prob_2.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
             if viz_prediction and (i%20==0):
                 val_dataset.save_pred_viz(pred, index=i, img_name='val_' + str(i), img=images_val, lbl=labels_val)
 
             running_metrics_val.update(gt, pred)
+            running_metrics_val_1.update(gt, pred_1)
+            running_metrics_val_2.update(gt, pred_2)
 
+    # ** Ensemble model
     log_info = OrderedDict({
         'Train Step': step,
         #'Validation loss': val_loss_meter.avg
@@ -265,6 +272,35 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print('Ensemble model')
+    print(log_str)
+
+
+    # ** Round 1 model
+    log_info = OrderedDict({
+        'Train Step': step,
+        #'Validation loss': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val_1.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log')
+    print('Round 1 model')
+    print(log_str)
+
+    # ** Round 2 model
+    log_info = OrderedDict({
+        'Train Step': step,
+        #'Validation loss': val_loss_meter.avg
+    })
+    
+    score, class_iou = running_metrics_val_2.get_scores()
+    for k, v in score.items():
+        log_info.update({k: FormattedLogItem(v, '{:.6f}')})
+
+    log_str = get_log_str(args, log_info, title='Validation Log')
+    print('Round 2 model')
     print(log_str)
 
 
@@ -286,7 +322,7 @@ if __name__ == '__main__':
         path_to_model_r3='expts/tmp_last/checkpoint_abl_noPCmix_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
-        ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=True)
+        ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False)
 
 
 # python evaluate.py 
