@@ -248,7 +248,6 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
 
             if viz_prediction and (i%20==0):
                 val_dataset.save_pred_viz(pred, index=i, img_name='val_' + str(i), img=images_val, lbl=labels_val)
-                pdb.set_trace()
 
             running_metrics_val.update(gt, pred)
 
