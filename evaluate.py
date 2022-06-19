@@ -175,7 +175,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
         val_dataset,
         batch_size=batch_size,
         num_workers=1,
-        shuffle=True,
+        shuffle=False,
     )    
     
     # --- Model ---
@@ -246,7 +246,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
             pred = prob_ens.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
-            if viz_prediction:
+            if viz_prediction and (i%20==0):
                 val_dataset.save_pred_viz(pred, index=i, img_name='val_' + str(i), img=images_val, lbl=labels_val)
                 pdb.set_trace()
 
