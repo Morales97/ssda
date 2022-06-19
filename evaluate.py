@@ -246,16 +246,16 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
                 prob_ens = (prob_1 + prob_2 + prob_3)/3 # ensemble by combining probabilities
 
             pred = prob_ens.data.max(1)[1].cpu().numpy()
-            pred_1 = prob_1.data.max(1)[1].cpu().numpy()
-            pred_2 = prob_2.data.max(1)[1].cpu().numpy()
+            #pred_1 = prob_1.data.max(1)[1].cpu().numpy()
+            #pred_2 = prob_2.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
             if viz_prediction and (i%20==0):
                 val_dataset.save_pred_viz(pred, index=i, img_name='val_' + str(i), img=images_val, lbl=labels_val)
 
             running_metrics_val.update(gt, pred)
-            running_metrics_val_1.update(gt, pred_1)
-            running_metrics_val_2.update(gt, pred_2)
+            #running_metrics_val_1.update(gt, pred_1)
+            #running_metrics_val_2.update(gt, pred_2)
 
     # ** Ensemble model
     log_info = OrderedDict({
@@ -274,7 +274,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     print('Ensemble model')
     print(log_str)
 
-
+    '''
     # ** Round 1 model
     log_info = OrderedDict({
         'Train Step': step,
@@ -302,7 +302,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     log_str = get_log_str(args, log_info, title='Validation Log')
     print('Round 2 model')
     print(log_str)
-
+    '''
 
 if __name__ == '__main__':
     args = parse_args()

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=nomix
+#SBATCH --job-name=372
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -11,11 +11,11 @@
 #SBATCH --mem=30000
 #SBATCH --time=12:00:00
 
-python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=abl_100_no_mix_batch --cr=ce --pixel_contrast=True 
+#python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=abl_100_no_mix_batch --cr=ce --pixel_contrast=True 
 #python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=full_2975 --target_samples=2975 --cr=ce --pixel_contrast=True
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_372_r3 --target_samples=372 --cr=ce --pixel_contrast=True --pseudolabel_folder=SS_372_r2_s$1
 
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_2975 --target_samples=2975 --cr=ce --pixel_contrast=True
-#python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_r2_noPL --cr=ce --pixel_contrast=True --pseudolabel_folder=SSnomem_s$1
+python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_372_r2_nodrop --cr=ce --pixel_contrast=True --pseudolabel_folder=SS_372_s$1
 #python main_SSDA.py --seed=$1 --project=clean_runs --expt_name=abl_d500 --pixel_contrast=False --target_samples=500
 
