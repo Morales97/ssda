@@ -250,8 +250,10 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
             #pred_2 = prob_2.data.max(1)[1].cpu().numpy()
             gt = labels_val.data.cpu().numpy()
 
-            if viz_prediction and (i%20==0):
+            if viz_prediction:# and (i%20==0):
                 val_dataset.save_pred_viz(pred, index=i, img_name='val_' + str(i), img=images_val, lbl=labels_val)
+                if i == 9:
+                    break
 
             running_metrics_val.update(gt, pred)
             #running_metrics_val_1.update(gt, pred_1)
