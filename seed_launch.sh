@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=744
+#SBATCH --job-name=200
 #
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -16,6 +16,6 @@
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_744_r3 --target_samples=744 --cr=ce --pixel_contrast=True --pseudolabel_folder=SS_744_r2_s$1
 
 #python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_2975 --target_samples=2975 --cr=ce --pixel_contrast=True
-python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_744_r2_nodrop --target_samples=744 --cr=ce --pixel_contrast=True --pseudolabel_folder=SS_744_s$1
-#python main_SSDA.py --seed=$1 --project=clean_runs --expt_name=abl_d500 --pixel_contrast=False --target_samples=500
+python main_SSDA.py --seed=$1 --steps_job=20000 --project=clean_runs --expt_name=full_200_r2_nodrop --target_samples=200 --cr=ce --pixel_contrast=True --pseudolabel_folder=full_200_s$1
+#python main_SemiSup.py --seed=$1 --steps_job=20000 --project=clean_SSL --expt_name=SemiSup_744_r2_nodrop --target_samples=744 --cr=ce --pixel_contrast=True --pseudolabel_folder=SS_744_s$1
 
