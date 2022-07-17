@@ -139,8 +139,8 @@ def evaluate(args, path_to_model):
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
-    #for k, v in class_iou.items():
-    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
+    for k, v in class_iou.items():
+        log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print('teacher EMA model')
@@ -269,8 +269,8 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     for k, v in score.items():
         log_info.update({k: FormattedLogItem(v, '{:.6f}')})
 
-    #for k, v in class_iou.items():
-    #    log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
+    for k, v in class_iou.items():
+        log_info.update({str(k): FormattedLogItem(v, '{:.6f}')})
 
     log_str = get_log_str(args, log_info, title='Validation Log')
     print('Ensemble model')
@@ -316,8 +316,6 @@ if __name__ == '__main__':
     evaluate(args, path_to_model)
     print('** Round 1 **')
     '''
-
-    #path_to_model_r1='expts/tmp_last/checkpoint_full_rampupFIX_p2_3.pth.tar'  # round 1
 
     for seed in [3]: #[1,2,3]:
         path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_100_r2_' + str(seed) + '.pth.tar'  # round 2
