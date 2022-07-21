@@ -276,6 +276,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     print('Ensemble model')
     print(log_str)
 
+    return log_info
     '''
     # ** Round 1 model
     log_info = OrderedDict({
@@ -317,12 +318,21 @@ if __name__ == '__main__':
     print('** Round 1 **')
     '''
 
-    for seed in [3]: #[1,2,3]:
+    logs = []
+    for seed in [1,2,3]:
         path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_100_r2_' + str(seed) + '.pth.tar'  # round 2
         path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_100_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
-        ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False)
+        logs.append(ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False))
+
+    n_logs = len(logs)
+    for key in logs[0].keys()
+        avg = 0
+        for i in range(n_logs):
+            avg += logs[i][key]
+        avg /= n_logs
+        print(key + '\t\t' + str(avg))
 
 
 # python evaluate.py 
