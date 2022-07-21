@@ -325,7 +325,7 @@ if __name__ == '__main__':
         path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_100_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
-        score, class_iou = ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False))
+        score, class_iou = ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False)
         scores.append(score)
         class_ious.append(class_iou)
 
