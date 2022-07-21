@@ -276,7 +276,7 @@ def ensemble(args, path_1, path_2, path_3=None, viz_prediction=False):
     print('Ensemble model')
     print(log_str)
 
-    return log_info
+    return score, class_iou
     '''
     # ** Round 1 model
     log_info = OrderedDict({
@@ -318,20 +318,23 @@ if __name__ == '__main__':
     print('** Round 1 **')
     '''
 
-    logs = []
+    scores = []
+    class_ious = []
     for seed in [1,2,3]:
         path_to_model_r2='expts/tmp_last/checkpoint_SemiSup_100_r2_' + str(seed) + '.pth.tar'  # round 2
         path_to_model_r3='expts/tmp_last/checkpoint_SemiSup_100_r3_' + str(seed) + '.pth.tar'  # round 3
         
         print('seed ', str(seed))
-        logs.append(ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False))
+        score, class_iou = ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False))
+        scores.append(score)
+        class_ious.append(class_iou)
 
-    n_logs = len(logs)
-    for key in logs[0].keys():
+    n_seeds = len(class_ious)
+    for key in class_ious[0].keys():
         avg = 0
-        for i in range(n_logs):
-            avg += logs[i][key]
-        avg /= n_logs
+        for i in range(n_seeds):
+            avg += class_ious[i][key]
+        avg /= n_seeds
         print(str(key) + '\t\t' + str(avg))
 
 
