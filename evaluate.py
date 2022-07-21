@@ -327,12 +327,12 @@ if __name__ == '__main__':
         logs.append(ensemble(args, path_to_model_r2, path_to_model_r3, viz_prediction=False))
 
     n_logs = len(logs)
-    for key in logs[0].keys()
+    for key in logs[0].keys():
         avg = 0
         for i in range(n_logs):
             avg += logs[i][key]
         avg /= n_logs
-        print(key + '\t\t' + str(avg))
+        print(str(key) + '\t\t' + str(avg))
 
 
 # python evaluate.py 
